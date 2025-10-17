@@ -37,7 +37,6 @@ async function DynamicUser() {
     console.error("Error fetching user:", userError);
     redirect("/auth/login");
   }
-  console.log("Fetched user:", user);
 
   return (
     <DropdownMenu>
