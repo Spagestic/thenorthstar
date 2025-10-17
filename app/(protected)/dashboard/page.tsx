@@ -1,55 +1,450 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+/** biome-ignore-all lint/style/noMagicNumbers: minor */
+"use client";
 
-export default function Page() {
+import { Building2, Clock, Filter, MapPin, Search, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Mock data - replace with actual Convex queries
+const companies = [
+  {
+    _id: "company1",
+    name: "Google",
+    description: "A multinational technology company",
+    logo: "🔍",
+  },
+  {
+    _id: "company2",
+    name: "Microsoft",
+    description: "A technology corporation",
+    logo: "🪟",
+  },
+  {
+    _id: "company3",
+    name: "Meta",
+    description: "A social media and technology company",
+    logo: "📘",
+  },
+  {
+    _id: "company4",
+    name: "Apple",
+    description: "A technology company",
+    logo: "🍎",
+  },
+  {
+    _id: "company5",
+    name: "Amazon",
+    description: "An e-commerce and cloud computing company",
+    logo: "📦",
+  },
+  {
+    _id: "company6",
+    name: "Netflix",
+    description: "A streaming entertainment service",
+    logo: "🎬",
+  },
+];
+
+const jobPositions = [
+  {
+    _id: "job1",
+    title: "Software Engineer",
+    companyId: "company1",
+    company: "Google",
+    level: "mid",
+    department: "Engineering",
+    location: "Mountain View, CA",
+    remote: true,
+    salaryRange: { min: 120_000, max: 180_000, currency: "USD" },
+    description:
+      "Develop and maintain scalable web applications using modern technologies.",
+    requirements: ["JavaScript", "Python", "React", "Node.js"],
+    postedDate: "2 days ago",
+  },
+  {
+    _id: "job2",
+    title: "Product Manager",
+    companyId: "company2",
+    company: "Microsoft",
+    level: "senior",
+    department: "Product",
+    location: "Seattle, WA",
+    remote: false,
+    salaryRange: { min: 140_000, max: 200_000, currency: "USD" },
+    description:
+      "Lead product strategy and execution for enterprise software solutions.",
+    requirements: ["Product Strategy", "Agile", "Analytics", "Leadership"],
+    postedDate: "1 week ago",
+  },
+  {
+    _id: "job3",
+    title: "Data Scientist",
+    companyId: "company3",
+    company: "Meta",
+    level: "mid",
+    department: "Data Science",
+    location: "Menlo Park, CA",
+    remote: true,
+    salaryRange: { min: 130_000, max: 190_000, currency: "USD" },
+    description:
+      "Analyze large datasets to extract insights and build machine learning models.",
+    requirements: ["Python", "Machine Learning", "Statistics", "SQL"],
+    postedDate: "3 days ago",
+  },
+  {
+    _id: "job4",
+    title: "Frontend Developer",
+    companyId: "company4",
+    company: "Apple",
+    level: "entry",
+    department: "Engineering",
+    location: "Cupertino, CA",
+    remote: false,
+    salaryRange: { min: 100_000, max: 150_000, currency: "USD" },
+    description:
+      "Build beautiful and intuitive user interfaces for Apple products.",
+    requirements: ["React", "TypeScript", "CSS", "iOS"],
+    postedDate: "5 days ago",
+  },
+  {
+    _id: "job5",
+    title: "Cloud Engineer",
+    companyId: "company5",
+    company: "Amazon",
+    level: "senior",
+    department: "Engineering",
+    location: "Seattle, WA",
+    remote: true,
+    salaryRange: { min: 150_000, max: 220_000, currency: "USD" },
+    description: "Design and implement cloud infrastructure solutions on AWS.",
+    requirements: ["AWS", "Docker", "Kubernetes", "Terraform"],
+    postedDate: "1 day ago",
+  },
+  {
+    _id: "job6",
+    title: "UX Designer",
+    companyId: "company6",
+    company: "Netflix",
+    level: "mid",
+    department: "Design",
+    location: "Los Gatos, CA",
+    remote: true,
+    salaryRange: { min: 110_000, max: 160_000, currency: "USD" },
+    description: "Create user-centered designs for streaming experiences.",
+    requirements: ["Figma", "User Research", "Prototyping", "Design Systems"],
+    postedDate: "4 days ago",
+  },
+];
+
+export default function DashboardPage() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState<string>("all");
+  const [selectedLevel, setSelectedLevel] = useState<string>("all");
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
+  const [selectedLocation, setSelectedLocation] = useState<string>("all");
+
+  // Get unique values for filters
+  const departments = useMemo(() => {
+    const deps = [...new Set(jobPositions.map((job) => job.department))];
+    return deps;
+  }, []);
+
+  const locations = useMemo(() => {
+    const locs = [...new Set(jobPositions.map((job) => job.location))];
+    return locs;
+  }, []);
+
+  // Filter job positions based on search and filters
+  const filteredJobs = useMemo(
+    () =>
+      jobPositions.filter((job) => {
+        const matchesSearch =
+          job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          job.requirements.some((req) =>
+            req.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+
+        const matchesCompany =
+          selectedCompany === "all" || job.companyId === selectedCompany;
+        const matchesLevel =
+          selectedLevel === "all" || job.level === selectedLevel;
+        const matchesDepartment =
+          selectedDepartment === "all" || job.department === selectedDepartment;
+        const matchesLocation =
+          selectedLocation === "all" || job.location === selectedLocation;
+
+        return (
+          matchesSearch &&
+          matchesCompany &&
+          matchesLevel &&
+          matchesDepartment &&
+          matchesLocation
+        );
+      }),
+    [
+      searchQuery,
+      selectedCompany,
+      selectedLevel,
+      selectedDepartment,
+      selectedLocation,
+    ]
+  );
+
+  const handleStartInterview = (jobId: string) => {
+    // Navigate to the call page with the selected job
+    router.push(`/call?jobId=${jobId}`);
+  };
+
+  const getLevelColor = (level: string) => {
+    switch (level) {
+      case "entry":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      case "mid":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+      case "senior":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
+      case "lead":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+    }
+  };
+
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="mb-2 font-bold text-3xl">Practice Interviews</h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          Choose a position to start your practice interview with AI-powered
+          interviewers
+        </p>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="mb-8 space-y-4">
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-400" />
+          <Input
+            className="h-12 pl-10 text-lg"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by job title, company, or skills..."
+            value={searchQuery}
+          />
         </div>
-      </SidebarInset>
-    </SidebarProvider>
-  )
+
+        {/* Filters */}
+        <div className="flex flex-wrap gap-4">
+          <Select onValueChange={setSelectedCompany} value={selectedCompany}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="All Companies" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Companies</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company._id} value={company._id}>
+                  {company.logo} {company.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select onValueChange={setSelectedLevel} value={selectedLevel}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="All Levels" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Levels</SelectItem>
+              <SelectItem value="entry">Entry Level</SelectItem>
+              <SelectItem value="mid">Mid Level</SelectItem>
+              <SelectItem value="senior">Senior Level</SelectItem>
+              <SelectItem value="lead">Lead Level</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            onValueChange={setSelectedDepartment}
+            value={selectedDepartment}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="All Departments" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Departments</SelectItem>
+              {departments.map((dept) => (
+                <SelectItem key={dept} value={dept}>
+                  {dept}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select onValueChange={setSelectedLocation} value={selectedLocation}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="All Locations" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Locations</SelectItem>
+              {locations.map((location) => (
+                <SelectItem key={location} value={location}>
+                  {location}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Button
+            className="ml-auto"
+            onClick={() => {
+              setSearchQuery("");
+              setSelectedCompany("all");
+              setSelectedLevel("all");
+              setSelectedDepartment("all");
+              setSelectedLocation("all");
+            }}
+            variant="outline"
+          >
+            <Filter className="mr-2 h-4 w-4" />
+            Clear Filters
+          </Button>
+        </div>
+      </div>
+
+      {/* Results Count */}
+      <div className="mb-6">
+        <p className="text-gray-600 text-sm dark:text-gray-400">
+          {filteredJobs.length} position{filteredJobs.length !== 1 ? "s" : ""}{" "}
+          found
+        </p>
+      </div>
+
+      {/* Job Positions Grid */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredJobs.map((job) => (
+          <Card
+            className="group cursor-pointer transition-shadow hover:shadow-lg"
+            key={job._id}
+          >
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="text-2xl">
+                    {companies.find((c) => c._id === job.companyId)?.logo ||
+                      "🏢"}
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg transition-colors group-hover:text-blue-600">
+                      {job.title}
+                    </CardTitle>
+                    <CardDescription className="mt-1 flex items-center">
+                      <Building2 className="mr-1 h-3 w-3" />
+                      {job.company}
+                    </CardDescription>
+                  </div>
+                </div>
+                <Badge className={getLevelColor(job.level)}>
+                  {job.level.charAt(0).toUpperCase() + job.level.slice(1)}
+                </Badge>
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              <p className="line-clamp-2 text-gray-600 text-sm dark:text-gray-400">
+                {job.description}
+              </p>
+
+              <div className="space-y-2">
+                <div className="flex items-center text-gray-500 text-sm">
+                  <MapPin className="mr-1 h-3 w-3" />
+                  {job.location} {job.remote && "• Remote"}
+                </div>
+                <div className="flex items-center text-gray-500 text-sm">
+                  <Users className="mr-1 h-3 w-3" />
+                  {job.department}
+                </div>
+                <div className="flex items-center text-gray-500 text-sm">
+                  <Clock className="mr-1 h-3 w-3" />
+                  {job.postedDate}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="font-medium text-sm">Key Skills:</p>
+                <div className="flex flex-wrap gap-1">
+                  {job.requirements.slice(0, 3).map((skill, index) => (
+                    <Badge
+                      className="text-xs"
+                      key={index as number}
+                      variant="secondary"
+                    >
+                      {skill}
+                    </Badge>
+                  ))}
+                  {job.requirements.length > 3 && (
+                    <Badge className="text-xs" variant="secondary">
+                      +{job.requirements.length - 3} more
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Button
+                  className="w-full"
+                  onClick={() => handleStartInterview(job._id)}
+                  size="sm"
+                >
+                  Start Practice Interview
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Empty State */}
+      {filteredJobs.length === 0 && (
+        <div className="py-12 text-center">
+          <div className="mb-4 text-6xl">🔍</div>
+          <h3 className="mb-2 font-semibold text-xl">No positions found</h3>
+          <p className="mb-4 text-gray-600 dark:text-gray-400">
+            Try adjusting your search criteria or filters
+          </p>
+          <Button
+            onClick={() => {
+              setSearchQuery("");
+              setSelectedCompany("all");
+              setSelectedLevel("all");
+              setSelectedDepartment("all");
+              setSelectedLocation("all");
+            }}
+            variant="outline"
+          >
+            Clear all filters
+          </Button>
+        </div>
+      )}
+    </div>
+  );
 }
