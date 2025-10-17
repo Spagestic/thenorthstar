@@ -1,6 +1,8 @@
 "use client";
-
 import {
+  Frame,
+  Map,
+  PieChart,
   Folder,
   Forward,
   type LucideIcon,
@@ -25,22 +27,32 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-export function NavInterviews({
-  interviews,
-}: {
-  interviews?: {
-    name: string;
-    url: string;
-    icon: LucideIcon;
-  }[];
-}) {
+const projects = [
+  {
+    name: "Design Engineering",
+    url: "#",
+    icon: Frame,
+  },
+  {
+    name: "Sales & Marketing",
+    url: "#",
+    icon: PieChart,
+  },
+  {
+    name: "Travel",
+    url: "#",
+    icon: Map,
+  },
+];
+
+export function NavInterviews() {
   const { isMobile } = useSidebar();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Interviews</SidebarGroupLabel>
       <SidebarMenu>
-        {interviews?.map((item) => (
+        {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
               <a href={item.url}>

@@ -1,18 +1,4 @@
-"use client";
-
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  // biome-ignore lint/suspicious/noShadowRestrictedNames: minor
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react";
+import { Frame, Map, PieChart } from "lucide-react";
 import Image from "next/image";
 import type * as React from "react";
 import { NavInterviews } from "@/components/nav-interviews";
@@ -28,27 +14,6 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-
-// This is sample data.
-const data = {
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -78,7 +43,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavInterviews interviews={data.projects} />
+        <NavInterviews />
       </SidebarContent>
       <SidebarFooter>
         <NavUser
