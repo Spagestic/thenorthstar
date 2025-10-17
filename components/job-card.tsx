@@ -9,6 +9,7 @@ import {
 import { Building2, Clock, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
+import Image from "next/image";
 
 interface JobCardProps {
   job: any;
@@ -29,7 +30,19 @@ export const JobCard: React.FC<JobCardProps> = ({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
-            <div className="text-2xl">{job.logo || "🏢"}</div>
+            <div className="text-2xl">
+              {job.logo && job.logo.endsWith(".svg") ? (
+                <Image
+                  width={60}
+                  height={60}
+                  src={job.logo}
+                  alt={job.company + " logo"}
+                  className="w-8 h-8 object-contain"
+                />
+              ) : (
+                job.logo || "🏢"
+              )}
+            </div>
             <div>
               <CardTitle className="text-lg transition-colors group-hover:text-blue-600">
                 {job.title}
