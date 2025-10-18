@@ -1,14 +1,6 @@
 "use client";
-import {
-  Frame,
-  Map,
-  PieChart,
-  Folder,
-  Forward,
-  type LucideIcon,
-  MoreHorizontal,
-  Trash2,
-} from "lucide-react";
+import { Folder, Forward, MoreHorizontal, Trash2 } from "lucide-react";
+import Image from "next/image";
 
 import {
   DropdownMenu,
@@ -26,24 +18,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { jobPositions } from "@/app/(protected)/dashboard/job-positions";
+import { getCompanyLogo } from "@/lib/company-logos";
 
-const projects = [
-  {
-    name: "Design Engineering",
-    url: "#",
-    icon: Frame,
-  },
-  {
-    name: "Sales & Marketing",
-    url: "#",
-    icon: PieChart,
-  },
-  {
-    name: "Travel",
-    url: "#",
-    icon: Map,
-  },
-];
+const interviews = jobPositions.map((job) => ({
+  name: job.title,
+  company: job.company,
+  logo: getCompanyLogo(job.company),
+  url: "#",
+}));
 
 export function NavInterviews() {
   const { isMobile } = useSidebar();
@@ -52,11 +35,17 @@ export function NavInterviews() {
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Interviews</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
+        {interviews.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
-                <item.icon />
+                <Image
+                  src={item.logo?.src || ""}
+                  alt={item.company}
+                  width={16}
+                  height={16}
+                  className="h-4 w-4"
+                />
                 <span>{item.name}</span>
               </a>
             </SidebarMenuButton>
@@ -74,16 +63,16 @@ export function NavInterviews() {
               >
                 <DropdownMenuItem>
                   <Folder className="text-muted-foreground" />
-                  <span>View Project</span>
+                  <span>View Interview</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Forward className="text-muted-foreground" />
-                  <span>Share Project</span>
+                  <span>Share Interview</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Trash2 className="text-muted-foreground" />
-                  <span>Delete Project</span>
+                  <span>Delete Interview</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
