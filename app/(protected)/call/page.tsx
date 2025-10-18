@@ -66,8 +66,14 @@ export default function Page() {
       console.error("ElevenLabs Error:", error);
       setAgentState("disconnected");
       setErrorType("session_error");
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      setErrorMessage(`Session error: ${errorMessage}`);
+      // Ensure error is checked as object before using 'message'
+      let sessionErrorMessage: string;
+      if (error && typeof error === "object" && "message" in error && typeof (error as any).message === "string") {
+        sessionErrorMessage = (error as any).message;
+      } else {
+        sessionErrorMessage = String(error);
+      }
+      setErrorMessage(`Session error: ${sessionErrorMessage}`);
     },
   });
 
