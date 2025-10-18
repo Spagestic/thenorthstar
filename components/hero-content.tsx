@@ -26,7 +26,7 @@ export default function HeroContent() {
         </h1>
 
         {/* Description */}
-        <p className="mb-4 font-light text-sm text-white/70 leading-relaxed md:text-base lg:text-md">
+        <p className="mb-4 font-light text-sm text-white/70 leading-relaxed md:text-base lg:text-md pe-4">
           Simulate voice-based interviews and get targeted feedback on your
           speech content and delivery. Practice with company-specific questions
           and improve faster.
@@ -36,7 +36,7 @@ export default function HeroContent() {
         <div className="flex flex-wrap items-center gap-4">
           <Link href={"#pricing"}>
             <button
-              className="cursor-pointer rounded-full border border-white/30 bg-transparent px-8 py-3 font-normal text-white text-xs transition-all duration-200 hover:border-white/50 hover:bg-white/10"
+              className="cursor-pointer rounded-full border border-white/30 bg-transparent px-8 py-3 font-medium text-white text-xs transition-all duration-200 hover:border-white/50 hover:bg-white/10"
               type="button"
             >
               Pricing
@@ -44,7 +44,7 @@ export default function HeroContent() {
           </Link>
           <Link href={"/dashboard"}>
             <button
-              className="cursor-pointer rounded-full bg-white px-8 py-3 font-normal text-black text-xs transition-all duration-200 hover:bg-white/90"
+              className="cursor-pointer rounded-full bg-white px-8 py-3 font-medium text-black text-xs transition-all duration-200 hover:bg-white/90"
               type="button"
             >
               Get Started
