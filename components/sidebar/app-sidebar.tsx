@@ -1,9 +1,9 @@
 import { Frame, Map, PieChart } from "lucide-react";
 import Image from "next/image";
 import type * as React from "react";
-import { NavInterviews } from "@/components/nav-interviews";
-import { NavMain } from "@/components/nav-main";
-import { NavUser } from "@/components/nav-user";
+import { NavInterviews } from "@/components/sidebar/nav-interviews";
+import { NavMain } from "@/components/sidebar/nav-main";
+import { NavUser } from "@/components/sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,

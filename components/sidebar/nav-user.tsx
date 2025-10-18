@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { createClient } from "@/lib/supabase/server";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "../ui/skeleton";
 import React from "react";
 import { UserDropdown } from "@/components/user-dropdown";
 import { redirect } from "next/navigation";
