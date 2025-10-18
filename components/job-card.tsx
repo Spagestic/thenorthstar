@@ -10,12 +10,7 @@ import { Building2, Clock, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import Image from "next/image";
-import Google from "@/public/logos/images/google.png";
-import Microsoft from "@/public/logos/images/microsoft.png";
-import Meta from "@/public/logos/images/meta.png";
-import Apple from "@/public/logos/images/apple.png";
-import Amazon from "@/public/logos/images/amazon.png";
-import Netflix from "@/public/logos/images/netflix.png";
+import { getCompanyLogo } from "@/lib/company-logos";
 
 interface JobCardProps {
   job: any;
@@ -28,18 +23,8 @@ export const JobCard: React.FC<JobCardProps> = ({
   getLevelColor,
   onStartInterview,
 }) => {
-  // Map company names to imported images
-  const companyImages: Record<string, any> = {
-    Google,
-    Microsoft,
-    Meta,
-    Apple,
-    Amazon,
-    Netflix,
-  };
-
-  // Get image by company name, fallback to Google
-  const companyImage = companyImages[job.company] || Google;
+  // Get company logo dynamically
+  const companyImage = getCompanyLogo(job.company);
 
   return (
     <Card
