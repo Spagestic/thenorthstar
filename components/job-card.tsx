@@ -10,6 +10,12 @@ import { Building2, Clock, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import Image from "next/image";
+import Google from "@/public/logos/images/google.png";
+import Microsoft from "@/public/logos/images/microsoft.png";
+import Meta from "@/public/logos/images/meta.png";
+import Apple from "@/public/logos/images/apple.png";
+import Amazon from "@/public/logos/images/amazon.png";
+import Netflix from "@/public/logos/images/netflix.png";
 
 interface JobCardProps {
   job: any;
@@ -22,6 +28,19 @@ export const JobCard: React.FC<JobCardProps> = ({
   getLevelColor,
   onStartInterview,
 }) => {
+  // Map company names to imported images
+  const companyImages: Record<string, any> = {
+    Google,
+    Microsoft,
+    Meta,
+    Apple,
+    Amazon,
+    Netflix,
+  };
+
+  // Get image by company name, fallback to Google
+  const companyImage = companyImages[job.company] || Google;
+
   return (
     <Card
       className="group cursor-pointer transition-shadow hover:shadow-lg"
@@ -31,17 +50,13 @@ export const JobCard: React.FC<JobCardProps> = ({
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
             <div className="text-2xl">
-              {job.logo && job.logo.endsWith(".svg") ? (
-                <Image
-                  width={60}
-                  height={60}
-                  src={job.logo}
-                  alt={job.company + " logo"}
-                  className="w-8 h-8 object-contain"
-                />
-              ) : (
-                job.logo || "🏢"
-              )}
+              <Image
+                width={60}
+                height={60}
+                src={companyImage}
+                alt={job.company + " logo"}
+                className="w-8 h-8 object-contain"
+              />
             </div>
             <div>
               <CardTitle className="text-lg transition-colors group-hover:text-blue-600">
