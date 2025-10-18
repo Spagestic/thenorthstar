@@ -16,7 +16,9 @@ export async function AuthButton() {
         className="w-48"
         userEmail={user.email}
         userImageUrl={user.picture}
-        userName={user.name || user.email || "User"}
+        userName={
+          user.user_metadata.full_name || user.user_metadata.email || "User"
+        }
       />
     </div>
   ) : (
