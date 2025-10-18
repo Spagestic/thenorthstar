@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,13 +12,16 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -40,18 +42,28 @@ export function SignUpForm({
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // Sign up the user
+      const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            full_name: `${firstName} ${lastName}`,
+          },
         },
       });
-      if (error) throw error;
-      router.push("/auth/sign-up-success");
+      if (signUpError) throw signUpError;
+
+      // Directly sign in the user after successful sign up
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInError) throw signInError;
+
+      router.push("/dashboard");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
       setIsLoading(false);
     }
   };
@@ -65,16 +77,40 @@ export function SignUpForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp}>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="first-name">First name</Label>
+                  <Input
+                    name="first-name"
+                    id="first-name"
+                    placeholder="John"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="last-name">Last name</Label>
+                  <Input
+                    name="last-name"
+                    id="last-name"
+                    placeholder="Doe"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </div>
+              </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
                   placeholder="m@example.com"
                   required
-                  type="email"
                   value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
@@ -83,10 +119,10 @@ export function SignUpForm({
                 </div>
                 <Input
                   id="password"
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
                   type="password"
+                  required
                   value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
@@ -95,26 +131,31 @@ export function SignUpForm({
                 </div>
                 <Input
                   id="repeat-password"
-                  onChange={(e) => setRepeatPassword(e.target.value)}
-                  required
                   type="password"
+                  required
                   value={repeatPassword}
+                  onChange={(e) => setRepeatPassword(e.target.value)}
                 />
               </div>
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              <Button className="w-full" disabled={isLoading} type="submit">
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Creating an account..." : "Sign up"}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
-              <Link className="underline underline-offset-4" href="/auth/login">
+              <Link href="/auth/login" className="underline underline-offset-4">
                 Login
               </Link>
             </div>
           </form>
         </CardContent>
       </Card>
+      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary  ">
+        By proceeding, you agree to our{" "}
+        <Link href="/terms">Terms of Service</Link> and{" "}
+        <Link href="/privacy">Privacy Policy</Link>.
+      </div>
     </div>
   );
 }
