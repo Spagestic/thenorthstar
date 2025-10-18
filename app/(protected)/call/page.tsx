@@ -1,14 +1,15 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useConversation } from "@elevenlabs/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2Icon, PhoneIcon, PhoneOffIcon } from "lucide-react";
+import { Loader2Icon, PhoneIcon, PhoneOffIcon, AlertTriangleIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Orb } from "@/components/ui/orb";
 import { ShimmeringText } from "@/components/ui/shimmering-text";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from "../Header";
 
 const DEFAULT_AGENT = {
@@ -24,36 +25,117 @@ type AgentState =
   | "disconnecting"
   | null;
 
+type ErrorType = 
+  | "api_key_missing"
+  | "agent_id_missing"
+  | "microphone_permission"
+  | "audio_device"
+  | "connection_failed"
+  | "session_error"
+  | null;
+
 export default function Page() {
   const [agentState, setAgentState] = useState<AgentState>("disconnected");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<ErrorType>(null);
+
+  // Environment validation
+  useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY) {
+      setErrorType("api_key_missing");
+      setErrorMessage("ElevenLabs API key is missing. Please check your environment variables.");
+    }
+    
+    if (!DEFAULT_AGENT.agentId) {
+      setErrorType("agent_id_missing");
+      setErrorMessage("ElevenLabs Agent ID is missing. Please check your environment variables.");
+    }
+  }, []);
 
   const conversation = useConversation({
-    onConnect: () => console.log("Connected"),
-    onDisconnect: () => console.log("Disconnected"),
-    onMessage: (message) => console.log("Message:", message),
+    onConnect: () => {
+      console.log("Connected to ElevenLabs");
+    },
+    onDisconnect: () => {
+      console.log("Disconnected from ElevenLabs");
+    },
+    onMessage: (message) => {
+      console.log("Message received:", message);
+    },
     onError: (error) => {
-      console.error("Error:", error);
+      console.error("ElevenLabs Error:", error);
       setAgentState("disconnected");
+      setErrorType("session_error");
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setErrorMessage(`Session error: ${errorMessage}`);
     },
   });
 
   const startConversation = useCallback(async () => {
     try {
       setErrorMessage(null);
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      setErrorType(null);
+      
+      // Check for audio devices
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioInputs = devices.filter(device => device.kind === 'audioinput');
+      
+      if (audioInputs.length === 0) {
+        setErrorType("audio_device");
+        setErrorMessage("No audio input devices found. Please connect a microphone.");
+        return;
+      }
+      
+      // Request microphone permission
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
+      
+      // Check if we have an agent ID
+      if (!DEFAULT_AGENT.agentId) {
+        setErrorType("agent_id_missing");
+        setErrorMessage("Agent ID is missing. Please check your environment variables.");
+        return;
+      }
+      
       await conversation.startSession({
         agentId: DEFAULT_AGENT.agentId,
         connectionType: "webrtc",
-        onStatusChange: (status) => setAgentState(status.status),
+        onStatusChange: (status) => {
+          console.log("Status change:", status);
+          setAgentState(status.status);
+        },
       });
+      
     } catch (error) {
       console.error("Error starting conversation:", error);
       setAgentState("disconnected");
-      if (error instanceof DOMException && error.name === "NotAllowedError") {
-        setErrorMessage(
-          "Please enable microphone permissions in your browser."
-        );
+      
+      if (error instanceof DOMException) {
+        switch (error.name) {
+          case "NotAllowedError":
+            setErrorType("microphone_permission");
+            setErrorMessage("Microphone permission denied. Please allow microphone access and try again.");
+            break;
+          case "NotFoundError":
+            setErrorType("audio_device");
+            setErrorMessage("No microphone found. Please connect a microphone and try again.");
+            break;
+          case "NotReadableError":
+            setErrorType("audio_device");
+            setErrorMessage("Microphone is being used by another application. Please close other apps and try again.");
+            break;
+          default:
+            setErrorType("connection_failed");
+            setErrorMessage(`Audio error: ${error.message}`);
+        }
+      } else {
+        setErrorType("connection_failed");
+        setErrorMessage(`Connection failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     }
   }, [conversation]);
@@ -104,15 +186,20 @@ export default function Page() {
             <h2 className="text-xl font-semibold">{DEFAULT_AGENT.name}</h2>
             <AnimatePresence mode="wait">
               {errorMessage ? (
-                <motion.p
+                <motion.div
                   key="error"
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="text-destructive text-center text-sm"
+                  className="w-full max-w-md"
                 >
-                  {errorMessage}
-                </motion.p>
+                  <Alert variant="destructive">
+                    <AlertTriangleIcon className="h-4 w-4" />
+                    <AlertDescription className="text-center">
+                      {errorMessage}
+                    </AlertDescription>
+                  </Alert>
+                </motion.div>
               ) : agentState === "disconnected" || agentState === null ? (
                 <motion.p
                   key="disconnected"
@@ -192,6 +279,7 @@ export default function Page() {
             </AnimatePresence>
           </Button>
         </div>
+        
       </div>
     </div>
   );
