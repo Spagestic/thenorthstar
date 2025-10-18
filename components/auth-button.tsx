@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "./ui/button";
 import { UserAvatar } from "./user-avatar";
 
 export async function AuthButton() {
