@@ -7,14 +7,13 @@ import { Loader2Icon, PhoneIcon, PhoneOffIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Orb } from "@/components/ui/orb";
 import { ShimmeringText } from "@/components/ui/shimmering-text";
 
 const DEFAULT_AGENT = {
   agentId: process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID!,
-  name: "Customer Support",
-  description: "Tap to start voice chat",
+  name: "Interview Agent",
+  description: "Tap to start the interview",
 };
 
 type AgentState =
