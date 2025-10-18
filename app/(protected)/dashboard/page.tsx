@@ -15,6 +15,7 @@ import {
 import { companies } from "./companies";
 import { jobPositions } from "./job-positions";
 import { JobCard } from "@/components/job-card";
+import Header from "../Header";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -94,148 +95,145 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="mb-2 font-bold text-3xl">Practice Interviews</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Choose a position to start your practice interview with AI-powered
-          interviewers
-        </p>
-      </div>
+    <div className="container mx-auto">
+      <Header nav={["Dashboard"]} />
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-8">
+        {/* Search and Filters */}
+        <div className="mb-8 space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-400" />
+            <Input
+              className="h-12 pl-10 text-lg"
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by job title, company, or skills..."
+              value={searchQuery}
+            />
+          </div>
 
-      {/* Search and Filters */}
-      <div className="mb-8 space-y-4">
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-400" />
-          <Input
-            className="h-12 pl-10 text-lg"
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by job title, company, or skills..."
-            value={searchQuery}
-          />
+          {/* Filters */}
+          <div className="flex flex-wrap gap-4">
+            <Select onValueChange={setSelectedCompany} value={selectedCompany}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="All Companies" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {companies.map((company) => (
+                  <SelectItem key={company._id} value={company._id}>
+                    {company.logo} {company.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select onValueChange={setSelectedLevel} value={selectedLevel}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="All Levels" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Levels</SelectItem>
+                <SelectItem value="entry">Entry Level</SelectItem>
+                <SelectItem value="mid">Mid Level</SelectItem>
+                <SelectItem value="senior">Senior Level</SelectItem>
+                <SelectItem value="lead">Lead Level</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select
+              onValueChange={setSelectedDepartment}
+              value={selectedDepartment}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="All Departments" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {departments.map((dept) => (
+                  <SelectItem key={dept} value={dept}>
+                    {dept}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select
+              onValueChange={setSelectedLocation}
+              value={selectedLocation}
+            >
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="All Locations" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Locations</SelectItem>
+                {locations.map((location) => (
+                  <SelectItem key={location} value={location}>
+                    {location}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button
+              className="ml-auto"
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedCompany("all");
+                setSelectedLevel("all");
+                setSelectedDepartment("all");
+                setSelectedLocation("all");
+              }}
+              variant="outline"
+            >
+              <Filter className="mr-2 h-4 w-4" />
+              Clear Filters
+            </Button>
+          </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-4">
-          <Select onValueChange={setSelectedCompany} value={selectedCompany}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All Companies" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Companies</SelectItem>
-              {companies.map((company) => (
-                <SelectItem key={company._id} value={company._id}>
-                  {company.logo} {company.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select onValueChange={setSelectedLevel} value={selectedLevel}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="All Levels" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Levels</SelectItem>
-              <SelectItem value="entry">Entry Level</SelectItem>
-              <SelectItem value="mid">Mid Level</SelectItem>
-              <SelectItem value="senior">Senior Level</SelectItem>
-              <SelectItem value="lead">Lead Level</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select
-            onValueChange={setSelectedDepartment}
-            value={selectedDepartment}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Departments" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Departments</SelectItem>
-              {departments.map((dept) => (
-                <SelectItem key={dept} value={dept}>
-                  {dept}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select onValueChange={setSelectedLocation} value={selectedLocation}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All Locations" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Locations</SelectItem>
-              {locations.map((location) => (
-                <SelectItem key={location} value={location}>
-                  {location}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Button
-            className="ml-auto"
-            onClick={() => {
-              setSearchQuery("");
-              setSelectedCompany("all");
-              setSelectedLevel("all");
-              setSelectedDepartment("all");
-              setSelectedLocation("all");
-            }}
-            variant="outline"
-          >
-            <Filter className="mr-2 h-4 w-4" />
-            Clear Filters
-          </Button>
-        </div>
-      </div>
-
-      {/* Results Count */}
-      <div className="mb-6">
-        <p className="text-gray-600 text-sm dark:text-gray-400">
-          {filteredJobs.length} position{filteredJobs.length !== 1 ? "s" : ""}{" "}
-          found
-        </p>
-      </div>
-
-      {/* Job Positions Grid */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {filteredJobs.map((job) => (
-          <JobCard
-            key={job._id}
-            job={job}
-            getLevelColor={getLevelColor}
-            onStartInterview={handleStartInterview}
-          />
-        ))}
-      </div>
-
-      {/* Empty State */}
-      {filteredJobs.length === 0 && (
-        <div className="py-12 text-center">
-          <div className="mb-4 text-6xl">🔍</div>
-          <h3 className="mb-2 font-semibold text-xl">No positions found</h3>
-          <p className="mb-4 text-gray-600 dark:text-gray-400">
-            Try adjusting your search criteria or filters
+        {/* Results Count */}
+        <div className="mb-6">
+          <p className="text-gray-600 text-sm dark:text-gray-400">
+            {filteredJobs.length} position{filteredJobs.length !== 1 ? "s" : ""}{" "}
+            found
           </p>
-          <Button
-            onClick={() => {
-              setSearchQuery("");
-              setSelectedCompany("all");
-              setSelectedLevel("all");
-              setSelectedDepartment("all");
-              setSelectedLocation("all");
-            }}
-            variant="outline"
-          >
-            Clear all filters
-          </Button>
         </div>
-      )}
+
+        {/* Job Positions Grid */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {filteredJobs.map((job) => (
+            <JobCard
+              key={job._id}
+              job={job}
+              getLevelColor={getLevelColor}
+              onStartInterview={handleStartInterview}
+            />
+          ))}
+        </div>
+
+        {/* Empty State */}
+        {filteredJobs.length === 0 && (
+          <div className="py-12 text-center">
+            <div className="mb-4 text-6xl">🔍</div>
+            <h3 className="mb-2 font-semibold text-xl">No positions found</h3>
+            <p className="mb-4 text-gray-600 dark:text-gray-400">
+              Try adjusting your search criteria or filters
+            </p>
+            <Button
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedCompany("all");
+                setSelectedLevel("all");
+                setSelectedDepartment("all");
+                setSelectedLocation("all");
+              }}
+              variant="outline"
+            >
+              Clear all filters
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
