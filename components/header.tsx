@@ -19,7 +19,7 @@ export default function Header() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex items-center space-x-2">
+      <nav className="md:flex items-center space-x-2 hidden">
         <Link
           className="rounded-full px-3 py-2 font-light text-white/80 text-xs transition-all duration-200 hover:bg-white/10 hover:text-white"
           href="#features"
