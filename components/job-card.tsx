@@ -49,17 +49,17 @@ export const JobCard: React.FC<JobCardProps> = ({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
-            <div className="text-2xl">
+            <div className="text-2xl border-2 border-accent ">
               <Image
                 width={60}
                 height={60}
                 src={companyImage}
                 alt={job.company + " logo"}
-                className="w-8 h-8 object-contain"
+                className="w-16 h-16 object-contain"
               />
             </div>
             <div>
-              <CardTitle className="text-lg transition-colors group-hover:text-blue-600">
+              <CardTitle className="text-md transition-colors group-hover:text-blue-600">
                 {job.title}
               </CardTitle>
               <CardDescription className="mt-1 flex items-center">
@@ -68,9 +68,6 @@ export const JobCard: React.FC<JobCardProps> = ({
               </CardDescription>
             </div>
           </div>
-          <Badge className={getLevelColor(job.level)}>
-            {job.level.charAt(0).toUpperCase() + job.level.slice(1)}
-          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
