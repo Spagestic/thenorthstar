@@ -115,11 +115,9 @@ function createStore<
 
     setState({ isFetching: true });
 
-    let query = supabase
-      .from(tableName)
-      .select(columns, {
-        count: "exact",
-      }) as unknown as SupabaseSelectBuilder<T>;
+    let query = supabase.from(tableName).select(columns, {
+      count: "exact",
+    }) as unknown as SupabaseSelectBuilder<T>;
 
     if (trailingQuery) {
       query = trailingQuery(query);
@@ -134,8 +132,14 @@ function createStore<
       console.error("An unexpected error occurred:", error);
       setState({ error });
     } else {
+      // Deduplicate data by id to prevent duplicate entries
+      const existingIds = new Set(state.data.map((item: any) => item.id));
+      const uniqueNewData = (newData as TData[]).filter(
+        (item: any) => !existingIds.has(item.id)
+      );
+
       setState({
-        data: [...state.data, ...(newData as TData[])],
+        data: [...state.data, ...uniqueNewData],
         count: count || 0,
         isSuccess: true,
         error: null,
