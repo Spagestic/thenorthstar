@@ -2,8 +2,8 @@
 
 import { JobCard, JobPosition } from "@/components/jobs/job-card";
 import { InfiniteList } from "@/components/jobs/infinite-job-list";
+import { JobCardSkeleton } from "@/components/jobs/job-card-skeleton";
 import { SupabaseQueryHandler } from "@/hooks/use-infinite-query";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface JobListInfiniteProps {
   searchValue: string;
@@ -46,31 +46,6 @@ const extractStrings = (value: unknown): string[] => {
 
   return [];
 };
-
-const JobSkeleton = ({ count }: { count: number }) => (
-  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-    {Array.from({ length: count }).map((_, index) => (
-      <div key={index} className="rounded-lg border bg-card p-6 space-y-4">
-        <div className="flex items-start justify-between">
-          <div className="space-y-2 flex-1">
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
-          <Skeleton className="h-12 w-12 rounded-lg" />
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-2/3" />
-        </div>
-        <div className="flex gap-2">
-          <Skeleton className="h-6 w-20" />
-          <Skeleton className="h-6 w-20" />
-        </div>
-      </div>
-    ))}
-  </div>
-);
 
 export function JobListInfinite({
   searchValue,
@@ -134,7 +109,7 @@ export function JobListInfinite({
 
         return <JobCard job={job} />;
       }}
-      renderSkeleton={(count) => <JobSkeleton count={count} />}
+      renderSkeleton={(count) => <JobCardSkeleton count={count} />}
       renderNoResults={() => (
         <div className="py-12 text-center text-muted-foreground">
           No roles match the current filters. Try adjusting your search.
