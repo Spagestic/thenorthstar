@@ -7,7 +7,7 @@ import Header from "../Header";
 export const revalidate = 0;
 
 type JobsPageProps = {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 const normalizeText = (value: string | null | undefined) =>
@@ -46,6 +46,7 @@ const extractStrings = (value: unknown): string[] => {
 };
 
 export default async function JobsPage({ searchParams }: JobsPageProps) {
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("job_positions")
@@ -55,31 +56,31 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
 
   const jobs = (data ?? []) as JobPosition[];
   const searchValue = normalizeText(
-    typeof searchParams.q === "string"
-      ? searchParams.q
-      : Array.isArray(searchParams.q)
-      ? searchParams.q[0]
+    typeof resolvedSearchParams.q === "string"
+      ? resolvedSearchParams.q
+      : Array.isArray(resolvedSearchParams.q)
+      ? resolvedSearchParams.q[0]
       : undefined
   );
   const industryFilter = normalizeText(
-    typeof searchParams.industry === "string"
-      ? searchParams.industry
-      : Array.isArray(searchParams.industry)
-      ? searchParams.industry[0]
+    typeof resolvedSearchParams.industry === "string"
+      ? resolvedSearchParams.industry
+      : Array.isArray(resolvedSearchParams.industry)
+      ? resolvedSearchParams.industry[0]
       : undefined
   );
   const categoryFilter = normalizeText(
-    typeof searchParams.category === "string"
-      ? searchParams.category
-      : Array.isArray(searchParams.category)
-      ? searchParams.category[0]
+    typeof resolvedSearchParams.category === "string"
+      ? resolvedSearchParams.category
+      : Array.isArray(resolvedSearchParams.category)
+      ? resolvedSearchParams.category[0]
       : undefined
   );
   const seniorityFilter = normalizeText(
-    typeof searchParams.seniority === "string"
-      ? searchParams.seniority
-      : Array.isArray(searchParams.seniority)
-      ? searchParams.seniority[0]
+    typeof resolvedSearchParams.seniority === "string"
+      ? resolvedSearchParams.seniority
+      : Array.isArray(resolvedSearchParams.seniority)
+      ? resolvedSearchParams.seniority[0]
       : undefined
   );
 
