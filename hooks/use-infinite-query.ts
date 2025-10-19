@@ -45,11 +45,7 @@ type SupabaseTableData<T extends SupabaseTableName> =
   DatabaseSchema["Tables"][T]["Row"];
 
 type SupabaseSelectBuilder<T extends SupabaseTableName> = ReturnType<
-  PostgrestQueryBuilder<
-    DatabaseSchema,
-    DatabaseSchema["Tables"][T],
-    T
-  >["select"]
+  PostgrestQueryBuilder<any, any, any>["select"]
 >;
 
 // A function that modifies the query. Can be used to sort, filter, etc. If .range is used, it will be overwritten.
