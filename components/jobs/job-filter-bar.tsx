@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useTransition, useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import {
@@ -35,6 +35,26 @@ export function JobFilterBar({
   const currentIndustry = searchParams.get("industry") ?? ALL_VALUE;
   const currentCategory = searchParams.get("category") ?? ALL_VALUE;
   const currentSeniority = searchParams.get("seniority") ?? ALL_VALUE;
+
+  // Local state for search input to avoid lag
+  const [searchValue, setSearchValue] = useState(currentSearch);
+
+  // Update local state when URL changes
+  useEffect(() => {
+    setSearchValue(currentSearch);
+  }, [currentSearch]);
+
+  // Debounce search updates
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchValue !== currentSearch) {
+        updateParam("q", searchValue);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [searchValue]);
+
   const hasActiveFilters =
     currentSearch.trim().length > 0 ||
     currentIndustry !== ALL_VALUE ||
@@ -65,9 +85,9 @@ export function JobFilterBar({
         <Input
           aria-label="Search job titles, companies, or skills"
           className="pl-9"
-          onChange={(event) => updateParam("q", event.target.value)}
+          onChange={(event) => setSearchValue(event.target.value)}
           placeholder="Search by role, company, or skills"
-          value={currentSearch}
+          value={searchValue}
         />
       </div>
       <div className="flex flex-wrap items-center gap-3">
@@ -125,11 +145,12 @@ export function JobFilterBar({
         <Button
           className="ml-auto"
           disabled={!hasActiveFilters}
-          onClick={() =>
+          onClick={() => {
+            setSearchValue("");
             startTransition(() => {
               router.push(pathname, { scroll: false });
-            })
-          }
+            });
+          }}
           type="button"
           variant="outline"
         >

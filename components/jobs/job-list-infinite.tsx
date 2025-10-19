@@ -53,6 +53,9 @@ export function JobListInfinite({
   categoryFilter,
   seniorityFilter,
 }: JobListInfiniteProps) {
+  // Create a key that changes when filters change to reset the query
+  const filterKey = `${industryFilter}-${categoryFilter}-${seniorityFilter}`;
+
   const trailingQuery: SupabaseQueryHandler<"job_positions"> = (query) => {
     let filteredQuery = query.order("created_at", { ascending: false });
 
@@ -97,6 +100,7 @@ export function JobListInfinite({
 
   return (
     <InfiniteList
+      key={filterKey}
       tableName="job_positions"
       columns="*"
       pageSize={12}
