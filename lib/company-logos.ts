@@ -29,7 +29,7 @@ export const companyLogos = {
   EY,
   "Goldman Sachs": GoldmanSachs,
   HSBC,
-  JPMC,
+  "JPMorgan Chase": JPMC,
   McKinsey,
   "Morgan Stanley": MorganStanley,
   PWC,
