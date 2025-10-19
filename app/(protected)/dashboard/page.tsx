@@ -1,236 +1,174 @@
-"use client";
-
-import { Filter, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { companies } from "./companies";
-import { jobPositions } from "./job-positions";
-import { JobCard } from "@/components/job-card";
+import React from "react";
+import { createClient } from "@/lib/supabase/server";
+import { JobCard, JobPosition } from "@/components/jobs/job-card";
+import { JobFilterBar } from "@/components/jobs/job-filter-bar";
 import Header from "../Header";
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCompany, setSelectedCompany] = useState<string>("all");
-  const [selectedLevel, setSelectedLevel] = useState<string>("all");
-  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
-  const [selectedLocation, setSelectedLocation] = useState<string>("all");
+export const revalidate = 0;
 
-  // Get unique values for filters
-  const departments = useMemo(() => {
-    const deps = [...new Set(jobPositions.map((job) => job.department))];
-    return deps;
-  }, []);
+type JobsPageProps = {
+  searchParams: Record<string, string | string[] | undefined>;
+};
 
-  const locations = useMemo(() => {
-    const locs = [...new Set(jobPositions.map((job) => job.location))];
-    return locs;
-  }, []);
+const normalizeText = (value: string | null | undefined) =>
+  value?.toLowerCase().trim() ?? "";
 
-  // Filter job positions based on search and filters
-  const filteredJobs = useMemo(
-    () =>
-      jobPositions.filter((job) => {
-        const matchesSearch =
-          job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          job.requirements.some((req) =>
-            req.toLowerCase().includes(searchQuery.toLowerCase())
-          );
+const extractStrings = (value: unknown): string[] => {
+  if (!value) {
+    return [];
+  }
 
-        const matchesCompany =
-          selectedCompany === "all" || job.companyId === selectedCompany;
-        const matchesLevel =
-          selectedLevel === "all" || job.level === selectedLevel;
-        const matchesDepartment =
-          selectedDepartment === "all" || job.department === selectedDepartment;
-        const matchesLocation =
-          selectedLocation === "all" || job.location === selectedLocation;
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string");
+  }
 
-        return (
-          matchesSearch &&
-          matchesCompany &&
-          matchesLevel &&
-          matchesDepartment &&
-          matchesLocation
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(
+          (item): item is string => typeof item === "string"
         );
-      }),
-    [
-      searchQuery,
-      selectedCompany,
-      selectedLevel,
-      selectedDepartment,
-      selectedLocation,
-    ]
+      }
+    } catch {
+      return [value];
+    }
+    return [value];
+  }
+
+  if (typeof value === "object") {
+    return Object.values(value as Record<string, unknown>).filter(
+      (item): item is string => typeof item === "string"
+    );
+  }
+
+  return [];
+};
+
+export default async function JobsPage({ searchParams }: JobsPageProps) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("job_positions")
+    .select("*")
+    .range(0, 10)
+    .order("created_at", { ascending: false });
+
+  const jobs = (data ?? []) as JobPosition[];
+  const searchValue = normalizeText(
+    typeof searchParams.q === "string"
+      ? searchParams.q
+      : Array.isArray(searchParams.q)
+      ? searchParams.q[0]
+      : undefined
+  );
+  const industryFilter = normalizeText(
+    typeof searchParams.industry === "string"
+      ? searchParams.industry
+      : Array.isArray(searchParams.industry)
+      ? searchParams.industry[0]
+      : undefined
+  );
+  const categoryFilter = normalizeText(
+    typeof searchParams.category === "string"
+      ? searchParams.category
+      : Array.isArray(searchParams.category)
+      ? searchParams.category[0]
+      : undefined
+  );
+  const seniorityFilter = normalizeText(
+    typeof searchParams.seniority === "string"
+      ? searchParams.seniority
+      : Array.isArray(searchParams.seniority)
+      ? searchParams.seniority[0]
+      : undefined
   );
 
-  const handleStartInterview = (jobId: string) => {
-    // Navigate to the call page with the selected job
-    router.push(`/call?jobId=${jobId}`);
-  };
+  const industries = Array.from(
+    new Set(
+      jobs
+        .map((job) => job.industry)
+        .filter((value): value is string => !!value && value.trim().length > 0)
+    )
+  ).sort((a, b) => a.localeCompare(b));
 
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case "entry":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
-      case "mid":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
-      case "senior":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
-      case "lead":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
-    }
-  };
+  const categories = Array.from(
+    new Set(
+      jobs
+        .map((job) => job.category)
+        .filter((value): value is string => !!value && value.trim().length > 0)
+    )
+  ).sort((a, b) => a.localeCompare(b));
+
+  const seniorities = Array.from(
+    new Set(
+      jobs
+        .map((job) => job.seniority_level)
+        .filter((value): value is string => !!value && value.trim().length > 0)
+    )
+  ).sort((a, b) => a.localeCompare(b));
+
+  const filteredJobs = jobs.filter((job) => {
+    const title = normalizeText(job.title);
+    const company = normalizeText(job.company ?? undefined);
+    const category = normalizeText(job.category);
+    const industry = normalizeText(job.industry);
+    const seniority = normalizeText(job.seniority_level ?? undefined);
+
+    const requirements = extractStrings(job.typical_requirements).map((item) =>
+      item.toLowerCase()
+    );
+    const responsibilities = extractStrings(job.typical_responsibilities).map(
+      (item) => item.toLowerCase()
+    );
+    const skillTokens = [...requirements, ...responsibilities];
+
+    const searchMatches =
+      searchValue.length === 0 ||
+      title.includes(searchValue) ||
+      company.includes(searchValue) ||
+      category.includes(searchValue) ||
+      industry.includes(searchValue) ||
+      skillTokens.some((token) => token.includes(searchValue));
+
+    const industryMatches =
+      industryFilter.length === 0 || industry === industryFilter;
+    const categoryMatches =
+      categoryFilter.length === 0 || category === categoryFilter;
+    const seniorityMatches =
+      seniorityFilter.length === 0 || seniority === seniorityFilter;
+
+    return (
+      searchMatches && industryMatches && categoryMatches && seniorityMatches
+    );
+  });
 
   return (
     <div className="container mx-auto">
-      <Header nav={["Dashboard"]} />
+      <Header nav={["Jobs"]} />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-8">
-        {/* Search and Filters */}
-        <div className="mb-8 space-y-4">
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-400" />
-            <Input
-              className="h-12 pl-10 text-lg"
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by job title, company, or skills..."
-              value={searchQuery}
-            />
+        <JobFilterBar
+          categories={categories}
+          industries={industries}
+          seniorities={seniorities}
+        />
+
+        {error && (
+          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+            Unable to load positions right now. Please try again later.
           </div>
+        )}
 
-          {/* Filters */}
-          <div className="flex flex-wrap gap-4">
-            <Select onValueChange={setSelectedCompany} value={selectedCompany}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All Companies" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
-                {companies.map((company) => (
-                  <SelectItem key={company._id} value={company._id}>
-                    {company.logo} {company.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select onValueChange={setSelectedLevel} value={selectedLevel}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="All Levels" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Levels</SelectItem>
-                <SelectItem value="entry">Entry Level</SelectItem>
-                <SelectItem value="mid">Mid Level</SelectItem>
-                <SelectItem value="senior">Senior Level</SelectItem>
-                <SelectItem value="lead">Lead Level</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
-              onValueChange={setSelectedDepartment}
-              value={selectedDepartment}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="All Departments" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Departments</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept} value={dept}>
-                    {dept}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              onValueChange={setSelectedLocation}
-              value={selectedLocation}
-            >
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All Locations" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Locations</SelectItem>
-                {locations.map((location) => (
-                  <SelectItem key={location} value={location}>
-                    {location}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Button
-              className="ml-auto"
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedCompany("all");
-                setSelectedLevel("all");
-                setSelectedDepartment("all");
-                setSelectedLocation("all");
-              }}
-              variant="outline"
-            >
-              <Filter className="mr-2 h-4 w-4" />
-              Clear Filters
-            </Button>
-          </div>
-        </div>
-
-        {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-gray-600 text-sm dark:text-gray-400">
-            {filteredJobs.length} position{filteredJobs.length !== 1 ? "s" : ""}{" "}
-            found
-          </p>
-        </div>
-
-        {/* Job Positions Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filteredJobs.map((job) => (
-            <JobCard
-              key={job._id}
-              job={job}
-              getLevelColor={getLevelColor}
-              onStartInterview={handleStartInterview}
-            />
+            <JobCard key={job.id} job={job} />
           ))}
         </div>
 
-        {/* Empty State */}
-        {filteredJobs.length === 0 && (
-          <div className="py-12 text-center">
-            <div className="mb-4 text-6xl">🔍</div>
-            <h3 className="mb-2 font-semibold text-xl">No positions found</h3>
-            <p className="mb-4 text-gray-600 dark:text-gray-400">
-              Try adjusting your search criteria or filters
-            </p>
-            <Button
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedCompany("all");
-                setSelectedLevel("all");
-                setSelectedDepartment("all");
-                setSelectedLocation("all");
-              }}
-              variant="outline"
-            >
-              Clear all filters
-            </Button>
+        {filteredJobs.length === 0 && !error && (
+          <div className="py-12 text-center text-muted-foreground">
+            {jobs.length === 0
+              ? "Check back soon—new opportunities are on their way."
+              : "No roles match the current filters. Try adjusting your search."}
           </div>
         )}
       </div>

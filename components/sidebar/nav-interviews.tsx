@@ -18,7 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { jobPositions } from "@/app/(protected)/dashboard/job-positions";
+import { jobPositions } from "@/app/(protected)/dashboard/dummy/job-positions";
 import { getCompanyLogo } from "@/lib/company-logos";
 
 const interviews = jobPositions.map((job) => ({
