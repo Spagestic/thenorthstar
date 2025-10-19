@@ -177,7 +177,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
         {requirements.length > 0 && (
           <div>
             <p className="mb-2 text-sm font-medium text-foreground">
-              Responsibilities
+              Requirements
             </p>
             <ul className="space-y-1 text-sm text-muted-foreground">
               {requirements.slice(0, 3).map((item, index) => (
@@ -185,7 +185,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
                   className="flex items-start gap-2"
                   key={`${job.id}-resp-${index}`}
                 >
-                  <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                  <CheckCircle2 className="h-3 w-3 shrink-0 self-center text-primary" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -201,10 +201,10 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
             <ul className="space-y-1 text-sm text-muted-foreground">
               {responsibilities.slice(0, 3).map((item, index) => (
                 <li
-                  className="flex items-start gap-2"
+                  className="flex items-start gap-2 "
                   key={`${job.id}-resp-${index}`}
                 >
-                  <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                  <CheckCircle2 className="h-3 w-3 shrink-0 self-center text-primary" />
                   <span>{item}</span>
                 </li>
               ))}
