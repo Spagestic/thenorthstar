@@ -22,7 +22,23 @@ export default async function page({
     (job?.company?.name ? getCompanyLogo(job?.company?.name) : null);
   return (
     <div className="container mx-auto flex flex-col h-screen">
-      <Header nav={[job?.industry?.name, job?.company?.name, job?.title]} />
+      <Header
+        nav={[
+          {
+            label: job?.industry?.name,
+            href: `/dashboard?industry=${encodeURIComponent(
+              job?.industry?.name || ""
+            )}`,
+          },
+          {
+            label: job?.company?.name,
+            href: `/dashboard?company=${encodeURIComponent(
+              job?.company?.name || ""
+            )}`,
+          },
+          { label: job?.title },
+        ]}
+      />
       <div className="max-w-2xl mx-auto p-6">
         <h1 className="text-3xl font-bold mb-4 text-primary">{job?.title}</h1>
         <div className="mb-4 grid grid-cols-2 gap-4">
