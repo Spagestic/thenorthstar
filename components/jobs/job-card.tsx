@@ -139,7 +139,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
     : null;
 
   return (
-    <Card className="group h-full cursor-pointer transition-shadow hover:shadow-lg">
+    <Card className="group flex h-full cursor-pointer flex-col transition-shadow hover:shadow-lg">
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
@@ -180,44 +180,46 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {requirements.length > 0 && (
-          <div>
-            <p className="mb-2 text-sm font-medium text-foreground">
-              Requirements
-            </p>
-            <ul className="space-y-1 text-sm text-muted-foreground">
-              {requirements.slice(0, 3).map((item, index) => (
-                <li
-                  className="flex items-start gap-2"
-                  key={`${job.id}-resp-${index}`}
-                >
-                  <CheckCircle2 className="h-3 w-3 shrink-0 self-center text-primary" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+      <CardContent className="flex flex-1 flex-col space-y-4">
+        <div className="flex-1 space-y-4">
+          {requirements.length > 0 && (
+            <div>
+              <p className="mb-2 text-sm font-medium text-foreground">
+                Requirements
+              </p>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                {requirements.slice(0, 3).map((item, index) => (
+                  <li
+                    className="flex items-start gap-2"
+                    key={`${job.id}-resp-${index}`}
+                  >
+                    <CheckCircle2 className="h-3 w-3 shrink-0 self-center text-primary" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-        {responsibilities.length > 0 && (
-          <div>
-            <p className="mb-2 text-sm font-medium text-foreground">
-              Responsibilities
-            </p>
-            <ul className="space-y-1 text-sm text-muted-foreground">
-              {responsibilities.slice(0, 3).map((item, index) => (
-                <li
-                  className="flex items-start gap-2 "
-                  key={`${job.id}-resp-${index}`}
-                >
-                  <CheckCircle2 className="h-3 w-3 shrink-0 self-center text-primary" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+          {responsibilities.length > 0 && (
+            <div>
+              <p className="mb-2 text-sm font-medium text-foreground">
+                Responsibilities
+              </p>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                {responsibilities.slice(0, 3).map((item, index) => (
+                  <li
+                    className="flex items-start gap-2 "
+                    key={`${job.id}-resp-${index}`}
+                  >
+                    <CheckCircle2 className="h-3 w-3 shrink-0 self-center text-primary" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
 
         <Button asChild className="w-full" size="sm">
           <Link href={`/call?jobId=${job.id}`}>Start Practice Interview</Link>
