@@ -10,13 +10,29 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
+type NavItem = {
+  label: string;
+  href?: string;
+};
+
 type HeaderProps = {
-  nav?: string[];
+  nav?: (string | NavItem)[];
 };
 
 export default function Header({ nav }: HeaderProps) {
   // Fallback to default nav if not provided
-  const items = nav && nav.length > 0 ? nav : ["Dashboard"];
+  const rawItems = nav && nav.length > 0 ? nav : ["Dashboard"];
+
+  // Normalize items to NavItem format
+  const items: NavItem[] = rawItems.map((item) => {
+    if (typeof item === "string") {
+      return {
+        label: item,
+        href: `/${item.toLowerCase().replace(/\s+/g, "-")}`,
+      };
+    }
+    return item;
+  });
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2">
@@ -33,15 +49,13 @@ export default function Header({ nav }: HeaderProps) {
               const showHidden =
                 items.length > 1 && idx === 0 ? "hidden md:block" : undefined;
               return (
-                <React.Fragment key={item}>
+                <React.Fragment key={item.label}>
                   <BreadcrumbItem className={showHidden}>
                     {isLast ? (
-                      <BreadcrumbPage>{item}</BreadcrumbPage>
+                      <BreadcrumbPage>{item.label}</BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink
-                        href={`/${item.toLowerCase().replace(/\s+/g, "-")}`}
-                      >
-                        {item}
+                      <BreadcrumbLink href={item.href}>
+                        {item.label}
                       </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
