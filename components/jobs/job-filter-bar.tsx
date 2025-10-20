@@ -38,7 +38,6 @@ const ALL_VALUE = "all";
 
 export function JobFilterBar({
   industries,
-  categories,
   seniorities,
   companies,
 }: JobFilterBarProps) {
@@ -71,7 +70,8 @@ export function JobFilterBar({
     parseAsString.withDefault("").withOptions({ shallow: false })
   );
 
-  const [open, setOpen] = React.useState(false);
+  const [companyOpen, setCompanyOpen] = React.useState(false);
+  const [industryOpen, setIndustryOpen] = React.useState(false);
 
   const hasActiveFilters =
     searchValue.trim().length > 0 ||
@@ -101,12 +101,12 @@ export function JobFilterBar({
         />
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={companyOpen} onOpenChange={setCompanyOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               role="combobox"
-              aria-expanded={open}
+              aria-expanded={companyOpen}
               className="w-[200px] justify-between"
             >
               {company
@@ -129,7 +129,7 @@ export function JobFilterBar({
                         setCompany(
                           currentValue === company ? "" : currentValue
                         );
-                        setOpen(false);
+                        setCompanyOpen(false);
                       }}
                     >
                       {c}
@@ -146,43 +146,52 @@ export function JobFilterBar({
             </Command>
           </PopoverContent>
         </Popover>
-        <Select
-          onValueChange={(value) =>
-            setIndustry(value === ALL_VALUE ? "" : value)
-          }
-          value={industry || ALL_VALUE}
-        >
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Industry" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL_VALUE}>All Industries</SelectItem>
-            {industries.map((ind) => (
-              <SelectItem key={ind} value={ind}>
-                {ind}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
 
-        <Select
-          onValueChange={(value) =>
-            setCategory(value === ALL_VALUE ? "" : value)
-          }
-          value={category || ALL_VALUE}
-        >
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL_VALUE}>All Categories</SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Popover open={industryOpen} onOpenChange={setIndustryOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={industryOpen}
+              className="w-[240px] justify-between"
+            >
+              {industry
+                ? industries.find((ind) => ind === industry)
+                : "Select industry..."}
+              <ChevronsUpDown className="opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[240px] p-0">
+            <Command>
+              <CommandInput placeholder="Search industry..." className="h-9" />
+              <CommandList>
+                <CommandEmpty>No industry found.</CommandEmpty>
+                <CommandGroup>
+                  {industries.map((ind) => (
+                    <CommandItem
+                      key={ind}
+                      value={ind}
+                      onSelect={(currentValue) => {
+                        setIndustry(
+                          currentValue === industry ? "" : currentValue
+                        );
+                        setIndustryOpen(false);
+                      }}
+                    >
+                      {ind}
+                      <Check
+                        className={cn(
+                          "ml-auto",
+                          industry === ind ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
 
         <Select
           onValueChange={(value) =>
