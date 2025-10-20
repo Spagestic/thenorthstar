@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useConversation } from "@elevenlabs/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2Icon, PhoneIcon, PhoneOffIcon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -25,8 +26,26 @@ type AgentState =
   | null;
 
 export default function Page() {
+  const searchParams = useSearchParams();
+  const jobId = searchParams.get("jobId");
+
   const [agentState, setAgentState] = useState<AgentState>("disconnected");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [jobTitle, setJobTitle] = useState<string | null>(null);
+
+  // Fetch job details if jobId is present
+  useEffect(() => {
+    if (jobId) {
+      fetch(`/api/jobs/${jobId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.title) {
+            setJobTitle(data.title);
+          }
+        })
+        .catch((err) => console.error("Failed to fetch job details:", err));
+    }
+  }, [jobId]);
 
   const conversation = useConversation({
     onConnect: () => console.log("Connected"),
@@ -84,9 +103,19 @@ export default function Page() {
 
   return (
     <div>
-      <Header nav={["Call"]} />
-      <div className="flex h-[90vh] w-full flex-col items-center justify-center overflow-hidden p-6">
+      <Header nav={jobTitle ? ["Call", jobTitle] : ["Call"]} />
+      <div className="flex h-[84vh] w-full flex-col items-center justify-center overflow-hidden p-6">
         <div className="flex flex-col items-center gap-6">
+          {jobTitle && (
+            <div className="text-center mb-2">
+              <p className="text-sm text-muted-foreground mb-1">
+                Interview for
+              </p>
+              <h1 className="text-2xl font-bold text-primary">{jobTitle}</h1>
+              <p className="text-sm text-muted-foreground">Position</p>
+            </div>
+          )}
+
           <div className="relative size-32">
             <div className="bg-muted relative h-full w-full rounded-full p-1 shadow-[inset_0_2px_8px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]">
               <div className="bg-background h-full w-full overflow-hidden rounded-full shadow-[inset_0_0_12px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_0_12px_rgba(0,0,0,0.3)]">
