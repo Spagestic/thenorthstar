@@ -143,14 +143,13 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-md border bg-accent/20">
+            <div className="relative h-16 w-16 overflow-hidden rounded-md border bg-accent/20 aspect-square p-8">
               {companyLogo ? (
                 <Image
                   alt={`${companyName || "Company"} logo`}
-                  className="h-12 w-12 object-contain"
-                  height={48}
+                  className="h-full w-full object-contain"
+                  fill
                   src={companyLogo}
-                  width={48}
                 />
               ) : (
                 <Building2 className="h-6 w-6 text-muted-foreground" />
