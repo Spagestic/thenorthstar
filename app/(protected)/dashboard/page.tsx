@@ -7,15 +7,7 @@ import Header from "../Header";
 
 export const revalidate = 0;
 
-type JobsPageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-const normalizeText = (value: string | null | undefined) =>
-  value?.toLowerCase().trim() ?? "";
-
-export default async function JobsPage({ searchParams }: JobsPageProps) {
-  const resolvedSearchParams = await searchParams;
+export default async function JobsPage() {
   const supabase = await createClient();
 
   // Fetch initial data for filter options
@@ -25,35 +17,6 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
     .order("created_at", { ascending: false });
 
   const jobs = (data ?? []) as Partial<JobPosition>[];
-
-  const searchValue = normalizeText(
-    typeof resolvedSearchParams.q === "string"
-      ? resolvedSearchParams.q
-      : Array.isArray(resolvedSearchParams.q)
-      ? resolvedSearchParams.q[0]
-      : undefined
-  );
-  const industryFilter = normalizeText(
-    typeof resolvedSearchParams.industry === "string"
-      ? resolvedSearchParams.industry
-      : Array.isArray(resolvedSearchParams.industry)
-      ? resolvedSearchParams.industry[0]
-      : undefined
-  );
-  const categoryFilter = normalizeText(
-    typeof resolvedSearchParams.category === "string"
-      ? resolvedSearchParams.category
-      : Array.isArray(resolvedSearchParams.category)
-      ? resolvedSearchParams.category[0]
-      : undefined
-  );
-  const seniorityFilter = normalizeText(
-    typeof resolvedSearchParams.seniority === "string"
-      ? resolvedSearchParams.seniority
-      : Array.isArray(resolvedSearchParams.seniority)
-      ? resolvedSearchParams.seniority[0]
-      : undefined
-  );
 
   const industries = Array.from(
     new Set(
@@ -89,12 +52,7 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
           seniorities={seniorities}
         />
 
-        <JobListInfinite
-          searchValue={searchValue}
-          industryFilter={industryFilter}
-          categoryFilter={categoryFilter}
-          seniorityFilter={seniorityFilter}
-        />
+        <JobListInfinite />
       </div>
     </div>
   );

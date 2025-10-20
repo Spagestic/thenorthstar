@@ -4,13 +4,7 @@ import { JobCard, JobPosition } from "@/components/jobs/job-card";
 import { InfiniteList } from "@/components/jobs/infinite-job-list";
 import { JobCardSkeleton } from "@/components/jobs/job-card-skeleton";
 import { SupabaseQueryHandler } from "@/hooks/use-infinite-query";
-
-interface JobListInfiniteProps {
-  searchValue: string;
-  industryFilter: string;
-  categoryFilter: string;
-  seniorityFilter: string;
-}
+import { useQueryState, parseAsString } from "nuqs";
 
 const normalizeText = (value: string | null | undefined) =>
   value?.toLowerCase().trim() ?? "";
@@ -47,12 +41,22 @@ const extractStrings = (value: unknown): string[] => {
   return [];
 };
 
-export function JobListInfinite({
-  searchValue,
-  industryFilter,
-  categoryFilter,
-  seniorityFilter,
-}: JobListInfiniteProps) {
+export function JobListInfinite() {
+  // Use nuqs to read URL state
+  const [searchValue] = useQueryState("q", parseAsString.withDefault(""));
+  const [industryFilter] = useQueryState(
+    "industry",
+    parseAsString.withDefault("")
+  );
+  const [categoryFilter] = useQueryState(
+    "category",
+    parseAsString.withDefault("")
+  );
+  const [seniorityFilter] = useQueryState(
+    "seniority",
+    parseAsString.withDefault("")
+  );
+
   // Create a key that changes when filters change to reset the query
   const filterKey = `${industryFilter}-${categoryFilter}-${seniorityFilter}`;
 

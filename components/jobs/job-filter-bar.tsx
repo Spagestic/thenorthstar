@@ -1,7 +1,6 @@
 "use client";
 
-import { useTransition, useState, useEffect } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useQueryState, parseAsString } from "nuqs";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -11,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Filter, Search, Loader2 } from "lucide-react";
+import { Filter, Search } from "lucide-react";
 
 interface JobFilterBarProps {
   industries: string[];
@@ -26,56 +25,41 @@ export function JobFilterBar({
   categories,
   seniorities,
 }: JobFilterBarProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  // Use nuqs for URL state management with debouncing
+  const [searchValue, setSearchValue] = useQueryState(
+    "q",
+    parseAsString.withDefault("").withOptions({
+      shallow: false,
+      throttleMs: 300, // Built-in debouncing
+    })
+  );
 
-  const currentSearch = searchParams.get("q") ?? "";
-  const currentIndustry = searchParams.get("industry") ?? ALL_VALUE;
-  const currentCategory = searchParams.get("category") ?? ALL_VALUE;
-  const currentSeniority = searchParams.get("seniority") ?? ALL_VALUE;
+  const [industry, setIndustry] = useQueryState(
+    "industry",
+    parseAsString.withDefault("").withOptions({ shallow: false })
+  );
 
-  // Local state for search input to avoid lag
-  const [searchValue, setSearchValue] = useState(currentSearch);
+  const [category, setCategory] = useQueryState(
+    "category",
+    parseAsString.withDefault("").withOptions({ shallow: false })
+  );
 
-  // Update local state when URL changes
-  useEffect(() => {
-    setSearchValue(currentSearch);
-  }, [currentSearch]);
-
-  // Debounce search updates
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchValue !== currentSearch) {
-        updateParam("q", searchValue);
-      }
-    }, 300); // 300ms debounce
-
-    return () => clearTimeout(timer);
-  }, [searchValue]);
+  const [seniority, setSeniority] = useQueryState(
+    "seniority",
+    parseAsString.withDefault("").withOptions({ shallow: false })
+  );
 
   const hasActiveFilters =
-    currentSearch.trim().length > 0 ||
-    currentIndustry !== ALL_VALUE ||
-    currentCategory !== ALL_VALUE ||
-    currentSeniority !== ALL_VALUE;
+    searchValue.trim().length > 0 ||
+    industry.length > 0 ||
+    category.length > 0 ||
+    seniority.length > 0;
 
-  const updateParam = (key: string, value: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (value && value.length > 0 && value !== ALL_VALUE) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-
-    startTransition(() => {
-      const query = params.toString();
-      router.push(`${pathname}${query ? `?${query}` : ""}`, {
-        scroll: false,
-      });
-    });
+  const resetFilters = () => {
+    setSearchValue("");
+    setIndustry("");
+    setCategory("");
+    setSeniority("");
   };
 
   return (
@@ -92,51 +76,57 @@ export function JobFilterBar({
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <Select
-          onValueChange={(value) => updateParam("industry", value)}
-          value={currentIndustry}
+          onValueChange={(value) =>
+            setIndustry(value === ALL_VALUE ? "" : value)
+          }
+          value={industry || ALL_VALUE}
         >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Industry" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL_VALUE}>All Industries</SelectItem>
-            {industries.map((industry) => (
-              <SelectItem key={industry} value={industry}>
-                {industry}
+            {industries.map((ind) => (
+              <SelectItem key={ind} value={ind}>
+                {ind}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
         <Select
-          onValueChange={(value) => updateParam("category", value)}
-          value={currentCategory}
+          onValueChange={(value) =>
+            setCategory(value === ALL_VALUE ? "" : value)
+          }
+          value={category || ALL_VALUE}
         >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL_VALUE}>All Categories</SelectItem>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
+            {categories.map((cat) => (
+              <SelectItem key={cat} value={cat}>
+                {cat}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
         <Select
-          onValueChange={(value) => updateParam("seniority", value)}
-          value={currentSeniority}
+          onValueChange={(value) =>
+            setSeniority(value === ALL_VALUE ? "" : value)
+          }
+          value={seniority || ALL_VALUE}
         >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Seniority" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL_VALUE}>All Levels</SelectItem>
-            {seniorities.map((seniority) => (
-              <SelectItem key={seniority} value={seniority}>
-                {seniority.charAt(0).toUpperCase() + seniority.slice(1)}
+            {seniorities.map((sen) => (
+              <SelectItem key={sen} value={sen}>
+                {sen.charAt(0).toUpperCase() + sen.slice(1)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -145,12 +135,7 @@ export function JobFilterBar({
         <Button
           className="ml-auto"
           disabled={!hasActiveFilters}
-          onClick={() => {
-            setSearchValue("");
-            startTransition(() => {
-              router.push(pathname, { scroll: false });
-            });
-          }}
+          onClick={resetFilters}
           type="button"
           variant="outline"
         >
@@ -158,12 +143,6 @@ export function JobFilterBar({
           Reset Filters
         </Button>
       </div>
-      {isPending && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Loader2 className="h-3 w-3 animate-spin" />
-          Updating results...
-        </div>
-      )}
     </div>
   );
 }
