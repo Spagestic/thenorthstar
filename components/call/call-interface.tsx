@@ -19,7 +19,12 @@ type AgentState =
   | "disconnecting"
   | null;
 
-export function CallInterface() {
+type CallInterfaceProps = {
+  job_title: string;
+  company_name: string;
+};
+
+export function CallInterface({ job_title, company_name }: CallInterfaceProps) {
   const [agentState, setAgentState] = useState<AgentState>("disconnected");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -39,6 +44,7 @@ export function CallInterface() {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       await conversation.startSession({
         agentId: DEFAULT_AGENT.agentId,
+        dynamicVariables: { job_title: job_title, company_name: company_name },
         connectionType: "webrtc",
         onStatusChange: (status) => setAgentState(status.status),
       });
