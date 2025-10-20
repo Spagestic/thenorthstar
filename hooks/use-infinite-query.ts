@@ -186,6 +186,7 @@ function useInfiniteQuery<
   T extends SupabaseTableName = SupabaseTableName
 >(props: UseInfiniteQueryProps<T>) {
   const storeRef = useRef(createStore<TData, T>(props));
+  const prevPropsKeyRef = useRef<string>("");
 
   const state = useSyncExternalStore(
     storeRef.current.subscribe,
@@ -194,20 +195,26 @@ function useInfiniteQuery<
   );
 
   useEffect(() => {
-    // Recreate store if props change
-    if (
-      storeRef.current.getState().hasInitialFetch &&
-      (props.tableName !== props.tableName ||
-        props.columns !== props.columns ||
-        props.pageSize !== props.pageSize)
-    ) {
-      storeRef.current = createStore<TData, T>(props);
-    }
+    // Create a stable key based on props to detect changes
+    const propsKey = JSON.stringify({
+      tableName: props.tableName,
+      columns: props.columns,
+      pageSize: props.pageSize,
+      trailingQuery: props.trailingQuery?.toString(),
+    });
 
-    if (!state.hasInitialFetch && typeof window !== "undefined") {
+    const currentState = storeRef.current.getState();
+
+    // Only reinitialize if props actually changed and we've had an initial fetch
+    if (currentState.hasInitialFetch && prevPropsKeyRef.current !== propsKey) {
+      storeRef.current = createStore<TData, T>(props);
+      storeRef.current.initialize();
+    } else if (!currentState.hasInitialFetch && typeof window !== "undefined") {
       storeRef.current.initialize();
     }
-  }, [props.tableName, props.columns, props.pageSize, state.hasInitialFetch]);
+
+    prevPropsKeyRef.current = propsKey;
+  }, [props.tableName, props.columns, props.pageSize, props.trailingQuery]);
 
   return {
     data: state.data,

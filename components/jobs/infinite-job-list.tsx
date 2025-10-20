@@ -53,7 +53,7 @@ export function InfiniteList<TableName extends SupabaseTableName>({
   renderEndMessage = DefaultEndMessage,
   renderSkeleton = defaultSkeleton,
 }: InfiniteListProps<TableName>) {
-  const { data, isFetching, hasMore, fetchNextPage, isSuccess } =
+  const { data, isFetching, hasMore, fetchNextPage, isSuccess, isLoading } =
     useInfiniteQuery({
       tableName,
       columns,
@@ -99,13 +99,24 @@ export function InfiniteList<TableName extends SupabaseTableName>({
       className={cn("relative overflow-auto", className)}
     >
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {isSuccess && data.length === 0 && renderNoResults()}
+        {/* Show skeleton only during initial load when there's no data */}
+        {isLoading &&
+          data.length === 0 &&
+          renderSkeleton &&
+          renderSkeleton(pageSize)}
+
+        {/* Show no results only when not loading and data is empty */}
+        {!isLoading && isSuccess && data.length === 0 && renderNoResults()}
 
         {data.map((item, index) => (
           <React.Fragment key={index}>{renderItem(item, index)}</React.Fragment>
         ))}
 
-        {isFetching && renderSkeleton && renderSkeleton(pageSize)}
+        {/* Show loading skeleton for pagination (when fetching more) */}
+        {isFetching &&
+          data.length > 0 &&
+          renderSkeleton &&
+          renderSkeleton(pageSize)}
 
         <div ref={loadMoreSentinelRef} style={{ height: "1px" }} />
 
