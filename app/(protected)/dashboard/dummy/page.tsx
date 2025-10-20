@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { companies } from "./companies";
 import { jobPositions } from "./job-positions";
-import { JobCard } from "@/components/job-card";
+import { JobCard } from "@/app/(protected)/dashboard/dummy/job-card";
 import Header from "../../Header";
 
 export default function DashboardPage() {
