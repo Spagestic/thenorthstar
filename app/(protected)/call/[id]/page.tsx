@@ -1,5 +1,6 @@
 import { CallInterface } from "@/components/call";
-import Header from "../Header";
+import Header from "../../Header";
+import { createClient } from "@/lib/supabase/server";
 
 interface PageProps {
   searchParams: { jobId?: string };
@@ -20,11 +21,20 @@ async function getJobTitle(jobId: string) {
   }
 }
 
-export default async function Page({ searchParams }: PageProps) {
-  const data = await searchParams;
-  const jobId = data.jobId;
-  const jobTitle = jobId ? await getJobTitle(jobId) : null;
-
+export default async function page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const jobId = id;
+  const supabase = await createClient();
+  const { data: job } = await supabase
+    .from("job_positions")
+    .select(`title`)
+    .eq("id", jobId)
+    .single();
+  const jobTitle = jobId ? job?.title || null : null;
   return (
     <div>
       <Header

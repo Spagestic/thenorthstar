@@ -67,7 +67,7 @@ export default async function page({
           </div>
 
           {/* Primary CTA */}
-          <Link href={`/call?jobId=${id}`}>
+          <Link href={`/call/${id}`}>
             <Button size="lg" className="w-full sm:w-auto">
               <PhoneIcon className="mr-2 h-5 w-5" />
               Start Interview for this Role
@@ -206,7 +206,7 @@ export default async function page({
             Practice your interview skills with our AI interviewer tailored for
             this role
           </p>
-          <Link href={`/call?jobId=${id}`}>
+          <Link href={`/call/${id}`}>
             <Button size="lg">
               <PhoneIcon className="mr-2 h-5 w-5" />
               Start Interview Now
