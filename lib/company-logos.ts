@@ -47,7 +47,7 @@ export const companyLogos = {
   ADM: ADM,
   Amazon: Amazon,
   Apple: Apple,
-  Aramco: Aramco,
+  "Saudi Aramco": Aramco,
   "AT&T": ATnT,
   "Bank of America": BankOfAmerica,
   BASF: BASF,
