@@ -103,7 +103,13 @@ export default function Page() {
 
   return (
     <div>
-      <Header nav={jobTitle ? ["Call", jobTitle] : ["Call"]} />
+      <Header
+        nav={
+          jobTitle
+            ? [{ label: jobTitle, href: `/job/${jobId}` }, { label: "Call" }]
+            : [{ label: "Call" }]
+        }
+      />
       <div className="flex h-[84vh] w-full flex-col items-center justify-center overflow-hidden p-6">
         <div className="flex flex-col items-center gap-6">
           {jobTitle && (
