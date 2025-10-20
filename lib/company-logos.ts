@@ -33,7 +33,7 @@ import Netflix from "@/public/logos/images/netflix.png";
 import Pfizer from "@/public/logos/images/pfizer.png";
 import PWC from "@/public/logos/images/pwc.png";
 import Roche from "@/public/logos/images/roche.png";
-import Seimens from "@/public/logos/images/seimens.png";
+import Siemens from "@/public/logos/images/siemens.png";
 import Shell from "@/public/logos/images/shell.png";
 import Skanska from "@/public/logos/images/skanska.png";
 import TSMC from "@/public/logos/images/tsmc.png";
@@ -66,19 +66,19 @@ export const companyLogos = {
   Google: Google,
   HSBC: HSBC,
   "Johnson & Johnson": JohnsonAndJohnson,
-  JPMC: JPMC,
+  "JPMorgan Chase": JPMC,
   KPMG: KPMG,
   Maersk: Maersk,
-  McKinsey: McKinsey,
+  "McKinsey & Company": McKinsey,
   Meta: Meta,
   Microsoft: Microsoft,
   "Morgan Stanley": MorganStanley,
-  Nestle: Nestle,
+  Nestlé: Nestle,
   Netflix: Netflix,
   Pfizer: Pfizer,
-  PWC: PWC,
+  PwC: PWC,
   Roche: Roche,
-  Seimens: Seimens,
+  Siemens: Siemens,
   Shell: Shell,
   Skanska: Skanska,
   TSMC: TSMC,
