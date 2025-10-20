@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌟 NorthStar
 
-## Getting Started
+**NorthStar** is a GenAI role-play platform that simulates voice-based interviews and delivers targeted, actionable feedback personalized for each user. We help university students practice effectively and improve faster through AI-powered interview simulations.
 
-First, run the development server:
+## 🎯 What We Do
+
+NorthStar curates company and role-specific question banks and analyzes both speech content and delivery to provide comprehensive feedback on:
+
+- 🗣️ **Speech Content**: Relevance, structure, and completeness of answers
+- 🎤 **Speech Delivery**: Filler words, pauses, pace, and clarity
+- 🎯 **Role Alignment**: How well answers match the specific job requirements
+- 💼 **Company Fit**: Tailored feedback based on company culture and values
+
+## 📊 Our Database
+
+We've curated an extensive interview preparation resource:
+
+- **1,000+** interview questions
+- **100+** different job positions
+- **40+** companies
+- **40+** industries
+
+From software engineering roles at tech giants to consulting positions at top firms, we cover the positions that matter most to university students entering the job market.
+
+## 🛠️ Tech Stack
+
+- **Frontend**: [Next.js](https://nextjs.org) (App Router)
+- **Backend**: [Supabase](https://supabase.com) (Database, Authentication, Storage)
+- **UI Components**: Shadcn/ui with Tailwind CSS
+- **AI Integration**: Voice-based GenAI for interview simulation
+- **TypeScript**: Full type safety across the application
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ or Bun
+- Supabase account and project
+
+### Installation
+
+1. Clone the repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Spagestic/thenorthstar.git
+cd thenorthstar
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+bun install
+# or
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Set up environment variables:
 
-## Learn More
+```bash
+# Create a .env.local file with your Supabase credentials
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Run the development server:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+bun dev
+# or
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## Deploy on Vercel
+## 📁 Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+app/
+├── (protected)/          # Authenticated routes
+│   ├── dashboard/        # Job listings and search
+│   ├── job/[id]/         # Individual job details
+│   ├── call/             # AI interview interface
+│   └── profile/          # User profile and settings
+├── (public)/             # Public landing page
+├── auth/                 # Authentication flows
+└── api/                  # API routes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+components/
+├── auth/                 # Authentication components
+├── jobs/                 # Job listing components
+├── sidebar/              # Navigation components
+└── ui/                   # Reusable UI components
+
+lib/
+└── supabase/             # Supabase client configuration
+```
+
+## ✨ Key Features
+
+- 🎙️ **Voice-Based Interviews**: Realistic AI-powered interview simulations
+- 📈 **Personalized Feedback**: Detailed analysis of your interview performance
+- 🔍 **Smart Job Matching**: Browse and filter through 100+ curated positions
+- 🏢 **Company-Specific Prep**: Questions tailored to specific companies and industries
+- 📊 **Progress Tracking**: Monitor your improvement over time
+- 🎯 **Role-Specific Questions**: Targeted practice for your desired position
+
+## 🤝 Contributing
+
+We welcome contributions! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+Built with ❤️ for university students preparing for their dream jobs.
+
+---
+
+**Note**: This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
