@@ -10,18 +10,30 @@ export const revalidate = 0;
 export default async function JobsPage() {
   const supabase = await createClient();
 
-  // Fetch initial data for filter options
+  // Fetch initial data for filter options with joined tables
   const { data } = await supabase
     .from("job_positions")
-    .select("industry, category, seniority_level")
+    .select(
+      `
+      category,
+      seniority_level,
+      industry:industry_id(name)
+    `
+    )
     .order("created_at", { ascending: false });
 
-  const jobs = (data ?? []) as Partial<JobPosition>[];
+  const jobs = (data ?? []) as any[];
 
   const industries = Array.from(
     new Set(
       jobs
-        .map((job) => job.industry)
+        .map((job) => {
+          // Handle both array and single object responses
+          if (Array.isArray(job.industry)) {
+            return job.industry[0]?.name;
+          }
+          return job.industry?.name;
+        })
         .filter((value): value is string => !!value && value.trim().length > 0)
     )
   ).sort((a, b) => a.localeCompare(b));

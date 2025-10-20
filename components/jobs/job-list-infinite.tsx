@@ -64,26 +64,33 @@ export function JobListInfinite() {
     let filteredQuery = query.order("created_at", { ascending: false });
 
     // Apply server-side filters when possible
-    if (industryFilter) {
-      filteredQuery = filteredQuery.ilike("industry", industryFilter);
-    }
     if (categoryFilter) {
       filteredQuery = filteredQuery.ilike("category", categoryFilter);
     }
     if (seniorityFilter) {
       filteredQuery = filteredQuery.ilike("seniority_level", seniorityFilter);
     }
+    // Note: Industry filtering will be done client-side due to join complexity
 
     return filteredQuery;
   };
 
   const matchesClientFilters = (job: JobPosition) => {
+    // Apply industry filter (client-side due to join)
+    if (industryFilter) {
+      const jobIndustryName = job.industry?.name?.toLowerCase().trim() ?? "";
+      if (jobIndustryName !== industryFilter.toLowerCase().trim()) {
+        return false;
+      }
+    }
+
+    // Apply search filter
     if (!searchValue) return true;
 
     const title = normalizeText(job.title);
-    const company = normalizeText(job.company ?? undefined);
+    const company = normalizeText(job.company?.name ?? undefined);
     const category = normalizeText(job.category);
-    const industry = normalizeText(job.industry);
+    const industry = normalizeText(job.industry?.name ?? undefined);
 
     const requirements = extractStrings(job.typical_requirements).map((item) =>
       item.toLowerCase()
@@ -106,7 +113,7 @@ export function JobListInfinite() {
     <InfiniteList
       key={filterKey}
       tableName="job_positions"
-      columns="*"
+      columns="*, company:company_id(name, logo_url), industry:industry_id(name)"
       pageSize={12}
       trailingQuery={trailingQuery}
       renderItem={(job: JobPosition, index) => {

@@ -119,7 +119,7 @@ export function JobFilterBar({
           }
           value={seniority || ALL_VALUE}
         >
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Seniority" />
           </SelectTrigger>
           <SelectContent>

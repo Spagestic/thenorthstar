@@ -17,7 +17,6 @@ export interface JobPosition {
   id: string;
   title: string;
   category: string | null;
-  industry: string | null;
   seniority_level: string | null;
   typical_requirements: unknown;
   typical_responsibilities: unknown;
@@ -26,7 +25,11 @@ export interface JobPosition {
   salary_currency: string | null;
   created_at: string | null;
   updated_at: string | null;
-  company: string | null;
+  company_id: string | null;
+  industry_id: string | null;
+  // Joined relations
+  company?: { name: string; logo_url?: string | null } | null;
+  industry?: { name: string } | null;
 }
 
 interface JobCardProps {
@@ -121,7 +124,11 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
     job.salary_range_max,
     job.salary_currency
   );
-  const companyLogo = job.company ? getCompanyLogo(job.company) : null;
+  const companyName = job.company?.name || null;
+  const companyLogoUrl = job.company?.logo_url || null;
+  const companyLogo =
+    companyLogoUrl || (companyName ? getCompanyLogo(companyName) : null);
+  const industryName = job.industry?.name || null;
   const postedOn = job.created_at ? new Date(job.created_at) : null;
   const formattedPostedOn = postedOn
     ? postedOn.toLocaleDateString(undefined, {
@@ -139,7 +146,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
             <div className="flex h-14 w-14 items-center justify-center rounded-md border bg-accent/20">
               {companyLogo ? (
                 <Image
-                  alt={`${job.company} logo`}
+                  alt={`${companyName || "Company"} logo`}
                   className="h-12 w-12 object-contain"
                   height={48}
                   src={companyLogo}
@@ -154,8 +161,8 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
                 {job.title}
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground">
-                {job.company || "Company coming soon"}
-                {job.industry ? ` • ${job.industry}` : ""}
+                {companyName || "Company coming soon"}
+                {industryName ? ` • ${industryName}` : ""}
               </CardDescription>
               {formattedPostedOn && (
                 <p className="text-xs text-muted-foreground">{job.category}</p>
