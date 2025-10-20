@@ -17,7 +17,8 @@ export default async function JobsPage() {
       `
       category,
       seniority_level,
-      industry:industry_id(name)
+      industry:industry_id(name),
+      company:company_id(name)
     `
     )
     .order("created_at", { ascending: false });
@@ -54,6 +55,20 @@ export default async function JobsPage() {
     )
   ).sort((a, b) => a.localeCompare(b));
 
+  const companies = Array.from(
+    new Set(
+      jobs
+        .map((job) => {
+          // Handle both array and single object responses
+          if (Array.isArray(job.company)) {
+            return job.company[0]?.name;
+          }
+          return job.company?.name;
+        })
+        .filter((value): value is string => !!value && value.trim().length > 0)
+    )
+  ).sort((a, b) => a.localeCompare(b));
+
   return (
     <div className="container mx-auto flex flex-col h-screen">
       <Header nav={["Jobs"]} />
@@ -62,6 +77,7 @@ export default async function JobsPage() {
           categories={categories}
           industries={industries}
           seniorities={seniorities}
+          companies={companies}
         />
 
         <JobListInfinite />

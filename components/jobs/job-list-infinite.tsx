@@ -56,9 +56,13 @@ export function JobListInfinite() {
     "seniority",
     parseAsString.withDefault("")
   );
+  const [companyFilter] = useQueryState(
+    "company",
+    parseAsString.withDefault("")
+  );
 
   // Create a key that changes when filters change to reset the query
-  const filterKey = `${industryFilter}-${categoryFilter}-${seniorityFilter}`;
+  const filterKey = `${industryFilter}-${categoryFilter}-${seniorityFilter}-${companyFilter}`;
 
   const trailingQuery: SupabaseQueryHandler<"job_positions"> = (query) => {
     let filteredQuery = query.order("created_at", { ascending: false });
@@ -80,6 +84,14 @@ export function JobListInfinite() {
     if (industryFilter) {
       const jobIndustryName = job.industry?.name?.toLowerCase().trim() ?? "";
       if (jobIndustryName !== industryFilter.toLowerCase().trim()) {
+        return false;
+      }
+    }
+
+    // Apply company filter (client-side due to join)
+    if (companyFilter) {
+      const jobCompanyName = job.company?.name?.toLowerCase().trim() ?? "";
+      if (jobCompanyName !== companyFilter.toLowerCase().trim()) {
         return false;
       }
     }

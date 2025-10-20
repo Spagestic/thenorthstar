@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useQueryState, parseAsString } from "nuqs";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,12 +11,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Filter, Search } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Filter, Search, Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface JobFilterBarProps {
   industries: string[];
   categories: string[];
   seniorities: string[];
+  companies: string[];
 }
 
 const ALL_VALUE = "all";
@@ -24,6 +40,7 @@ export function JobFilterBar({
   industries,
   categories,
   seniorities,
+  companies,
 }: JobFilterBarProps) {
   // Use nuqs for URL state management with debouncing
   const [searchValue, setSearchValue] = useQueryState(
@@ -49,17 +66,26 @@ export function JobFilterBar({
     parseAsString.withDefault("").withOptions({ shallow: false })
   );
 
+  const [company, setCompany] = useQueryState(
+    "company",
+    parseAsString.withDefault("").withOptions({ shallow: false })
+  );
+
+  const [open, setOpen] = React.useState(false);
+
   const hasActiveFilters =
     searchValue.trim().length > 0 ||
     industry.length > 0 ||
     category.length > 0 ||
-    seniority.length > 0;
+    seniority.length > 0 ||
+    company.length > 0;
 
   const resetFilters = () => {
     setSearchValue("");
     setIndustry("");
     setCategory("");
     setSeniority("");
+    setCompany("");
   };
 
   return (
@@ -75,6 +101,51 @@ export function JobFilterBar({
         />
       </div>
       <div className="flex flex-wrap items-center gap-3">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-[200px] justify-between"
+            >
+              {company
+                ? companies.find((c) => c === company)
+                : "Select company..."}
+              <ChevronsUpDown className="opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-0">
+            <Command>
+              <CommandInput placeholder="Search company..." className="h-9" />
+              <CommandList>
+                <CommandEmpty>No company found.</CommandEmpty>
+                <CommandGroup>
+                  {companies.map((c) => (
+                    <CommandItem
+                      key={c}
+                      value={c}
+                      onSelect={(currentValue) => {
+                        setCompany(
+                          currentValue === company ? "" : currentValue
+                        );
+                        setOpen(false);
+                      }}
+                    >
+                      {c}
+                      <Check
+                        className={cn(
+                          "ml-auto",
+                          company === c ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
         <Select
           onValueChange={(value) =>
             setIndustry(value === ALL_VALUE ? "" : value)
