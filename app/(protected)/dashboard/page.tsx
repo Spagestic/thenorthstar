@@ -10,34 +10,33 @@ export const revalidate = 0;
 export default async function JobsPage() {
   const supabase = await createClient();
 
-  // Fetch initial data for filter options with joined tables
-  const { data } = await supabase
+  // Fetch all industries directly from the industry table
+  const { data: industriesData } = await supabase
+    .from("industry")
+    .select("name")
+    .order("name", { ascending: true });
+
+  // Fetch all companies directly from the companies table
+  const { data: companiesData } = await supabase
+    .from("companies")
+    .select("name")
+    .order("name", { ascending: true });
+
+  // Fetch distinct categories and seniority levels from job_positions
+  const { data: jobsData } = await supabase
     .from("job_positions")
-    .select(
-      `
-      category,
-      seniority_level,
-      industry:industry_id(name),
-      company:company_id(name)
-    `
-    )
+    .select("category, seniority_level")
     .order("created_at", { ascending: false });
 
-  const jobs = (data ?? []) as any[];
+  const jobs = (jobsData ?? []) as any[];
 
-  const industries = Array.from(
-    new Set(
-      jobs
-        .map((job) => {
-          // Handle both array and single object responses
-          if (Array.isArray(job.industry)) {
-            return job.industry[0]?.name;
-          }
-          return job.industry?.name;
-        })
-        .filter((value): value is string => !!value && value.trim().length > 0)
-    )
-  ).sort((a, b) => a.localeCompare(b));
+  const industries = (industriesData ?? [])
+    .map((ind) => ind.name)
+    .filter((value): value is string => !!value && value.trim().length > 0);
+
+  const companies = (companiesData ?? [])
+    .map((comp) => comp.name)
+    .filter((value): value is string => !!value && value.trim().length > 0);
 
   const categories = Array.from(
     new Set(
@@ -51,20 +50,6 @@ export default async function JobsPage() {
     new Set(
       jobs
         .map((job) => job.seniority_level)
-        .filter((value): value is string => !!value && value.trim().length > 0)
-    )
-  ).sort((a, b) => a.localeCompare(b));
-
-  const companies = Array.from(
-    new Set(
-      jobs
-        .map((job) => {
-          // Handle both array and single object responses
-          if (Array.isArray(job.company)) {
-            return job.company[0]?.name;
-          }
-          return job.company?.name;
-        })
         .filter((value): value is string => !!value && value.trim().length > 0)
     )
   ).sort((a, b) => a.localeCompare(b));
