@@ -1,7 +1,8 @@
 "use client";
 import type React from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useRef } from "react";
 
 type GradientBackgroundProps = React.ComponentProps<"div"> & {
   // Animation customization
@@ -34,8 +35,17 @@ export function GradientBackground({
   overlay = false,
   overlayOpacity = 0.3,
 }: GradientBackgroundProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+
   return (
     <div
+      ref={containerRef}
       className={cn("w-full relative min-h-screen overflow-hidden", className)}
     >
       {/* Animated gradient background */}
@@ -61,7 +71,12 @@ export function GradientBackground({
 
       {/* Content wrapper */}
       {children && (
-        <div className={cn("absolute inset-0 h-full w-full")}>{children}</div>
+        <motion.div
+          style={{ y }}
+          className={cn("absolute inset-0 h-full w-full")}
+        >
+          {children}
+        </motion.div>
       )}
     </div>
   );

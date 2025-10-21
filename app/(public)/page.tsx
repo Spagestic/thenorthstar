@@ -12,8 +12,10 @@ export default function Home() {
   return (
     <div>
       <GradientBackground>
-        <Header />
-        <HeroContent />
+        <div>
+          <Header />
+          <HeroContent />
+        </div>
       </GradientBackground>
       {/* <LogoCloud /> */}
       <Features />
