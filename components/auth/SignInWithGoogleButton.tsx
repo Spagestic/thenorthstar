@@ -19,11 +19,16 @@ const SignInWithGoogleButton: React.FC<SignInWithGoogleButtonProps> = ({
     try {
       setIsLoading(true);
       setError(null);
-      // const result = await signInWithGoogle();
+
+      // Get the correct redirect URL based on environment
+      const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/oauth`
+        : `${window.location.origin}/auth/oauth`;
+
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/oauth`,
+          redirectTo: redirectUrl,
           queryParams: {
             next: "/dashboard",
           },
