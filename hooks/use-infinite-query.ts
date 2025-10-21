@@ -75,6 +75,7 @@ interface StoreState<TData> {
   isFetching: boolean;
   error: Error | null;
   hasInitialFetch: boolean;
+  isRefetching: boolean;
 }
 
 type Listener = () => void;
@@ -93,6 +94,7 @@ function createStore<
     isFetching: false,
     error: null,
     hasInitialFetch: false,
+    isRefetching: false,
   };
 
   const listeners = new Set<Listener>();
@@ -154,9 +156,19 @@ function createStore<
   };
 
   const initialize = async () => {
-    setState({ isLoading: true, isSuccess: false, data: [] });
+    const isRefetch = state.hasInitialFetch;
+    setState({
+      isLoading: !isRefetch,
+      isRefetching: isRefetch,
+      isSuccess: false,
+      data: [],
+    });
     await fetchNextPage();
-    setState({ isLoading: false, hasInitialFetch: true });
+    setState({
+      isLoading: false,
+      isRefetching: false,
+      hasInitialFetch: true,
+    });
   };
 
   return {
@@ -179,6 +191,7 @@ const initialState: any = {
   isFetching: false,
   error: null,
   hasInitialFetch: false,
+  isRefetching: false,
 };
 
 function useInfiniteQuery<
@@ -222,6 +235,7 @@ function useInfiniteQuery<
     isSuccess: state.isSuccess,
     isLoading: state.isLoading,
     isFetching: state.isFetching,
+    isRefetching: state.isRefetching,
     error: state.error,
     hasMore: state.count > state.data.length,
     fetchNextPage: storeRef.current.fetchNextPage,

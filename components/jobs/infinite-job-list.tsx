@@ -53,13 +53,20 @@ export function InfiniteList<TableName extends SupabaseTableName>({
   renderEndMessage = DefaultEndMessage,
   renderSkeleton = defaultSkeleton,
 }: InfiniteListProps<TableName>) {
-  const { data, isFetching, hasMore, fetchNextPage, isSuccess, isLoading } =
-    useInfiniteQuery({
-      tableName,
-      columns,
-      pageSize,
-      trailingQuery,
-    });
+  const {
+    data,
+    isFetching,
+    hasMore,
+    fetchNextPage,
+    isSuccess,
+    isLoading,
+    isRefetching,
+  } = useInfiniteQuery({
+    tableName,
+    columns,
+    pageSize,
+    trailingQuery,
+  });
 
   // Ref for the scrolling container
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
@@ -105,15 +112,20 @@ export function InfiniteList<TableName extends SupabaseTableName>({
           renderSkeleton &&
           renderSkeleton(pageSize)}
 
-        {/* Show no results only when not loading and data is empty */}
-        {!isLoading && isSuccess && data.length === 0 && renderNoResults()}
+        {/* Show no results only when not loading, not refetching and data is empty */}
+        {!isLoading &&
+          !isRefetching &&
+          isSuccess &&
+          data.length === 0 &&
+          renderNoResults()}
 
         {data.map((item, index) => (
           <React.Fragment key={index}>{renderItem(item, index)}</React.Fragment>
         ))}
 
-        {/* Show loading skeleton for pagination (when fetching more) */}
+        {/* Show loading skeleton for pagination (when fetching more, but not refetching) */}
         {isFetching &&
+          !isRefetching &&
           data.length > 0 &&
           renderSkeleton &&
           renderSkeleton(pageSize)}
