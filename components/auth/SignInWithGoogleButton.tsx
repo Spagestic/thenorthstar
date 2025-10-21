@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-// import { signInWithGoogle } from "@/lib/auth-actions";
 import { createClient } from "@/lib/supabase/client";
 import React, { useState } from "react";
 
@@ -19,19 +18,10 @@ const SignInWithGoogleButton: React.FC<SignInWithGoogleButtonProps> = ({
     try {
       setIsLoading(true);
       setError(null);
-
-      // Get the correct redirect URL based on environment
-      const redirectUrl = process.env.NEXT_PUBLIC_SITE_URL
-        ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/oauth`
-        : `${window.location.origin}/auth/oauth`;
-
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            next: "/dashboard",
-          },
+          redirectTo: `${window.location.origin}/auth/oauth?next=/dashboard`,
         },
       });
     } catch {
