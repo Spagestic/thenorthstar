@@ -21,9 +21,13 @@ type AgentState =
 
 type CallInterfaceProps = {
   job_title: string;
-  company_name: string;
   requirements?: string[];
   responsibilities?: string[];
+  company_name: string;
+  company_description?: string;
+  company_culture?: string;
+  company_values?: string[];
+  industry_name?: string;
 };
 
 export function CallInterface({
@@ -31,6 +35,10 @@ export function CallInterface({
   company_name,
   requirements,
   responsibilities,
+  company_description,
+  company_culture,
+  company_values,
+  industry_name,
 }: CallInterfaceProps) {
   const [agentState, setAgentState] = useState<AgentState>("disconnected");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -53,9 +61,13 @@ export function CallInterface({
         agentId: DEFAULT_AGENT.agentId,
         dynamicVariables: {
           job_title: job_title,
-          company_name: company_name,
           requirements: (requirements || []).join(", "),
           responsibilities: (responsibilities || []).join(", "),
+          company_name: company_name,
+          company_description: company_description ?? "",
+          company_culture: company_culture ?? "",
+          company_values: (company_values || []).join(", "),
+          industry_name: industry_name ?? "",
         },
         connectionType: "webrtc",
         onStatusChange: (status) => setAgentState(status.status),
