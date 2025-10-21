@@ -5,17 +5,16 @@ import { Features } from "@/components/features";
 import { Footer } from "@/components/footer-section";
 import Header from "@/components/header";
 import HeroContent from "@/components/hero-content";
-// import { LogoCloud } from "@/components/logo-cloud";
 import PricingSection from "@/components/pricing-section";
-import ShaderBackground from "@/components/shader-background";
+import { GradientBackground } from "@/components/gradient-background";
 
 export default function Home() {
   return (
     <div>
-      <ShaderBackground>
+      <GradientBackground>
         <Header />
         <HeroContent />
-      </ShaderBackground>
+      </GradientBackground>
       {/* <LogoCloud /> */}
       <Features />
       <PricingSection />

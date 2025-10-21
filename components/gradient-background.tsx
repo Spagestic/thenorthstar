@@ -61,13 +61,7 @@ export function GradientBackground({
 
       {/* Content wrapper */}
       {children && (
-        <div
-          className={cn(
-            "relative z-10 flex min-h-screen items-center justify-center"
-          )}
-        >
-          {children}
-        </div>
+        <div className={cn("absolute inset-0 h-full w-full")}>{children}</div>
       )}
     </div>
   );
