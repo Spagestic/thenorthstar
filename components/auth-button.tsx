@@ -13,7 +13,7 @@ export async function AuthButton() {
             className="relative flex items-center group"
             style={{ filter: "url(#gooey-filter)" }}
           >
-            <button className="absolute right-0 px-2.5 py-2 rounded-full bg-white text-black font-normal text-xs transition-all duration-300 hover:bg-white/90 cursor-pointer h-8 flex items-center justify-center -translate-x-10 group-hover:-translate-x-19 z-0">
+            <button className="absolute right-0 px-2.5 py-2 rounded-full bg-[#37322f] hover:bg-[#37322f]/90 text-white font-normal text-xs transition-all duration-300 cursor-pointer h-8 flex items-center justify-center -translate-x-10 group-hover:-translate-x-19 z-0">
               <svg
                 className="w-3 h-3"
                 fill="none"
@@ -28,7 +28,7 @@ export async function AuthButton() {
                 />
               </svg>
             </button>
-            <button className="px-6 py-2 rounded-full bg-white text-black font-normal text-xs transition-all duration-300 hover:bg-white/90 cursor-pointer h-8 flex items-center z-10">
+            <button className="px-6 py-2 rounded-full bg-gray-900 text-white font-normal text-xs transition-all duration-300 hover:bg-gray-800 cursor-pointer h-8 flex items-center z-10">
               Login
             </button>
           </div>
@@ -56,7 +56,7 @@ async function AuthButtonContent() {
           className="relative flex items-center group"
           style={{ filter: "url(#gooey-filter)" }}
         >
-          <button className="absolute right-0 px-2.5 py-2 rounded-full bg-white text-black font-normal text-xs transition-all duration-300 hover:bg-white/90 cursor-pointer h-8 flex items-center justify-center -translate-x-10 group-hover:-translate-x-19 z-0">
+          <button className="absolute right-0 px-2.5 py-2 rounded-full bg-[#37322f] hover:bg-[#37322f]/90 text-white font-normal text-xs transition-all duration-300 cursor-pointer h-8 flex items-center justify-center -translate-x-10 group-hover:-translate-x-19 z-0">
             <svg
               className="w-3 h-3"
               fill="none"
@@ -71,7 +71,7 @@ async function AuthButtonContent() {
               />
             </svg>
           </button>
-          <button className="px-6 py-2 rounded-full bg-white text-black font-normal text-xs transition-all duration-300 hover:bg-white/90 cursor-pointer h-8 flex items-center z-10">
+          <button className="px-6 py-2 rounded-full bg-[#37322f] hover:bg-[#37322f]/90  text-white font-normal text-xs transition-all duration-300 cursor-pointer h-8 flex items-center z-10">
             App
           </button>
         </div>
@@ -94,7 +94,7 @@ async function AuthButtonContent() {
           className="relative flex items-center group"
           style={{ filter: "url(#gooey-filter)" }}
         >
-          <button className="absolute right-0 px-2.5 py-2 rounded-full bg-white text-black font-normal text-xs transition-all duration-300 hover:bg-white/90 cursor-pointer h-8 flex items-center justify-center -translate-x-10 group-hover:-translate-x-19 z-0">
+          <button className="absolute right-0 px-2.5 py-2 rounded-full bg-[#37322f] hover:bg-[#37322f]/90 text-white font-normal text-xs transition-all duration-300 cursor-pointer h-8 flex items-center justify-center -translate-x-10 group-hover:-translate-x-19 z-0">
             <svg
               className="w-3 h-3"
               fill="none"
@@ -109,7 +109,7 @@ async function AuthButtonContent() {
               />
             </svg>
           </button>
-          <button className="px-6 py-2 rounded-full bg-white text-black font-normal text-xs transition-all duration-300 hover:bg-white/90 cursor-pointer h-8 flex items-center z-10">
+          <button className="px-6 py-2 rounded-full bg-[#37322f] hover:bg-[#37322f]/90 text-white font-normal text-xs transition-all duration-300 cursor-pointer h-8 flex items-center z-10">
             Login
           </button>
         </div>

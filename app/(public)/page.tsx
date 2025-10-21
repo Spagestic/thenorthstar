@@ -7,16 +7,14 @@ import Header from "@/components/header";
 import HeroContent from "@/components/hero-content";
 import PricingSection from "@/components/pricing-section";
 import { GradientBackground } from "@/components/gradient-background";
+import { Button } from "@/components/ui/button";
+import HeroSection from "@/components/hero-section";
 
 export default function Home() {
   return (
     <div>
-      <GradientBackground>
-        <div>
-          <Header />
-          <HeroContent />
-        </div>
-      </GradientBackground>
+      <Header />
+      <HeroSection />
       {/* <LogoCloud /> */}
       <Features />
       <PricingSection />
