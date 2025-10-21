@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import SignInWithGoogleButton from "./SignInWithGoogleButton";
 
 export function LoginForm({
   className,
@@ -92,6 +93,7 @@ export function LoginForm({
               <Button className="w-full" disabled={isLoading} type="submit">
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
+              <SignInWithGoogleButton />
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
