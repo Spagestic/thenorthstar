@@ -2,7 +2,6 @@ import { CallInterface } from "@/components/call";
 import Header from "../../Header";
 import { createClient } from "@/lib/supabase/server";
 
-
 export default async function page({
   params,
 }: {
@@ -13,21 +12,35 @@ export default async function page({
   const supabase = await createClient();
   const { data: job } = await supabase
     .from("job_positions")
-    .select(`title, companies(name)`)
+    .select(`*, company:companies(name), industry:industry(name)`)
     .eq("id", jobId)
     .single();
   const jobTitle = jobId ? job?.title || null : null;
-  console.log(job);
   return (
     <div>
       <Header
         nav={
           jobTitle
-            ? [{ label: jobTitle, href: `/job/${jobId}` }, { label: "Call" }]
+            ? [
+                {
+                  label: job?.industry?.name,
+                  href: `/dashboard?industry=${encodeURIComponent(
+                    job?.industry?.name || ""
+                  )}`,
+                },
+                {
+                  label: job?.company?.name,
+                  href: `/dashboard?company=${encodeURIComponent(
+                    job?.company?.name || ""
+                  )}`,
+                },
+                { label: jobTitle, href: `/job/${jobId}` },
+                { label: "Call" },
+              ]
             : [{ label: "Call" }]
         }
       />
-      <CallInterface job_title={jobTitle} company_name={job?.companies?.name} />
+      <CallInterface job_title={jobTitle} company_name={job?.company?.name} />
     </div>
   );
 }

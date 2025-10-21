@@ -47,7 +47,7 @@ export default function Header({ nav }: HeaderProps) {
             {items.map((item, idx) => {
               const isLast = idx === items.length - 1;
               const showHidden =
-                items.length > 1 && idx === 0 ? "hidden md:block" : undefined;
+                items.length > 1 && idx <= 1 ? "hidden md:block" : undefined;
               return (
                 <React.Fragment key={item.label}>
                   <BreadcrumbItem className={showHidden}>
