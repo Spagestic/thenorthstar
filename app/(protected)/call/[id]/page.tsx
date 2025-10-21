@@ -15,12 +15,12 @@ export default async function page({
     .select(`*, company:companies(name), industry:industry(name)`)
     .eq("id", jobId)
     .single();
-  const jobTitle = jobId ? job?.title || null : null;
+
   return (
     <div>
       <Header
         nav={
-          jobTitle
+          job?.title
             ? [
                 {
                   label: job?.industry?.name,
@@ -34,13 +34,18 @@ export default async function page({
                     job?.company?.name || ""
                   )}`,
                 },
-                { label: jobTitle, href: `/job/${jobId}` },
+                { label: job?.title, href: `/job/${jobId}` },
                 { label: "Call" },
               ]
             : [{ label: "Call" }]
         }
       />
-      <CallInterface job_title={jobTitle} company_name={job?.company?.name} />
+      <CallInterface
+        job_title={job?.title}
+        company_name={job?.company?.name}
+        requirements={job?.typical_requirements}
+        responsibilities={job?.typical_responsibilities}
+      />
     </div>
   );
 }
