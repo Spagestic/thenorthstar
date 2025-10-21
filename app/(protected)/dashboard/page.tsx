@@ -2,7 +2,6 @@ import React from "react";
 import { createClient } from "@/lib/supabase/server";
 import { JobFilterBar } from "@/components/jobs/job-filter-bar";
 import { JobListInfinite } from "@/components/jobs/job-list-infinite";
-import { JobPosition } from "@/components/jobs/job-card";
 import Header from "../Header";
 
 export const revalidate = 0;
