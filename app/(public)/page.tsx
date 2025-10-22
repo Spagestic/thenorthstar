@@ -38,12 +38,14 @@ export default function Home() {
             width={40}
           />
         }
-        mainLinks={[
-          { href: "/products", label: "Products" },
-          { href: "/about", label: "About" },
-          { href: "/blog", label: "Blog" },
-          { href: "/contact", label: "Contact" },
-        ]}
+        mainLinks={
+          [
+            // { href: "/products", label: "Products" },
+            // { href: "/about", label: "About" },
+            // { href: "/blog", label: "Blog" },
+            // { href: "/contact", label: "Contact" },
+          ]
+        }
         socialLinks={[
           {
             icon: <Twitter className="h-5 w-5" />,
