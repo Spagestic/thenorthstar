@@ -43,7 +43,7 @@ export async function NavInterviews() {
       name: conv.job?.title || "Unknown Position",
       company: conv.job?.company?.name || "Unknown Company",
       logo: getCompanyLogo(conv.job?.company?.name || ""),
-      url: `/call/${conv.job?.id}`,
+      url: `/history/${conv.conversation_id}`,
       startedAt: conv.started_at,
     })) || [];
 
