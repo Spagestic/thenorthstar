@@ -1,6 +1,6 @@
-import { Frame, Map, PieChart } from "lucide-react";
 import Image from "next/image";
 import type * as React from "react";
+import { Suspense } from "react";
 import { NavInterviews } from "@/components/sidebar/nav-interviews";
 import { NavMain } from "@/components/sidebar/nav-main";
 import { NavUser } from "@/components/sidebar/nav-user";
@@ -14,6 +14,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { NavInterviewsSkeleton } from "./nav-interviews-skeleton";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -43,7 +44,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavInterviews />
+        <Suspense fallback={<NavInterviewsSkeleton />}>
+          <NavInterviews />
+        </Suspense>
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

@@ -1,84 +1,51 @@
-"use client";
-import { Folder, Forward, MoreHorizontal, Trash2 } from "lucide-react";
-import Image from "next/image";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuAction,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { jobPositions } from "@/components/sidebar/job-positions";
+import { createClient } from "@/lib/supabase/server";
 import { getCompanyLogo } from "@/lib/company-logos";
+import { NavInterviewsClient } from "./nav-interviews-client";
 
-const interviews = jobPositions.map((job) => ({
-  name: job.title,
-  company: job.company,
-  logo: getCompanyLogo(job.company),
-  url: "#",
-}));
+export async function NavInterviews() {
+  const supabase = await createClient();
 
-export function NavInterviews() {
-  const { isMobile } = useSidebar();
+  // Get the authenticated user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Interviews</SidebarGroupLabel>
-      <SidebarMenu>
-        {interviews.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <Image
-                  src={item.logo?.src || ""}
-                  alt={item.company}
-                  width={16}
-                  height={16}
-                  className="h-4 w-4"
-                />
-                <span>{item.name}</span>
-              </a>
-            </SidebarMenuButton>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuAction showOnHover>
-                  <MoreHorizontal />
-                  <span className="sr-only">More</span>
-                </SidebarMenuAction>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align={isMobile ? "end" : "start"}
-                className="w-48 rounded-lg"
-                side={isMobile ? "bottom" : "right"}
-              >
-                <DropdownMenuItem>
-                  <Folder className="text-muted-foreground" />
-                  <span>View Interview</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Forward className="text-muted-foreground" />
-                  <span>Share Interview</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Trash2 className="text-muted-foreground" />
-                  <span>Delete Interview</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        ))}
-      </SidebarMenu>
-    </SidebarGroup>
-  );
+  if (!user) {
+    return null;
+  }
+
+  // Fetch conversations with job and company details
+  const { data: conversations } = await supabase
+    .from("voice_conversations")
+    .select(
+      `
+      id,
+      conversation_id,
+      started_at,
+      job:job_positions(
+        id,
+        title,
+        company:companies(
+          name
+        )
+      )
+    `
+    )
+    .eq("user_id", user.id)
+    .order("started_at", { ascending: false })
+    .limit(10);
+
+  // Transform the data for display
+  const interviews =
+    conversations?.map((conv: any) => ({
+      id: conv.id,
+      conversationId: conv.conversation_id,
+      name: conv.job?.title || "Unknown Position",
+      company: conv.job?.company?.name || "Unknown Company",
+      logo: getCompanyLogo(conv.job?.company?.name || ""),
+      url: `/call/${conv.job?.id}`,
+      startedAt: conv.started_at,
+    })) || [];
+
+  return <NavInterviewsClient interviews={interviews} />;
 }
