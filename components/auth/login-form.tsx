@@ -48,17 +48,15 @@ export function LoginForm({
       className={cn("flex flex-col gap-6", className)}
     >
       <div className="flex flex-col items-center gap-2 text-center">
-        <Link href="#" className="flex flex-col items-center gap-2 font-medium">
+        <Link href="/" className="flex flex-col items-center gap-2 font-medium">
           <div className="flex size-10 items-center justify-center rounded-md">
-            <Link href="/">
-              <Image
-                alt="Logo"
-                className="h-16 w-16"
-                height={64}
-                src={"/logo_light.svg"}
-                width={64}
-              />
-            </Link>
+            <Image
+              alt="Logo"
+              className="h-16 w-16"
+              height={64}
+              src={"/logo_light.svg"}
+              width={64}
+            />
           </div>
           <span className="sr-only">NorthStar</span>
         </Link>
