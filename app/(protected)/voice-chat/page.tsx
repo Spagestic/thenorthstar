@@ -1,42 +1,42 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { CheckIcon, CopyIcon } from "lucide-react"
+import { useState } from "react";
+import { CheckIcon, CopyIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Conversation,
   ConversationContent,
   ConversationEmptyState,
   ConversationScrollButton,
-} from "@/components/ui/conversation"
-import { ConversationBar } from "@/components/ui/conversation-bar"
-import { Message, MessageContent } from "@/components/ui/message"
-import { Orb } from "@/components/ui/orb"
-import { Response } from "@/components/ui/response"
+} from "@/components/ui/conversation";
+import { ConversationBar } from "@/components/ui/conversation-bar";
+import { Message, MessageContent } from "@/components/ui/message";
+import { Orb } from "@/components/ui/orb";
+import { Response } from "@/components/ui/response";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
 
-const DEFAULT_AGENT_ID = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID!
+const DEFAULT_AGENT_ID = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID!;
 
 interface ChatMessage {
-  role: "user" | "assistant"
-  content: string
+  role: "user" | "assistant";
+  content: string;
 }
 
 export default function Page() {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   return (
-    <div className="relative mx-auto h-[600px] w-full">
-      <Card className="flex h-full w-full flex-col gap-0 overflow-hidden">
+    <div className="relative mx-auto h-screen w-full">
+      <Card className="flex h-full w-full flex-col gap-0 overflow-hidden border-none shadow-none">
         <CardContent className="relative flex-1 overflow-hidden p-0">
           <Conversation className="absolute inset-0 pb-[88px]">
             <ConversationContent className="flex min-w-0 flex-col gap-2 p-6 pb-6">
@@ -77,9 +77,12 @@ export default function Page() {
                                   onClick={() => {
                                     navigator.clipboard.writeText(
                                       message.content
-                                    )
-                                    setCopiedIndex(index)
-                                    setTimeout(() => setCopiedIndex(null), 2000)
+                                    );
+                                    setCopiedIndex(index);
+                                    setTimeout(
+                                      () => setCopiedIndex(null),
+                                      2000
+                                    );
                                   }}
                                 >
                                   {copiedIndex === index ? (
@@ -102,7 +105,7 @@ export default function Page() {
                         </div>
                       )}
                     </div>
-                  )
+                  );
                 })
               )}
             </ConversationContent>
@@ -118,15 +121,15 @@ export default function Page() {
                 const userMessage: ChatMessage = {
                   role: "user",
                   content: message,
-                }
-                setMessages((prev) => [...prev, userMessage])
+                };
+                setMessages((prev) => [...prev, userMessage]);
               }}
               onMessage={(message) => {
                 const newMessage: ChatMessage = {
                   role: message.source === "user" ? "user" : "assistant",
                   content: message.message,
-                }
-                setMessages((prev) => [...prev, newMessage])
+                };
+                setMessages((prev) => [...prev, newMessage]);
               }}
               onError={(error) => console.error("Conversation error:", error)}
             />
@@ -134,5 +137,5 @@ export default function Page() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
