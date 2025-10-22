@@ -1,6 +1,6 @@
 import Header from "@/components/header";
 import { Footer } from "@/components/footer-section";
-import { Github } from "lucide-react";
+import { IconBrandGithub } from "@tabler/icons-react";
 import Image from "next/image";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -42,7 +42,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           //     label: "Twitter",
           //   },
           {
-            icon: <Github className="h-5 w-5" />,
+            icon: <IconBrandGithub className="h-5 w-5" />,
             href: "https://github.com/Spagestic/thenorthstar",
             label: "GitHub",
           },
