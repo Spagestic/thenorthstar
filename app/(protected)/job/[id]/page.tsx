@@ -3,9 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import Header from "@/app/(protected)/Header";
 import { getCompanyLogo } from "@/lib/company-logos";
 import Image from "next/image";
-import { Building2, PhoneIcon, BookmarkIcon } from "lucide-react";
+import { Building2, PhoneIcon, BookmarkIcon, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 export default async function page({
@@ -23,6 +22,7 @@ export default async function page({
   const companyLogo =
     job?.company?.logo_url ||
     (job?.company?.name ? getCompanyLogo(job?.company?.name) : null);
+
   return (
     <div className="container mx-auto flex flex-col h-screen">
       <Header
@@ -42,177 +42,176 @@ export default async function page({
           { label: job?.title },
         ]}
       />
-      <div className="max-w-3xl mx-auto p-6 overflow-y-auto">
-        {/* Header Section with CTA */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between gap-4 mb-4">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2 text-primary">
-                {job?.title}
-              </h1>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {job?.category && (
-                  <Badge variant="secondary">{job.category}</Badge>
-                )}
-                {job?.seniority_level && (
-                  <Badge variant="outline">{job.seniority_level}</Badge>
-                )}
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon">
-                <BookmarkIcon className="h-5 w-5" />
+
+      <div className="max-w-2xl mx-auto w-full px-6 py-12 overflow-y-auto">
+        {/* Hero Section */}
+        <div className="mb-16">
+          <h1 className="text-4xl font-light mb-6 tracking-tight">
+            {job?.title}
+          </h1>
+
+          <div className="flex items-center gap-6 text-sm text-muted-foreground mb-8">
+            <span>{job?.company?.name}</span>
+            <span className="w-1 h-1 bg-muted-foreground rounded-full" />
+            <span>{job?.industry?.name}</span>
+            <span className="w-1 h-1 bg-muted-foreground rounded-full" />
+            <span>{job?.seniority_level}</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link href={`/call/${id}`}>
+              <Button
+                size="lg"
+                className="rounded-full font-normal"
+                variant="default"
+              >
+                <PhoneIcon className="mr-2 h-4 w-4" />
+                Start Interview
               </Button>
-            </div>
-          </div>
-
-          {/* Primary CTA */}
-          <Link href={`/call/${id}`}>
-            <Button size="lg" className="w-full sm:w-auto">
-              <PhoneIcon className="mr-2 h-5 w-5" />
-              Start Interview for this Role
+            </Link>
+            <Button variant="ghost" size="lg" className="rounded-full">
+              <BookmarkIcon className="h-4 w-4" />
             </Button>
-          </Link>
+          </div>
         </div>
 
-        {/* Job Details Grid */}
-        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 border rounded-lg bg-accent/20">
+        {/* Key Details */}
+        <div className="grid grid-cols-2 gap-x-12 gap-y-6 mb-16 py-8 border-y">
           <div>
-            <p className="mb-1">
-              <strong>Company:</strong> {job?.company?.name || "N/A"}
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
+              Category
             </p>
-            <p className="mb-1">
-              <strong>Industry:</strong> {job?.industry?.name || "N/A"}
-            </p>
+            <p className="font-light">{job?.category || "—"}</p>
           </div>
           <div>
-            <p className="mb-1">
-              <strong>Salary Range:</strong>{" "}
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
+              Compensation
+            </p>
+            <p className="font-light">
               {job?.salary_range_min && job?.salary_range_max
-                ? `${job.salary_range_min.toLocaleString()} - ${job.salary_range_max.toLocaleString()} ${
+                ? `${
                     job.salary_currency || ""
-                  }`
-                : "N/A"}
-            </p>
-            <p className="mb-1">
-              <strong>Seniority Level:</strong> {job?.seniority_level || "N/A"}
+                  } ${job.salary_range_min.toLocaleString()} - ${job.salary_range_max.toLocaleString()}`
+                : "—"}
             </p>
           </div>
         </div>
 
-        {/* Requirements Section */}
-        <div className="mt-6 p-4 border rounded-lg">
-          <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-            <span className="text-2xl">📋</span> Requirements
-          </h2>
-          {Array.isArray(job?.typical_requirements) &&
-          job.typical_requirements.length > 0 ? (
-            <ul className="list-disc list-inside space-y-1">
-              {job.typical_requirements.map((item: string) => (
-                <li key={item}>{item}</li>
+        {/* Requirements */}
+        {job?.typical_requirements && job.typical_requirements.length > 0 && (
+          <section className="mb-16">
+            <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-6">
+              Requirements
+            </h2>
+            <ul className="space-y-3">
+              {job.typical_requirements.map((item: string, index: number) => (
+                <li key={index} className="flex items-start gap-3">
+                  <span className="text-muted-foreground mt-1.5 text-xs">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="font-light leading-relaxed">{item}</span>
+                </li>
               ))}
             </ul>
-          ) : (
-            <p className="text-muted-foreground">No requirements specified.</p>
-          )}
-        </div>
+          </section>
+        )}
 
-        {/* Responsibilities Section */}
-        <div className="mt-6 p-4 border rounded-lg">
-          <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-            <span className="text-2xl">💼</span> Responsibilities
-          </h2>
-          {Array.isArray(job?.typical_responsibilities) &&
-          job.typical_responsibilities.length > 0 ? (
-            <ul className="list-disc list-inside space-y-1">
-              {job.typical_responsibilities.map((item: string) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-muted-foreground">
-              No responsibilities specified.
-            </p>
+        {/* Responsibilities */}
+        {job?.typical_responsibilities &&
+          job.typical_responsibilities.length > 0 && (
+            <section className="mb-16">
+              <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-6">
+                Responsibilities
+              </h2>
+              <ul className="space-y-3">
+                {job.typical_responsibilities.map(
+                  (item: string, index: number) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <span className="text-muted-foreground mt-1.5 text-xs">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className="font-light leading-relaxed">{item}</span>
+                    </li>
+                  )
+                )}
+              </ul>
+            </section>
           )}
-        </div>
 
-        {/* Company Section */}
+        {/* Company */}
         {job?.company && (
-          <div className="mt-8 p-6 border rounded-lg bg-accent/10">
-            <h2 className="text-2xl font-bold mb-4">About the Company</h2>
-            <div className="flex items-start gap-4 mb-4">
-              <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border bg-accent/20 aspect-square p-2">
+          <section className="mb-16 pt-12 border-t">
+            <div className="flex items-start gap-6 mb-8">
+              <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg">
                 {companyLogo ? (
                   <Image
                     alt={`${job?.company?.name || "Company"} logo`}
-                    className="h-full w-full object-contain"
+                    className="h-full w-full object-contain p-2"
                     fill
                     src={companyLogo}
                   />
                 ) : (
-                  <Building2 className="h-8 w-8 text-muted-foreground" />
+                  <div className="h-full w-full flex items-center justify-center">
+                    <Building2 className="h-5 w-5 text-muted-foreground" />
+                  </div>
                 )}
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold mb-1">{job.company.name}</h3>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Founded: {job.company.founded_year || "N/A"}
+                <h3 className="text-lg font-light mb-1">{job.company.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  Since {job.company.founded_year || "—"}
                 </p>
-                {job.company.website && (
-                  <a
-                    href={job.company.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline text-sm"
-                  >
-                    Visit Website →
-                  </a>
-                )}
               </div>
+              {job.company.website && (
+                <a
+                  href={job.company.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-sm hover:underline"
+                >
+                  Visit
+                  <ArrowUpRight className="h-3 w-3" />
+                </a>
+              )}
             </div>
 
             {job.company.description && (
-              <p className="mb-4 text-muted-foreground">
+              <p className="font-light leading-relaxed text-muted-foreground mb-8">
                 {job.company.description}
               </p>
             )}
-            {Array.isArray(job.company.values) &&
-              job.company.values.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="font-semibold mb-2">Company Values:</h4>
-                  <div className="flex flex-wrap gap-2">
+
+            {job.company.values && job.company.values.length > 0 && (
+              <div className="grid grid-cols-2 gap-x-12 gap-y-6">
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
+                    Values
+                  </p>
+                  <div className="space-y-1">
                     {job.company.values.map((value: string) => (
-                      <Badge key={value} variant="secondary">
+                      <p key={value} className="font-light text-sm">
                         {value}
-                      </Badge>
+                      </p>
                     ))}
                   </div>
                 </div>
-              )}
-
-            {job.company.culture && (
-              <div>
-                <h4 className="font-semibold mb-2">Company Culture:</h4>
-                <p className="text-muted-foreground">{job.company.culture}</p>
+                {job.company.culture && (
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
+                      Culture
+                    </p>
+                    <p className="font-light text-sm leading-relaxed">
+                      {job.company.culture}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
-          </div>
+          </section>
         )}
 
-        {/* Bottom CTA */}
-        <div className="mt-8 p-6 border rounded-lg bg-primary/5 text-center">
-          <h3 className="text-lg font-semibold mb-2">Ready to Interview?</h3>
-          <p className="text-muted-foreground mb-4">
-            Practice your interview skills with our AI interviewer tailored for
-            this role
-          </p>
-          <Link href={`/call/${id}`}>
-            <Button size="lg">
-              <PhoneIcon className="mr-2 h-5 w-5" />
-              Start Interview Now
-            </Button>
-          </Link>
-        </div>
+        {/* Bottom spacing */}
+        <div className="h-24" />
       </div>
     </div>
   );
