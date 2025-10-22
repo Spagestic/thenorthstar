@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Get audio download URL
+    // Get audio file from ElevenLabs
     const audioRes = await fetch(
       `${ELEVENLABS_BASE_URL}/${conversation_id}/audio`,
       {
@@ -41,10 +41,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const audioData = await audioRes.json();
+    // Get the audio blob
+    const audioBlob = await audioRes.blob();
 
-    return NextResponse.json({
-      audio_url: audioData.audio_url,
+    // Return the audio file directly
+    return new NextResponse(audioBlob, {
+      headers: {
+        "Content-Type": audioRes.headers.get("Content-Type") || "audio/mpeg",
+        "Content-Disposition": `inline; filename="conversation_${conversation_id}.mp3"`,
+        "Cache-Control": "public, max-age=31536000, immutable",
+      },
     });
   } catch (err: any) {
     console.error("Error fetching audio:", err);
