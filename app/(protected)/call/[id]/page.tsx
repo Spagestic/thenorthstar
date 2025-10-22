@@ -10,6 +10,12 @@ export default async function page({
   const { id } = await params;
   const jobId = id;
   const supabase = await createClient();
+
+  // Get the authenticated user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { data: job } = await supabase
     .from("job_positions")
     .select(
@@ -43,6 +49,8 @@ export default async function page({
         }
       />
       <CallInterface
+        userId={user?.id}
+        jobId={jobId}
         job_title={job?.title}
         requirements={job?.typical_requirements}
         responsibilities={job?.typical_responsibilities}

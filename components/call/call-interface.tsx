@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef } from "react";
 import { useConversation } from "@elevenlabs/react";
 import { CallOrb } from "./call-orb";
 import { CallStatus } from "./call-status";
 import { CallControls } from "./call-controls";
+import { createClient } from "@/lib/supabase/client";
 
 const DEFAULT_AGENT = {
   agentId: process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID!,
@@ -20,6 +21,8 @@ type AgentState =
   | null;
 
 type CallInterfaceProps = {
+  userId?: string;
+  jobId: string;
   job_title: string;
   requirements?: string[];
   responsibilities?: string[];
@@ -31,6 +34,8 @@ type CallInterfaceProps = {
 };
 
 export function CallInterface({
+  userId,
+  jobId,
   job_title,
   company_name,
   requirements,
@@ -42,11 +47,19 @@ export function CallInterface({
 }: CallInterfaceProps) {
   const [agentState, setAgentState] = useState<AgentState>("disconnected");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const conversationIdRef = useRef<string | null>(null);
+  const supabase = createClient();
 
   const conversation = useConversation({
-    onConnect: () => console.log("Connected"),
-    onDisconnect: () => console.log("Disconnected"),
-    onMessage: (message) => console.log("Message:", message),
+    onConnect: () => {
+      console.log("Connected");
+    },
+    onDisconnect: () => {
+      console.log("Disconnected");
+    },
+    onMessage: (message) => {
+      console.log("Message:", message);
+    },
     onError: (error) => {
       console.error("Error:", error);
       setAgentState("disconnected");
@@ -57,7 +70,8 @@ export function CallInterface({
     try {
       setErrorMessage(null);
       await navigator.mediaDevices.getUserMedia({ audio: true });
-      await conversation.startSession({
+
+      const conversationId = await conversation.startSession({
         agentId: DEFAULT_AGENT.agentId,
         dynamicVariables: {
           job_title: job_title,
@@ -72,6 +86,23 @@ export function CallInterface({
         connectionType: "webrtc",
         onStatusChange: (status) => setAgentState(status.status),
       });
+
+      // Save conversation to database when it starts
+      if (userId && conversationId) {
+        conversationIdRef.current = conversationId;
+
+        const { error } = await supabase.from("voice_conversations").insert({
+          user_id: userId,
+          job_id: jobId,
+          agent_id: DEFAULT_AGENT.agentId,
+          conversation_id: conversationId,
+          started_at: new Date().toISOString(),
+        });
+
+        if (error) {
+          console.error("Error saving conversation:", error);
+        }
+      }
     } catch (error) {
       console.error("Error starting conversation:", error);
       setAgentState("disconnected");
@@ -81,7 +112,20 @@ export function CallInterface({
         );
       }
     }
-  }, [conversation]);
+  }, [
+    conversation,
+    userId,
+    jobId,
+    job_title,
+    requirements,
+    responsibilities,
+    company_name,
+    company_description,
+    company_culture,
+    company_values,
+    industry_name,
+    supabase,
+  ]);
 
   const handleCall = useCallback(() => {
     if (agentState === "disconnected" || agentState === null) {
