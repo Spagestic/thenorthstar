@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useConversation } from "@elevenlabs/react"
+import * as React from "react";
+import { useConversation } from "@elevenlabs/react";
 import {
   ArrowUpIcon,
   ChevronDown,
@@ -10,55 +10,60 @@ import {
   MicOff,
   PhoneIcon,
   XIcon,
-} from "lucide-react"
+} from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { LiveWaveform } from "@/components/ui/live-waveform"
-import { Separator } from "@/components/ui/separator"
-import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { LiveWaveform } from "@/components/ui/live-waveform";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 
 export interface ConversationBarProps {
   /**
    * ElevenLabs Agent ID to connect to
    */
-  agentId: string
+  agentId: string;
 
   /**
    * Custom className for the container
    */
-  className?: string
+  className?: string;
 
   /**
    * Custom className for the waveform
    */
-  waveformClassName?: string
+  waveformClassName?: string;
+
+  /**
+   * Dynamic variables to pass to the agent
+   */
+  dynamicVariables?: Record<string, string>;
 
   /**
    * Callback when conversation connects
    */
-  onConnect?: () => void
+  onConnect?: () => void;
 
   /**
    * Callback when conversation disconnects
    */
-  onDisconnect?: () => void
+  onDisconnect?: () => void;
 
   /**
    * Callback when an error occurs
    */
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void;
 
   /**
    * Callback when a message is received
    */
-  onMessage?: (message: { source: "user" | "ai"; message: string }) => void
+  onMessage?: (message: { source: "user" | "ai"; message: string }) => void;
 
   /**
    * Callback when user sends a message
    */
-  onSendMessage?: (message: string) => void
+  onSendMessage?: (message: string) => void;
 }
 
 export const ConversationBar = React.forwardRef<
@@ -70,6 +75,7 @@ export const ConversationBar = React.forwardRef<
       agentId,
       className,
       waveformClassName,
+      dynamicVariables,
       onConnect,
       onDisconnect,
       onError,
@@ -78,129 +84,130 @@ export const ConversationBar = React.forwardRef<
     },
     ref
   ) => {
-    const [isMuted, setIsMuted] = React.useState(false)
+    const [isMuted, setIsMuted] = React.useState(false);
     const [agentState, setAgentState] = React.useState<
       "disconnected" | "connecting" | "connected" | "disconnecting" | null
-    >("disconnected")
-    const [keyboardOpen, setKeyboardOpen] = React.useState(false)
-    const [textInput, setTextInput] = React.useState("")
-    const mediaStreamRef = React.useRef<MediaStream | null>(null)
+    >("disconnected");
+    const [keyboardOpen, setKeyboardOpen] = React.useState(false);
+    const [textInput, setTextInput] = React.useState("");
+    const mediaStreamRef = React.useRef<MediaStream | null>(null);
 
     const conversation = useConversation({
       onConnect: () => {
-        onConnect?.()
+        onConnect?.();
       },
       onDisconnect: () => {
-        setAgentState("disconnected")
-        onDisconnect?.()
-        setKeyboardOpen(false)
+        setAgentState("disconnected");
+        onDisconnect?.();
+        setKeyboardOpen(false);
       },
       onMessage: (message) => {
-        onMessage?.(message)
+        onMessage?.(message);
       },
       micMuted: isMuted,
       onError: (error: unknown) => {
-        console.error("Error:", error)
-        setAgentState("disconnected")
+        console.error("Error:", error);
+        setAgentState("disconnected");
         const errorObj =
           error instanceof Error
             ? error
             : new Error(
                 typeof error === "string" ? error : JSON.stringify(error)
-              )
-        onError?.(errorObj)
+              );
+        onError?.(errorObj);
       },
-    })
+    });
 
     const getMicStream = React.useCallback(async () => {
-      if (mediaStreamRef.current) return mediaStreamRef.current
+      if (mediaStreamRef.current) return mediaStreamRef.current;
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      mediaStreamRef.current = stream
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
 
-      return stream
-    }, [])
+      return stream;
+    }, []);
 
     const startConversation = React.useCallback(async () => {
       try {
-        setAgentState("connecting")
+        setAgentState("connecting");
 
-        await getMicStream()
+        await getMicStream();
 
         await conversation.startSession({
           agentId,
+          dynamicVariables,
           connectionType: "webrtc",
           onStatusChange: (status) => setAgentState(status.status),
-        })
+        });
       } catch (error) {
-        console.error("Error starting conversation:", error)
-        setAgentState("disconnected")
-        onError?.(error as Error)
+        console.error("Error starting conversation:", error);
+        setAgentState("disconnected");
+        onError?.(error as Error);
       }
-    }, [conversation, getMicStream, agentId, onError])
+    }, [conversation, getMicStream, agentId, dynamicVariables, onError]);
 
     const handleEndSession = React.useCallback(() => {
-      conversation.endSession()
-      setAgentState("disconnected")
+      conversation.endSession();
+      setAgentState("disconnected");
 
       if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach((t) => t.stop())
-        mediaStreamRef.current = null
+        mediaStreamRef.current.getTracks().forEach((t) => t.stop());
+        mediaStreamRef.current = null;
       }
-    }, [conversation])
+    }, [conversation]);
 
     const toggleMute = React.useCallback(() => {
-      setIsMuted((prev) => !prev)
-    }, [])
+      setIsMuted((prev) => !prev);
+    }, []);
 
     const handleStartOrEnd = React.useCallback(() => {
       if (agentState === "connected" || agentState === "connecting") {
-        handleEndSession()
+        handleEndSession();
       } else if (agentState === "disconnected") {
-        startConversation()
+        startConversation();
       }
-    }, [agentState, handleEndSession, startConversation])
+    }, [agentState, handleEndSession, startConversation]);
 
     const handleSendText = React.useCallback(() => {
-      if (!textInput.trim()) return
+      if (!textInput.trim()) return;
 
-      const messageToSend = textInput
-      conversation.sendUserMessage(messageToSend)
-      setTextInput("")
-      onSendMessage?.(messageToSend)
-    }, [conversation, textInput, onSendMessage])
+      const messageToSend = textInput;
+      conversation.sendUserMessage(messageToSend);
+      setTextInput("");
+      onSendMessage?.(messageToSend);
+    }, [conversation, textInput, onSendMessage]);
 
-    const isConnected = agentState === "connected"
+    const isConnected = agentState === "connected";
 
     const handleTextChange = React.useCallback(
       (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const value = e.target.value
-        setTextInput(value)
+        const value = e.target.value;
+        setTextInput(value);
 
         if (value.trim() && isConnected) {
-          conversation.sendContextualUpdate(value)
+          conversation.sendContextualUpdate(value);
         }
       },
       [conversation, isConnected]
-    )
+    );
 
     const handleKeyDown = React.useCallback(
       (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
-          e.preventDefault()
-          handleSendText()
+          e.preventDefault();
+          handleSendText();
         }
       },
       [handleSendText]
-    )
+    );
 
     React.useEffect(() => {
       return () => {
         if (mediaStreamRef.current) {
-          mediaStreamRef.current.getTracks().forEach((t) => t.stop())
+          mediaStreamRef.current.getTracks().forEach((t) => t.stop());
         }
-      }
-    }, [])
+      };
+    }, []);
 
     return (
       <div
@@ -249,7 +256,7 @@ export const ConversationBar = React.forwardRef<
                         {agentState === "disconnected" && (
                           <div className="absolute inset-0 flex items-center justify-center">
                             <span className="text-foreground/50 text-[10px] font-medium">
-                              Customer Support
+                              Interview Agent
                             </span>
                           </div>
                         )}
@@ -339,8 +346,8 @@ export const ConversationBar = React.forwardRef<
           </div>
         </Card>
       </div>
-    )
+    );
   }
-)
+);
 
-ConversationBar.displayName = "ConversationBar"
+ConversationBar.displayName = "ConversationBar";
