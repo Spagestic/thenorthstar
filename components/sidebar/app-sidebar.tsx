@@ -31,7 +31,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     alt="Logo"
                     className="rounded-lg"
                     height={24}
-                    src="/logo_light.svg"
+                    src="/logo_light.png"
                     width={24}
                   />
                 </div>

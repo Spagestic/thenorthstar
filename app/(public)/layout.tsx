@@ -23,7 +23,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             alt="Logo"
             className="h-10 w-10"
             height={40}
-            src={"/logo_light.svg"}
+            src={"/logo_light.png"}
             width={40}
           />
         }

@@ -49,12 +49,12 @@ export function LoginForm({
     >
       <div className="flex flex-col items-center gap-2 text-center">
         <Link href="/" className="flex flex-col items-center gap-2 font-medium">
-          <div className="flex size-10 items-center justify-center rounded-md">
+          <div className="flex items-center justify-center rounded-md aspect-square">
             <Image
               alt="Logo"
-              className="h-16 w-16"
+              className="size-14 aspect-square"
               height={64}
-              src={"/logo_light.svg"}
+              src={"/logo_light.png"}
               width={64}
             />
           </div>

@@ -12,7 +12,7 @@ export default function Header() {
             alt="Logo"
             className="h-8 w-8"
             height={40}
-            src={"/logo_light.svg"}
+            src={"/logo_light.png"}
             width={40}
           />
         </Link>
