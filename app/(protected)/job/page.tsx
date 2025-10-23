@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useSearchParams } from "next/navigation";
 import { useInfiniteQuery } from "./use-infinite-query";
 import { Button } from "@/components/ui/button";
 
@@ -18,6 +19,9 @@ type Job = {
 };
 
 export default function Page() {
+  const params = useSearchParams();
+  const searchQuery = params.get("q");
+
   const {
     data,
     isLoading,
@@ -31,7 +35,15 @@ export default function Page() {
     tableName: "job_positions",
     columns: "*",
     pageSize: 10,
-    trailingQuery: (query) => query.order("created_at", { ascending: false }),
+    trailingQuery: (query) => {
+      let modifiedQuery = query.order("created_at", { ascending: false });
+
+      if (searchQuery && searchQuery.length > 0) {
+        modifiedQuery = modifiedQuery.ilike("title", `%${searchQuery}%`);
+      }
+
+      return modifiedQuery;
+    },
   });
 
   // Cast the potentially-unknown data to a typed array for safe usage
