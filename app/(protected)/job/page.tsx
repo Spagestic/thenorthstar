@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useInfiniteQuery } from "./use-infinite-query";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ type Job = {
   created_at: string | Date;
 };
 
-export default function Page() {
+function JobListContent() {
   const params = useSearchParams();
   const searchQuery = params.get("q");
 
@@ -183,5 +183,28 @@ export default function Page() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-2xl font-bold mb-6">Job Positions</h1>
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="border rounded-lg p-6 animate-pulse">
+                <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <JobListContent />
+    </Suspense>
   );
 }
