@@ -221,7 +221,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
         </div>
 
         <Button asChild className="w-full" size="sm">
-          <Link href={`/call/${job.id}`}>Start Practice Interview</Link>
+          <Link href={`/call/${job.id}`}>Start Interview</Link>
         </Button>
       </CardContent>
     </Card>
