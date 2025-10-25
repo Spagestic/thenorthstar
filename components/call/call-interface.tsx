@@ -31,6 +31,7 @@ type CallInterfaceProps = {
   company_culture?: string;
   company_values?: string[];
   industry_name?: string;
+  isDataLoaded?: boolean;
 };
 
 export function CallInterface({
@@ -44,6 +45,7 @@ export function CallInterface({
   company_culture,
   company_values,
   industry_name,
+  isDataLoaded = true,
 }: CallInterfaceProps) {
   const [agentState, setAgentState] = useState<AgentState>("disconnected");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -159,9 +161,14 @@ export function CallInterface({
           agentName={DEFAULT_AGENT.name}
           agentState={agentState}
           errorMessage={errorMessage}
+          isDataLoaded={isDataLoaded}
         />
 
-        <CallControls agentState={agentState} onCall={handleCall} />
+        <CallControls
+          agentState={agentState}
+          onCall={handleCall}
+          isDataLoaded={isDataLoaded}
+        />
       </div>
     </div>
   );

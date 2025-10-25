@@ -24,6 +24,9 @@ export default async function page({
     .eq("id", jobId)
     .single();
 
+  // Check if essential data is loaded
+  const isDataLoaded = !!(job?.title && job?.company?.name);
+
   return (
     <div>
       <Header
@@ -59,6 +62,7 @@ export default async function page({
         company_culture={job?.company?.culture}
         company_values={job?.company?.values}
         industry_name={job?.industry?.name}
+        isDataLoaded={isDataLoaded}
       />
     </div>
   );
