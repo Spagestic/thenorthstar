@@ -43,10 +43,7 @@ export function UserAvatar({
           variant="ghost"
         >
           <Avatar className="ring-offset-background transition-all group-hover:ring-2 group-hover:ring-secondary">
-            <AvatarImage
-              alt="Profile image"
-              src={userImageUrl || "./avatar.png"}
-            />
+            <AvatarImage alt="Profile image" src={userImageUrl || ""} />
             <AvatarFallback>{userName?.charAt(0)}</AvatarFallback>
           </Avatar>
         </Button>
