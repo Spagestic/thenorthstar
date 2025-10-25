@@ -110,8 +110,8 @@ function BillingToggle({
 function AnimatedPrice({
   price,
   billingPeriod,
-  // currentPeriod,
-}: {
+}: // currentPeriod,
+{
   price: { monthly: number; annually: number };
   billingPeriod: "monthly" | "annually";
   currentPeriod: "monthly" | "annually";
@@ -281,7 +281,7 @@ export default function PricingSection() {
                   <div className="font-medium font-sans text-[rgba(55,50,47,0.90)] text-lg leading-7 md:text-xl">
                     Free
                   </div>
-                  <div className="w-full max-w-[242px] font-normal font-sans text-[rgba(41,37,35,0.70)] text-sm leading-5 md:text-base">
+                  <div className="w-full max-w-[260px] font-normal font-sans text-[rgba(41,37,35,0.70)] text-sm leading-5 md:text-base">
                     Perfect for trying out the platform and getting started.
                   </div>
                 </div>
@@ -318,7 +318,7 @@ export default function PricingSection() {
                   <div className="font-medium font-sans text-[#FBFAF9] text-lg leading-7 md:text-xl">
                     Pro
                   </div>
-                  <div className="w-full max-w-[242px] font-normal font-sans text-[#B2AEA9] text-sm leading-5 md:text-base">
+                  <div className="w-full max-w-[260px] font-normal font-sans text-[#B2AEA9] text-sm leading-5 md:text-base">
                     Unlimited practice with advanced AI feedback for serious
                     prep.
                   </div>
@@ -363,7 +363,7 @@ export default function PricingSection() {
                   <div className="font-medium font-sans text-[rgba(55,50,47,0.90)] text-lg leading-7 md:text-xl">
                     Enterprise
                   </div>
-                  <div className="w-full max-w-[242px] font-normal font-sans text-[rgba(41,37,35,0.70)] text-sm leading-5 md:text-base">
+                  <div className="w-full max-w-[260px] font-normal font-sans text-[rgba(41,37,35,0.70)] text-sm leading-5 md:text-base">
                     Complete solution for large organizations and enterprises.
                   </div>
                 </div>
