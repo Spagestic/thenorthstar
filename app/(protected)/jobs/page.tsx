@@ -41,35 +41,31 @@ interface JobListProps {
 async function JobList({ searchParams }: JobListProps) {
   const supabase = await createClient();
 
-  // Extract filter values from URL params with defaults
-  const industry = searchParams.industry as string | undefined;
-  const category = searchParams.category as string | undefined;
-  const seniority = searchParams.seniority as string | undefined;
-  const company = searchParams.company as string | undefined;
+  let query = supabase.from("job_positions").select(`
+    id, title, category, seniority_level, typical_requirements, 
+    typical_responsibilities, industry_id, company_id,
+    companies!inner (name),
+    industry!inner (name)
+  `);
 
-  // Start building the query
-  let query = supabase.from("job_positions").select(
-    `
-      id, title, category, seniority_level, typical_requirements, 
-      typical_responsibilities, industry_id, company_id,
-      companies!inner (name),
-      industry!inner (name)
-      `
-  );
+  // Generic mapping of param key to db field
+  const fieldMap: Record<string, string> = {
+    industry: "industry.name",
+    category: "category",
+    seniority: "seniority_level",
+    company: "companies.name",
+    // Add more param mappings if needed
+  };
 
-  // Conditionally apply filters only if they exist
-  if (industry) {
-    query = query.eq("industry.name", industry);
-  }
-  if (category) {
-    query = query.eq("category", category);
-  }
-  if (seniority) {
-    query = query.eq("seniority_level", seniority);
-  }
-  if (company) {
-    query = query.eq("companies.name", company);
-  }
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (value && fieldMap[key]) {
+      if (Array.isArray(value)) {
+        query = query.in(fieldMap[key], value);
+      } else {
+        query = query.eq(fieldMap[key], value as string);
+      }
+    }
+  });
 
   const { data } = await query.limit(18);
 
