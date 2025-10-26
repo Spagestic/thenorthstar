@@ -10,30 +10,25 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Building2, CheckCircle2, DollarSign } from "lucide-react";
+import { Building2, CheckCircle2 } from "lucide-react";
 import { getCompanyLogo } from "@/lib/company-logos";
 
-export interface JobPosition {
+export interface JobCardData {
   id: string;
   title: string;
   category: string | null;
   seniority_level: string | null;
   typical_requirements: unknown;
   typical_responsibilities: unknown;
-  salary_range_min: number | null;
-  salary_range_max: number | null;
-  salary_currency: string | null;
-  created_at: string | null;
-  updated_at: string | null;
   company_id: string | null;
   industry_id: string | null;
   // Joined relations
-  company?: { name: string; logo_url?: string | null } | null;
-  industry?: { name: string } | null;
+  companies: Array<{ name: string }>;
+  industry: Array<{ name: string }>;
 }
 
 interface JobCardProps {
-  job: JobPosition;
+  job: JobCardData;
 }
 
 const normalizeList = (value: unknown): string[] => {
@@ -69,32 +64,6 @@ const normalizeList = (value: unknown): string[] => {
   return [];
 };
 
-const formatSalaryRange = (
-  min: number | null,
-  max: number | null,
-  currency: string | null
-): string | null => {
-  if (min == null && max == null) {
-    return null;
-  }
-
-  const safeCurrency = currency?.toUpperCase() || "USD";
-  const formatAmount = (amount: number) =>
-    `${safeCurrency} ${amount.toLocaleString(undefined, {
-      maximumFractionDigits: 0,
-    })}`;
-
-  if (min != null && max != null) {
-    return `${formatAmount(min)} - ${formatAmount(max)}`;
-  }
-
-  if (min != null) {
-    return `From ${formatAmount(min)}`;
-  }
-
-  return `Up to ${formatAmount(max as number)}`;
-};
-
 const getSeniorityBadgeStyles = (level: string | null): string => {
   if (!level) {
     return "bg-muted text-muted-foreground";
@@ -119,24 +88,11 @@ const getSeniorityBadgeStyles = (level: string | null): string => {
 export const JobCard: React.FC<JobCardProps> = ({ job }) => {
   const requirements = normalizeList(job.typical_requirements);
   const responsibilities = normalizeList(job.typical_responsibilities);
-  const salaryRange = formatSalaryRange(
-    job.salary_range_min,
-    job.salary_range_max,
-    job.salary_currency
-  );
-  const companyName = job.company?.name || null;
-  const companyLogoUrl = job.company?.logo_url || null;
-  const companyLogo =
-    companyLogoUrl || (companyName ? getCompanyLogo(companyName) : null);
+  // @ts-ignore
+  const companyName = job.companies?.name || null;
+  const companyLogo = companyName ? getCompanyLogo(companyName) : null;
+  // @ts-ignore
   const industryName = job.industry?.name || null;
-  const postedOn = job.created_at ? new Date(job.created_at) : null;
-  const formattedPostedOn = postedOn
-    ? postedOn.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : null;
 
   return (
     <Card className="group flex h-full cursor-pointer flex-col transition-shadow hover:shadow-lg">
@@ -163,7 +119,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
                 {companyName || "Company coming soon"}
                 {industryName ? ` • ${industryName}` : ""}
               </CardDescription>
-              {formattedPostedOn && (
+              {job.category && (
                 <p className="text-xs text-muted-foreground">{job.category}</p>
               )}
             </div>
@@ -190,7 +146,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
                 {requirements.slice(0, 3).map((item, index) => (
                   <li
                     className="flex items-start gap-2"
-                    key={`${job.id}-resp-${index}`}
+                    key={`${job.id}-req-${index}`}
                   >
                     <CheckCircle2 className="h-3 w-3 shrink-0 self-center text-primary" />
                     <span>{item}</span>

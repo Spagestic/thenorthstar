@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import Header from "../Header";
-import { JobCard } from "@/app/(protected)/dashboard/job-card";
+import { JobCard } from "@/components/jobs/job-card";
 import { JobCardSkeleton } from "@/components/jobs/job-card-skeleton";
-import { JobSearchBar } from "@/app/(protected)/dashboard/job-search-bar";
-import { JobsFilters } from "@/app/(protected)/dashboard/jobs-filters-wrapper";
+import { JobSearchBar } from "@/components/jobs/job-search-bar";
+import { JobsFilters } from "@/components/jobs/jobs-filters-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
-import { jobSearchParamsCache } from "./searchParams";
+import { jobSearchParamsCache } from "@/components/jobs/searchParams";
 import type { SearchParams } from "nuqs/server";
 
 interface PageProps {
