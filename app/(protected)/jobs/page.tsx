@@ -79,9 +79,20 @@ async function JobList({ searchParams }: JobListProps) {
 
   const { data, error } = await query.limit(18);
 
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <p className="text-lg text-muted-foreground">No jobs found</p>
+        <p className="text-sm text-muted-foreground mt-2">
+          Try adjusting your search filters
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-      {data?.map((job) => (
+      {data.map((job) => (
         <JobCard key={job.id} job={job} />
       ))}
     </div>
