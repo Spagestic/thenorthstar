@@ -20,36 +20,45 @@ export default async function page({ searchParams }: PageProps) {
   return (
     <div className="container mx-auto flex flex-col h-screen">
       <Header nav={["Jobs"]} />
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-8 overflow-y-auto">
-        <div className="w-full">
-          <JobSearchBar />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Sticky search and filters section */}
+        <div className="sticky top-0 z-10 bg-background border-b">
+          <div className="p-4 pt-8 space-y-4">
+            <div className="w-full">
+              <JobSearchBar />
+            </div>
+            <div className="w-full">
+              <Suspense
+                fallback={
+                  <div className="space-y-4">
+                    <div className="flex gap-3">
+                      <Skeleton className="h-10 w-[200px]" />
+                      <Skeleton className="h-10 w-[200px]" />
+                      <Skeleton className="h-10 w-[200px]" />
+                      <Skeleton className="h-10 w-[160px]" />
+                    </div>
+                  </div>
+                }
+              >
+                <JobsFilters />
+              </Suspense>
+            </div>
+          </div>
         </div>
-        <div className="w-full mb-4">
+
+        {/* Scrollable job list */}
+        <div className="flex-1 overflow-y-auto p-4">
           <Suspense
+            key={JSON.stringify(params)}
             fallback={
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <Skeleton className="h-10 w-[200px]" />
-                  <Skeleton className="h-10 w-[200px]" />
-                  <Skeleton className="h-10 w-[200px]" />
-                  <Skeleton className="h-10 w-[160px]" />
-                </div>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                <JobCardSkeleton count={9} />
               </div>
             }
           >
-            <JobsFilters />
+            <JobList />
           </Suspense>
         </div>
-        <Suspense
-          key={JSON.stringify(params)}
-          fallback={
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-              <JobCardSkeleton count={9} />
-            </div>
-          }
-        >
-          <JobList />
-        </Suspense>
       </div>
     </div>
   );
