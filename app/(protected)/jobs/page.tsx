@@ -6,13 +6,16 @@ import { JobCardSkeleton } from "@/components/jobs/job-card-skeleton";
 import { JobSearchBar } from "@/app/(protected)/jobs/job-search-bar";
 import { JobsFilters } from "@/app/(protected)/jobs/jobs-filters-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
+import { jobSearchParamsCache } from "./searchParams";
+import type { SearchParams } from "nuqs/server";
 
 interface PageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<SearchParams>;
 }
 
 export default async function page({ searchParams }: PageProps) {
-  const params = await searchParams;
+  // Parse search params using nuqs cache
+  const params = await jobSearchParamsCache.parse(searchParams);
 
   return (
     <div className="container mx-auto flex flex-col h-screen">
@@ -45,18 +48,17 @@ export default async function page({ searchParams }: PageProps) {
             </div>
           }
         >
-          <JobList searchParams={params} />
+          <JobList />
         </Suspense>
       </div>
     </div>
   );
 }
 
-interface JobListProps {
-  searchParams: { [key: string]: string | string[] | undefined };
-}
+async function JobList() {
+  // Access parsed search params from the cache
+  const { search, industry, company, seniority } = jobSearchParamsCache.all();
 
-async function JobList({ searchParams }: JobListProps) {
   const supabase = await createClient();
 
   let query = supabase.from("job_positions").select(`
@@ -66,32 +68,22 @@ async function JobList({ searchParams }: JobListProps) {
     industry!inner (name)
   `);
 
-  // generic field map for filters
-  const fieldMap: Record<string, string> = {
-    industry: "industry.name",
-    category: "category",
-    seniority: "seniority_level",
-    company: "companies.name",
-  };
+  // Apply filters based on parsed search params
+  if (industry) {
+    query = query.eq("industry.name", industry);
+  }
 
-  // Filters
-  Object.entries(searchParams).forEach(([key, value]) => {
-    if (value && fieldMap[key]) {
-      if (Array.isArray(value)) {
-        query = query.in(fieldMap[key], value);
-      } else {
-        query = query.eq(fieldMap[key], value as string);
-      }
-    }
-  });
+  if (company) {
+    query = query.eq("companies.name", company);
+  }
+
+  if (seniority) {
+    query = query.eq("seniority_level", seniority);
+  }
 
   // TEXT SEARCH feature!
-  if (searchParams.search) {
-    query = query.textSearch(
-      "title", // Change to the text column you want to search (e.g., 'title', 'typical_requirements')
-      searchParams.search as string,
-      { config: "english" } // optional: specify search config
-    );
+  if (search) {
+    query = query.textSearch("title", search, { config: "english" });
   }
 
   const { data, error } = await query.limit(45);

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryStates, parseAsString } from "nuqs";
 import {
   Select,
   SelectContent,
@@ -38,53 +38,50 @@ export function JobsPageFilters({
   seniorities,
   companies,
 }: JobsPageFiltersProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [isPending, startTransition] = React.useTransition();
-
   const [companyOpen, setCompanyOpen] = React.useState(false);
   const [industryOpen, setIndustryOpen] = React.useState(false);
 
-  // Get current filter values from URL
-  const currentIndustry = searchParams.get("industry") || "";
-  const currentSeniority = searchParams.get("seniority") || "";
-  const currentCompany = searchParams.get("company") || "";
-  const currentSearch = searchParams.get("search") || "";
-
-  const updateFilter = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    if (value && value !== "all") {
-      params.set(key, value);
-    } else {
-      params.delete(key);
+  // Use nuqs to manage all filter states together
+  const [filters, setFilters] = useQueryStates(
+    {
+      search: parseAsString,
+      industry: parseAsString,
+      company: parseAsString,
+      seniority: parseAsString,
+    },
+    {
+      shallow: false, // Notify server
+      startTransition, // Use transition for loading state
     }
+  );
 
-    startTransition(() => {
-      router.push(`?${params.toString()}`, { scroll: false });
-    });
+  const { search, industry, company, seniority } = filters;
+
+  const updateFilter = (key: keyof typeof filters, value: string | null) => {
+    if (value && value !== "all") {
+      setFilters({ [key]: value });
+    } else {
+      setFilters({ [key]: null });
+    }
   };
 
-  const removeFilter = (key: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete(key);
-    startTransition(() => {
-      router.push(`?${params.toString()}`, { scroll: false });
-    });
+  const removeFilter = (key: keyof typeof filters) => {
+    setFilters({ [key]: null });
   };
 
   const resetAllFilters = () => {
-    startTransition(() => {
-      router.push("/jobs", { scroll: false });
+    setFilters({
+      search: null,
+      industry: null,
+      company: null,
+      seniority: null,
     });
   };
 
-  const activeFiltersCount = [
-    currentIndustry,
-    currentSeniority,
-    currentCompany,
-    currentSearch,
-  ].filter(Boolean).length;
+  const activeFiltersCount = [search, industry, company, seniority].filter(
+    Boolean
+  ).length;
 
   const hasActiveFilters = activeFiltersCount > 0;
 
@@ -96,13 +93,13 @@ export function JobsPageFilters({
         <Popover open={industryOpen} onOpenChange={setIndustryOpen}>
           <PopoverTrigger asChild>
             <Button
-              variant={currentIndustry ? "default" : "outline"}
+              variant={industry ? "default" : "outline"}
               role="combobox"
               aria-expanded={industryOpen}
               className="w-[200px] justify-between"
               disabled={isPending}
             >
-              <span className="truncate">{currentIndustry || "Industry"}</span>
+              <span className="truncate">{industry || "Industry"}</span>
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -119,7 +116,7 @@ export function JobsPageFilters({
                       onSelect={(value) => {
                         updateFilter(
                           "industry",
-                          value === currentIndustry ? "" : value
+                          value === industry ? null : value
                         );
                         setIndustryOpen(false);
                       }}
@@ -128,9 +125,7 @@ export function JobsPageFilters({
                       <Check
                         className={cn(
                           "ml-auto h-4 w-4",
-                          currentIndustry === ind.name
-                            ? "opacity-100"
-                            : "opacity-0"
+                          industry === ind.name ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>
@@ -145,13 +140,13 @@ export function JobsPageFilters({
         <Popover open={companyOpen} onOpenChange={setCompanyOpen}>
           <PopoverTrigger asChild>
             <Button
-              variant={currentCompany ? "default" : "outline"}
+              variant={company ? "default" : "outline"}
               role="combobox"
               aria-expanded={companyOpen}
               className="w-[200px] justify-between"
               disabled={isPending}
             >
-              <span className="truncate">{currentCompany || "Company"}</span>
+              <span className="truncate">{company || "Company"}</span>
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -168,7 +163,7 @@ export function JobsPageFilters({
                       onSelect={(value) => {
                         updateFilter(
                           "company",
-                          value === currentCompany ? "" : value
+                          value === company ? null : value
                         );
                         setCompanyOpen(false);
                       }}
@@ -177,9 +172,7 @@ export function JobsPageFilters({
                       <Check
                         className={cn(
                           "ml-auto h-4 w-4",
-                          currentCompany === comp.name
-                            ? "opacity-100"
-                            : "opacity-0"
+                          company === comp.name ? "opacity-100" : "opacity-0"
                         )}
                       />
                     </CommandItem>
@@ -192,12 +185,14 @@ export function JobsPageFilters({
 
         {/* Seniority Filter */}
         <Select
-          value={currentSeniority || "all"}
-          onValueChange={(value) => updateFilter("seniority", value)}
+          value={seniority || "all"}
+          onValueChange={(value) =>
+            updateFilter("seniority", value === "all" ? null : value)
+          }
           disabled={isPending}
         >
           <SelectTrigger
-            className={cn("w-[160px]", currentSeniority && "border-primary")}
+            className={cn("w-[160px]", seniority && "border-primary")}
           >
             <SelectValue placeholder="Seniority" />
           </SelectTrigger>
@@ -229,9 +224,9 @@ export function JobsPageFilters({
       {/* Active Filters Pills */}
       {hasActiveFilters && (
         <div className="flex flex-wrap gap-2">
-          {currentSearch && (
+          {search && (
             <Badge variant="secondary" className="gap-1.5 pr-1">
-              <span>Search: {currentSearch}</span>
+              <span>Search: {search}</span>
               <button
                 type="button"
                 onClick={(e) => {
@@ -247,9 +242,9 @@ export function JobsPageFilters({
               </button>
             </Badge>
           )}
-          {currentIndustry && (
+          {industry && (
             <Badge variant="secondary" className="gap-1.5 pr-1">
-              <span>{currentIndustry}</span>
+              <span>{industry}</span>
               <button
                 type="button"
                 onClick={(e) => {
@@ -265,9 +260,9 @@ export function JobsPageFilters({
               </button>
             </Badge>
           )}
-          {currentCompany && (
+          {company && (
             <Badge variant="secondary" className="gap-1.5 pr-1">
-              <span>{currentCompany}</span>
+              <span>{company}</span>
               <button
                 type="button"
                 onClick={(e) => {
@@ -283,11 +278,10 @@ export function JobsPageFilters({
               </button>
             </Badge>
           )}
-          {currentSeniority && (
+          {seniority && (
             <Badge variant="secondary" className="gap-1.5 pr-1">
               <span>
-                {currentSeniority.charAt(0).toUpperCase() +
-                  currentSeniority.slice(1)}
+                {seniority.charAt(0).toUpperCase() + seniority.slice(1)}
               </span>
               <button
                 type="button"

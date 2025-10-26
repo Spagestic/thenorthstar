@@ -1,59 +1,22 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryState, parseAsString, debounce } from "nuqs";
 import { Input } from "@/components/ui/input";
 import { Search, Loader2 } from "lucide-react";
 
 export function JobSearchBar() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [searchValue, setSearchValue] = React.useState(
-    searchParams.get("search") || ""
-  );
   const [isPending, startTransition] = React.useTransition();
 
-  // Debounce timer ref
-  const debounceTimer = React.useRef<NodeJS.Timeout | null>(null);
-
-  // Update URL with debouncing and transition
-  const updateSearchParam = React.useCallback(
-    (value: string) => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-
-      debounceTimer.current = setTimeout(() => {
-        const params = new URLSearchParams(searchParams.toString());
-
-        if (value.trim()) {
-          params.set("search", value.trim());
-        } else {
-          params.delete("search");
-        }
-
-        startTransition(() => {
-          router.push(`?${params.toString()}`, { scroll: false });
-        });
-      }, 200); // Reduced from 300ms to 200ms for faster response
-    },
-    [router, searchParams]
+  // Use nuqs for search state management with built-in debouncing
+  const [search, setSearch] = useQueryState(
+    "search",
+    parseAsString.withDefault("").withOptions({
+      shallow: false, // Notify server for re-render
+      startTransition, // Use transition for loading state
+      limitUrlUpdates: debounce(200), // Debounce URL updates
+    })
   );
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchValue(value);
-    updateSearchParam(value);
-  };
-
-  // Cleanup on unmount
-  React.useEffect(() => {
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-    };
-  }, []);
 
   return (
     <div className="relative">
@@ -65,9 +28,9 @@ export function JobSearchBar() {
       <Input
         aria-label="Search job titles"
         className="pl-9"
-        onChange={handleSearchChange}
+        onChange={(e) => setSearch(e.target.value || null)}
         placeholder="Search by role, company, or skills"
-        value={searchValue}
+        value={search ?? ""}
       />
     </div>
   );
