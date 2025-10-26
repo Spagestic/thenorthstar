@@ -3,12 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import Header from "../Header";
 import { JobCard } from "@/app/(protected)/jobs/job-card";
 import { JobCardSkeleton } from "@/components/jobs/job-card-skeleton";
-
-// /jobs?search=machine+%26+learning
-// You can filter Jobs by url like....
-// /jobs?industry=Technology&category=Data, AI & ML&seniority=mid&company=Apple
-// /jobs?jobs?industry=Agriculture+%26+Sustainability&company=Cargill
-// /jobs?company=Bank+of+America
+import { JobSearchBar } from "@/app/(protected)/jobs/job-search-bar";
+import { JobsFilters } from "@/app/(protected)/jobs/jobs-filters-wrapper";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PageProps {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -21,6 +18,25 @@ export default async function page({ searchParams }: PageProps) {
     <div className="container mx-auto flex flex-col h-screen">
       <Header nav={["Jobs"]} />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-8 overflow-y-auto">
+        <div className="w-full">
+          <JobSearchBar />
+        </div>
+        <div className="w-full mb-4">
+          <Suspense
+            fallback={
+              <div className="space-y-4">
+                <div className="flex gap-3">
+                  <Skeleton className="h-10 w-[200px]" />
+                  <Skeleton className="h-10 w-[200px]" />
+                  <Skeleton className="h-10 w-[200px]" />
+                  <Skeleton className="h-10 w-[160px]" />
+                </div>
+              </div>
+            }
+          >
+            <JobsFilters />
+          </Suspense>
+        </div>
         <Suspense
           fallback={
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -77,7 +93,7 @@ async function JobList({ searchParams }: JobListProps) {
     );
   }
 
-  const { data, error } = await query.limit(18);
+  const { data, error } = await query.limit(45);
 
   if (!data || data.length === 0) {
     return (
