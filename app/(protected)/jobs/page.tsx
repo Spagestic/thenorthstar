@@ -38,6 +38,7 @@ export default async function page({ searchParams }: PageProps) {
           </Suspense>
         </div>
         <Suspense
+          key={JSON.stringify(params)}
           fallback={
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
               <JobCardSkeleton count={9} />

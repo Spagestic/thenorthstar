@@ -40,6 +40,7 @@ export function JobsPageFilters({
 }: JobsPageFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = React.useTransition();
 
   const [companyOpen, setCompanyOpen] = React.useState(false);
   const [industryOpen, setIndustryOpen] = React.useState(false);
@@ -59,17 +60,23 @@ export function JobsPageFilters({
       params.delete(key);
     }
 
-    router.push(`?${params.toString()}`, { scroll: false });
+    startTransition(() => {
+      router.push(`?${params.toString()}`, { scroll: false });
+    });
   };
 
   const removeFilter = (key: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete(key);
-    router.push(`?${params.toString()}`, { scroll: false });
+    startTransition(() => {
+      router.push(`?${params.toString()}`, { scroll: false });
+    });
   };
 
   const resetAllFilters = () => {
-    router.push("/jobs", { scroll: false });
+    startTransition(() => {
+      router.push("/jobs", { scroll: false });
+    });
   };
 
   const activeFiltersCount = [
@@ -93,6 +100,7 @@ export function JobsPageFilters({
               role="combobox"
               aria-expanded={industryOpen}
               className="w-[200px] justify-between"
+              disabled={isPending}
             >
               <span className="truncate">{currentIndustry || "Industry"}</span>
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -141,6 +149,7 @@ export function JobsPageFilters({
               role="combobox"
               aria-expanded={companyOpen}
               className="w-[200px] justify-between"
+              disabled={isPending}
             >
               <span className="truncate">{currentCompany || "Company"}</span>
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -185,6 +194,7 @@ export function JobsPageFilters({
         <Select
           value={currentSeniority || "all"}
           onValueChange={(value) => updateFilter("seniority", value)}
+          disabled={isPending}
         >
           <SelectTrigger
             className={cn("w-[160px]", currentSeniority && "border-primary")}
@@ -208,6 +218,7 @@ export function JobsPageFilters({
             variant="ghost"
             size="sm"
             className="ml-auto"
+            disabled={isPending}
           >
             <Filter className="mr-2 h-4 w-4" />
             Clear All ({activeFiltersCount})
@@ -230,6 +241,7 @@ export function JobsPageFilters({
                 }}
                 className="ml-1 rounded-sm hover:bg-muted p-0.5"
                 aria-label="Remove search filter"
+                disabled={isPending}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -247,6 +259,7 @@ export function JobsPageFilters({
                 }}
                 className="ml-1 rounded-sm hover:bg-muted p-0.5"
                 aria-label="Remove industry filter"
+                disabled={isPending}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -264,6 +277,7 @@ export function JobsPageFilters({
                 }}
                 className="ml-1 rounded-sm hover:bg-muted p-0.5"
                 aria-label="Remove company filter"
+                disabled={isPending}
               >
                 <X className="h-3 w-3" />
               </button>
@@ -284,6 +298,7 @@ export function JobsPageFilters({
                 }}
                 className="ml-1 rounded-sm hover:bg-muted p-0.5"
                 aria-label="Remove seniority filter"
+                disabled={isPending}
               >
                 <X className="h-3 w-3" />
               </button>
