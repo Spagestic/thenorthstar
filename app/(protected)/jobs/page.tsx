@@ -4,6 +4,7 @@ import Header from "../Header";
 import { JobCard } from "@/app/(protected)/jobs/job-card";
 import { JobCardSkeleton } from "@/components/jobs/job-card-skeleton";
 
+// /jobs?search=machine+%26+learning
 // You can filter Jobs by url like....
 // /jobs?industry=Technology&category=Data, AI & ML&seniority=mid&company=Apple
 // /jobs?jobs?industry=Agriculture+%26+Sustainability&company=Cargill
@@ -48,15 +49,15 @@ async function JobList({ searchParams }: JobListProps) {
     industry!inner (name)
   `);
 
-  // Generic mapping of param key to db field
+  // generic field map for filters
   const fieldMap: Record<string, string> = {
     industry: "industry.name",
     category: "category",
     seniority: "seniority_level",
     company: "companies.name",
-    // Add more param mappings if needed
   };
 
+  // Filters
   Object.entries(searchParams).forEach(([key, value]) => {
     if (value && fieldMap[key]) {
       if (Array.isArray(value)) {
@@ -67,7 +68,16 @@ async function JobList({ searchParams }: JobListProps) {
     }
   });
 
-  const { data } = await query.limit(18);
+  // TEXT SEARCH feature!
+  if (searchParams.search) {
+    query = query.textSearch(
+      "title", // Change to the text column you want to search (e.g., 'title', 'typical_requirements')
+      searchParams.search as string,
+      { config: "english" } // optional: specify search config
+    );
+  }
+
+  const { data, error } = await query.limit(18);
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
