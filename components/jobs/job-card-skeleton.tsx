@@ -12,55 +12,67 @@ export const JobCardSkeleton: React.FC<JobCardSkeletonProps> = ({
   return (
     <>
       {Array.from({ length: count }).map((_, index) => (
-        <Card key={index} className="h-full">
+        <Card key={index} className="flex h-full flex-col">
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3 flex-1">
-                <Skeleton className="h-14 w-14 rounded-md" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-3 w-1/3" />
+              <div className="flex items-start gap-3">
+                {/* Company logo skeleton - matches 64x64 (h-16 w-16) */}
+                <Skeleton className="h-16 w-16 rounded-md" />
+                <div>
+                  {/* Job title skeleton */}
+                  <Skeleton className="h-5 w-48 mb-2" />
+                  {/* Company and industry skeleton */}
+                  <Skeleton className="h-4 w-56 mb-1" />
+                  {/* Category skeleton */}
+                  <Skeleton className="h-3 w-32" />
                 </div>
               </div>
-              <Skeleton className="h-6 w-20 rounded-full" />
+              {/* Seniority badge skeleton */}
+              <Skeleton className="h-6 w-10 rounded-full" />
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Skeleton className="h-4 w-24 mb-2" />
-              <div className="space-y-2">
-                <div className="flex items-start gap-2">
-                  <Skeleton className="h-3 w-3 rounded-full shrink-0" />
-                  <Skeleton className="h-3 flex-1" />
-                </div>
-                <div className="flex items-start gap-2">
-                  <Skeleton className="h-3 w-3 rounded-full shrink-0" />
-                  <Skeleton className="h-3 flex-1" />
-                </div>
-                <div className="flex items-start gap-2">
-                  <Skeleton className="h-3 w-3 rounded-full shrink-0" />
-                  <Skeleton className="h-3 w-2/3" />
-                </div>
+          <CardContent className="flex flex-1 flex-col space-y-4">
+            <div className="flex-1 space-y-4">
+              {/* Requirements section */}
+              <div>
+                <Skeleton className="h-4 w-24 mb-2" />
+                <ul className="space-y-1">
+                  <li className="flex items-start gap-2">
+                    <Skeleton className="h-3 w-3 shrink-0 self-center rounded-full" />
+                    <Skeleton className="h-3 flex-1" />
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Skeleton className="h-3 w-3 shrink-0 self-center rounded-full" />
+                    <Skeleton className="h-3 flex-1" />
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Skeleton className="h-3 w-3 shrink-0 self-center rounded-full" />
+                    <Skeleton className="h-3 w-4/5" />
+                  </li>
+                </ul>
+              </div>
+
+              {/* Responsibilities section */}
+              <div>
+                <Skeleton className="h-4 w-32 mb-2" />
+                <ul className="space-y-1">
+                  <li className="flex items-start gap-2">
+                    <Skeleton className="h-3 w-3 shrink-0 self-center rounded-full" />
+                    <Skeleton className="h-3 flex-1" />
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Skeleton className="h-3 w-3 shrink-0 self-center rounded-full" />
+                    <Skeleton className="h-3 flex-1" />
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Skeleton className="h-3 w-3 shrink-0 self-center rounded-full" />
+                    <Skeleton className="h-3 w-4/5" />
+                  </li>
+                </ul>
               </div>
             </div>
-            <div>
-              <Skeleton className="h-4 w-32 mb-2" />
-              <div className="space-y-2">
-                <div className="flex items-start gap-2">
-                  <Skeleton className="h-3 w-3 rounded-full shrink-0" />
-                  <Skeleton className="h-3 flex-1" />
-                </div>
-                <div className="flex items-start gap-2">
-                  <Skeleton className="h-3 w-3 rounded-full shrink-0" />
-                  <Skeleton className="h-3 flex-1" />
-                </div>
-                <div className="flex items-start gap-2">
-                  <Skeleton className="h-3 w-3 rounded-full shrink-0" />
-                  <Skeleton className="h-3 w-2/3" />
-                </div>
-              </div>
-            </div>
+
+            {/* Button skeleton */}
             <Skeleton className="h-9 w-full rounded-md" />
           </CardContent>
         </Card>
