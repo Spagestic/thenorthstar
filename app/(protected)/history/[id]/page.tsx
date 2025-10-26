@@ -1,4 +1,3 @@
-import React from "react";
 import { createClient } from "@/lib/supabase/server";
 import Header from "../../Header";
 import { ConversationHistory } from "./conversation-history";
@@ -16,6 +15,23 @@ export default async function page({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Check if user is authenticated
+  if (!user) {
+    return (
+      <div>
+        <Header nav={[{ label: "History" }, { label: "Unauthorized" }]} />
+        <div className="flex h-[84vh] items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold">Unauthorized</h2>
+            <p className="text-muted-foreground mt-2">
+              Please sign in to view this conversation.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Fetch conversation details from database
   const { data: conversation } = await supabase
@@ -39,7 +55,7 @@ export default async function page({
     `
     )
     .eq("conversation_id", conversationId)
-    .eq("user_id", user?.id)
+    .eq("user_id", user.id)
     .single();
 
   if (!conversation) {

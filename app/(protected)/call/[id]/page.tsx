@@ -31,21 +31,21 @@ export default async function page({
     <div>
       <Header
         nav={
-          job?.title
+          job?.title && job?.industry?.name && job?.company?.name
             ? [
                 {
-                  label: job?.industry?.name,
+                  label: job.industry.name,
                   href: `/dashboard?industry=${encodeURIComponent(
-                    job?.industry?.name || ""
+                    job.industry.name
                   )}`,
                 },
                 {
-                  label: job?.company?.name,
+                  label: job.company.name,
                   href: `/dashboard?company=${encodeURIComponent(
-                    job?.company?.name || ""
+                    job.company.name
                   )}`,
                 },
-                { label: job?.title, href: `/job/${jobId}` },
+                { label: job.title, href: `/job/${jobId}` },
                 { label: "Call" },
               ]
             : [{ label: "Call" }]
@@ -54,14 +54,14 @@ export default async function page({
       <CallInterface
         userId={user?.id}
         jobId={jobId}
-        job_title={job?.title}
-        requirements={job?.typical_requirements}
-        responsibilities={job?.typical_responsibilities}
-        company_name={job?.company?.name}
-        company_description={job?.company?.description}
-        company_culture={job?.company?.culture}
-        company_values={job?.company?.values}
-        industry_name={job?.industry?.name}
+        job_title={job?.title || "Interview"}
+        requirements={job?.typical_requirements as string[] | undefined}
+        responsibilities={job?.typical_responsibilities as string[] | undefined}
+        company_name={job?.company?.name || "Company"}
+        company_description={job?.company?.description || undefined}
+        company_culture={job?.company?.culture || undefined}
+        company_values={job?.company?.values as string[] | undefined}
+        industry_name={job?.industry?.name || undefined}
         isDataLoaded={isDataLoaded}
       />
     </div>

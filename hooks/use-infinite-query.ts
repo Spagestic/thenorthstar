@@ -1,7 +1,10 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { PostgrestQueryBuilder } from "@supabase/postgrest-js";
+import {
+  PostgrestQueryBuilder,
+  type PostgrestClientOptions,
+} from "@supabase/postgrest-js";
 import { type SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 
@@ -44,8 +47,16 @@ type SupabaseTableName = keyof DatabaseSchema["Tables"];
 type SupabaseTableData<T extends SupabaseTableName> =
   DatabaseSchema["Tables"][T]["Row"];
 
+// Default client options for PostgrestQueryBuilder
+type DefaultClientOptions = PostgrestClientOptions;
+
 type SupabaseSelectBuilder<T extends SupabaseTableName> = ReturnType<
-  PostgrestQueryBuilder<any, any, any>["select"]
+  PostgrestQueryBuilder<
+    DefaultClientOptions,
+    DatabaseSchema,
+    DatabaseSchema["Tables"][T],
+    T
+  >["select"]
 >;
 
 // A function that modifies the query. Can be used to sort, filter, etc. If .range is used, it will be overwritten.
@@ -75,7 +86,6 @@ interface StoreState<TData> {
   isFetching: boolean;
   error: Error | null;
   hasInitialFetch: boolean;
-  isRefetching: boolean;
 }
 
 type Listener = () => void;
@@ -94,7 +104,6 @@ function createStore<
     isFetching: false,
     error: null,
     hasInitialFetch: false,
-    isRefetching: false,
   };
 
   const listeners = new Set<Listener>();
@@ -117,9 +126,11 @@ function createStore<
 
     setState({ isFetching: true });
 
-    let query = supabase.from(tableName).select(columns, {
-      count: "exact",
-    }) as unknown as SupabaseSelectBuilder<T>;
+    let query = supabase
+      .from(tableName)
+      .select(columns, {
+        count: "exact",
+      }) as unknown as SupabaseSelectBuilder<T>;
 
     if (trailingQuery) {
       query = trailingQuery(query);
@@ -134,14 +145,8 @@ function createStore<
       console.error("An unexpected error occurred:", error);
       setState({ error });
     } else {
-      // Deduplicate data by id to prevent duplicate entries
-      const existingIds = new Set(state.data.map((item: any) => item.id));
-      const uniqueNewData = (newData as TData[]).filter(
-        (item: any) => !existingIds.has(item.id)
-      );
-
       setState({
-        data: [...state.data, ...uniqueNewData],
+        data: [...state.data, ...(newData as TData[])],
         count: count || 0,
         isSuccess: true,
         error: null,
@@ -156,19 +161,9 @@ function createStore<
   };
 
   const initialize = async () => {
-    const isRefetch = state.hasInitialFetch;
-    setState({
-      isLoading: !isRefetch,
-      isRefetching: isRefetch,
-      isSuccess: false,
-      data: [],
-    });
+    setState({ isLoading: true, isSuccess: false, data: [] });
     await fetchNextPage();
-    setState({
-      isLoading: false,
-      isRefetching: false,
-      hasInitialFetch: true,
-    });
+    setState({ isLoading: false, hasInitialFetch: true });
   };
 
   return {
@@ -191,7 +186,6 @@ const initialState: any = {
   isFetching: false,
   error: null,
   hasInitialFetch: false,
-  isRefetching: false,
 };
 
 function useInfiniteQuery<
@@ -199,7 +193,6 @@ function useInfiniteQuery<
   T extends SupabaseTableName = SupabaseTableName
 >(props: UseInfiniteQueryProps<T>) {
   const storeRef = useRef(createStore<TData, T>(props));
-  const prevPropsKeyRef = useRef<string>("");
 
   const state = useSyncExternalStore(
     storeRef.current.subscribe,
@@ -208,26 +201,20 @@ function useInfiniteQuery<
   );
 
   useEffect(() => {
-    // Create a stable key based on props to detect changes
-    const propsKey = JSON.stringify({
-      tableName: props.tableName,
-      columns: props.columns,
-      pageSize: props.pageSize,
-      trailingQuery: props.trailingQuery?.toString(),
-    });
-
-    const currentState = storeRef.current.getState();
-
-    // Only reinitialize if props actually changed and we've had an initial fetch
-    if (currentState.hasInitialFetch && prevPropsKeyRef.current !== propsKey) {
+    // Recreate store if props change
+    if (
+      storeRef.current.getState().hasInitialFetch &&
+      (props.tableName !== props.tableName ||
+        props.columns !== props.columns ||
+        props.pageSize !== props.pageSize)
+    ) {
       storeRef.current = createStore<TData, T>(props);
-      storeRef.current.initialize();
-    } else if (!currentState.hasInitialFetch && typeof window !== "undefined") {
-      storeRef.current.initialize();
     }
 
-    prevPropsKeyRef.current = propsKey;
-  }, [props.tableName, props.columns, props.pageSize, props.trailingQuery]);
+    if (!state.hasInitialFetch && typeof window !== "undefined") {
+      storeRef.current.initialize();
+    }
+  }, [props.tableName, props.columns, props.pageSize, state.hasInitialFetch]);
 
   return {
     data: state.data,
@@ -235,7 +222,6 @@ function useInfiniteQuery<
     isSuccess: state.isSuccess,
     isLoading: state.isLoading,
     isFetching: state.isFetching,
-    isRefetching: state.isRefetching,
     error: state.error,
     hasMore: state.count > state.data.length,
     fetchNextPage: storeRef.current.fetchNextPage,

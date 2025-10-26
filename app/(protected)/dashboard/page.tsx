@@ -1,10 +1,9 @@
 import { Suspense } from "react";
-import { createClient } from "@/lib/supabase/server";
 import Header from "../Header";
-import { JobCard } from "@/components/jobs/job-card";
 import { JobCardSkeleton } from "@/components/jobs/job-card-skeleton";
 import { JobSearchBar } from "@/components/jobs/job-search-bar";
 import { JobsFilters } from "@/components/jobs/jobs-filters-wrapper";
+import { InfiniteJobList } from "@/components/jobs/infinite-job-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { jobSearchParamsCache } from "@/components/jobs/searchParams";
 import type { SearchParams } from "nuqs/server";
@@ -46,73 +45,17 @@ export default async function page({ searchParams }: PageProps) {
           </div>
         </div>
 
-        {/* Scrollable job list */}
+        {/* Scrollable job list with infinite scroll */}
         <div className="flex-1 overflow-y-auto p-4">
-          <Suspense
+          <InfiniteJobList
             key={JSON.stringify(params)}
-            fallback={
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                <JobCardSkeleton count={9} />
-              </div>
-            }
-          >
-            <JobList />
-          </Suspense>
+            search={params.search || undefined}
+            industry={params.industry || undefined}
+            company={params.company || undefined}
+            seniority={params.seniority || undefined}
+          />
         </div>
       </div>
-    </div>
-  );
-}
-
-async function JobList() {
-  // Access parsed search params from the cache
-  const { search, industry, company, seniority } = jobSearchParamsCache.all();
-
-  const supabase = await createClient();
-
-  let query = supabase.from("job_positions").select(`
-    id, title, category, seniority_level, typical_requirements, 
-    typical_responsibilities, industry_id, company_id,
-    companies!inner (name),
-    industry!inner (name)
-  `);
-
-  // Apply filters based on parsed search params
-  if (industry) {
-    query = query.eq("industry.name", industry);
-  }
-
-  if (company) {
-    query = query.eq("companies.name", company);
-  }
-
-  if (seniority) {
-    query = query.eq("seniority_level", seniority);
-  }
-
-  // TEXT SEARCH feature!
-  if (search) {
-    query = query.textSearch("title", search, { config: "english" });
-  }
-
-  const { data, error } = await query.limit(45);
-
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <p className="text-lg text-muted-foreground">No jobs found</p>
-        <p className="text-sm text-muted-foreground mt-2">
-          Try adjusting your search filters
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-      {data.map((job) => (
-        <JobCard key={job.id} job={job} />
-      ))}
     </div>
   );
 }

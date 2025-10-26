@@ -26,18 +26,18 @@ export default async function Page({
           job?.title
             ? [
                 {
-                  label: job?.industry?.name,
+                  label: job?.industry?.name || "Industry",
                   href: `/dashboard?industry=${encodeURIComponent(
                     job?.industry?.name || ""
                   )}`,
                 },
                 {
-                  label: job?.company?.name,
+                  label: job?.company?.name || "Company",
                   href: `/dashboard?company=${encodeURIComponent(
                     job?.company?.name || ""
                   )}`,
                 },
-                { label: job?.title, href: `/job/${jobId}` },
+                { label: job?.title || "Job", href: `/job/${jobId}` },
                 { label: "Voice Chat" },
               ]
             : [{ label: "Voice Chat" }]
@@ -48,8 +48,10 @@ export default async function Page({
         jobId={jobId}
         jobTitle={job?.title}
         companyName={job?.company?.name}
-        requirements={job?.typical_requirements}
-        responsibilities={job?.typical_responsibilities}
+        requirements={job?.typical_requirements as string[] | null | undefined}
+        responsibilities={
+          job?.typical_responsibilities as string[] | null | undefined
+        }
         industryName={job?.industry?.name}
       />
     </div>

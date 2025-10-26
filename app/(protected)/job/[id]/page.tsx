@@ -1,4 +1,3 @@
-import React from "react";
 import { createClient } from "@/lib/supabase/server";
 import Header from "@/app/(protected)/Header";
 import { getCompanyLogo } from "@/lib/company-logos";
@@ -28,18 +27,18 @@ export default async function page({
       <Header
         nav={[
           {
-            label: job?.industry?.name,
+            label: job?.industry?.name || "Industry",
             href: `/dashboard?industry=${encodeURIComponent(
               job?.industry?.name || ""
             )}`,
           },
           {
-            label: job?.company?.name,
+            label: job?.company?.name || "Company",
             href: `/dashboard?company=${encodeURIComponent(
               job?.company?.name || ""
             )}`,
           },
-          { label: job?.title },
+          { label: job?.title || "Job Title" },
         ]}
       />
 
@@ -98,34 +97,37 @@ export default async function page({
         </div>
 
         {/* Requirements */}
-        {job?.typical_requirements && job.typical_requirements.length > 0 && (
-          <section className="mb-16">
-            <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-6">
-              Requirements
-            </h2>
-            <ul className="space-y-3">
-              {job.typical_requirements.map((item: string, index: number) => (
-                <li key={index} className="flex items-start gap-3">
-                  <span className="text-muted-foreground mt-1.5 text-xs">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="font-light leading-relaxed">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+        {job?.typical_requirements &&
+          Array.isArray(job.typical_requirements) &&
+          job.typical_requirements.length > 0 && (
+            <section className="mb-16">
+              <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-6">
+                Requirements
+              </h2>
+              <ul className="space-y-3">
+                {(job.typical_requirements as string[]).map((item, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <span className="text-muted-foreground mt-1.5 text-xs">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="font-light leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
         {/* Responsibilities */}
         {job?.typical_responsibilities &&
+          Array.isArray(job.typical_responsibilities) &&
           job.typical_responsibilities.length > 0 && (
             <section className="mb-16">
               <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-6">
                 Responsibilities
               </h2>
               <ul className="space-y-3">
-                {job.typical_responsibilities.map(
-                  (item: string, index: number) => (
+                {(job.typical_responsibilities as string[]).map(
+                  (item, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <span className="text-muted-foreground mt-1.5 text-xs">
                         {String(index + 1).padStart(2, "0")}
@@ -181,32 +183,34 @@ export default async function page({
               </p>
             )}
 
-            {job.company.values && job.company.values.length > 0 && (
-              <div className="grid grid-cols-2 gap-x-12 gap-y-6">
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
-                    Values
-                  </p>
-                  <div className="space-y-1">
-                    {job.company.values.map((value: string) => (
-                      <p key={value} className="font-light text-sm">
-                        {value}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-                {job.company.culture && (
+            {job.company.values &&
+              Array.isArray(job.company.values) &&
+              job.company.values.length > 0 && (
+                <div className="grid grid-cols-2 gap-x-12 gap-y-6">
                   <div>
                     <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
-                      Culture
+                      Values
                     </p>
-                    <p className="font-light text-sm leading-relaxed">
-                      {job.company.culture}
-                    </p>
+                    <div className="space-y-1">
+                      {(job.company.values as string[]).map((value) => (
+                        <p key={value} className="font-light text-sm">
+                          {value}
+                        </p>
+                      ))}
+                    </div>
                   </div>
-                )}
-              </div>
-            )}
+                  {job.company.culture && (
+                    <div>
+                      <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">
+                        Culture
+                      </p>
+                      <p className="font-light text-sm leading-relaxed">
+                        {job.company.culture}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
           </section>
         )}
 
