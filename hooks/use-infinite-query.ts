@@ -2,8 +2,8 @@
 
 import { createClient } from "@/lib/supabase/client";
 import {
-  PostgrestQueryBuilder,
   type PostgrestClientOptions,
+  PostgrestQueryBuilder,
 } from "@supabase/postgrest-js";
 import { type SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useRef, useSyncExternalStore } from "react";
@@ -17,25 +17,24 @@ type SupabaseClientType = typeof supabase;
 type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N;
 
 // Extracts the database type from the supabase client. If the supabase client doesn't have a type, it will fallback properly.
-type Database = SupabaseClientType extends SupabaseClient<infer U>
-  ? IfAny<
-      U,
-      {
-        public: {
-          Tables: Record<string, any>;
-          Views: Record<string, any>;
-          Functions: Record<string, any>;
-        };
-      },
-      U
-    >
-  : {
+type Database = SupabaseClientType extends SupabaseClient<infer U> ? IfAny<
+    U,
+    {
       public: {
         Tables: Record<string, any>;
         Views: Record<string, any>;
         Functions: Record<string, any>;
       };
+    },
+    U
+  >
+  : {
+    public: {
+      Tables: Record<string, any>;
+      Views: Record<string, any>;
+      Functions: Record<string, any>;
     };
+  };
 
 // Change this to the database schema you want to use
 type DatabaseSchema = Database["public"];
@@ -61,12 +60,12 @@ type SupabaseSelectBuilder<T extends SupabaseTableName> = ReturnType<
 
 // A function that modifies the query. Can be used to sort, filter, etc. If .range is used, it will be overwritten.
 type SupabaseQueryHandler<T extends SupabaseTableName> = (
-  query: SupabaseSelectBuilder<T>
+  query: SupabaseSelectBuilder<T>,
 ) => SupabaseSelectBuilder<T>;
 
 interface UseInfiniteQueryProps<
   T extends SupabaseTableName,
-  Query extends string = "*"
+  Query extends string = "*",
 > {
   // The table name to query
   tableName: T;
@@ -92,7 +91,7 @@ type Listener = () => void;
 
 function createStore<
   TData extends SupabaseTableData<T>,
-  T extends SupabaseTableName
+  T extends SupabaseTableName,
 >(props: UseInfiniteQueryProps<T>) {
   const { tableName, columns = "*", pageSize = 20, trailingQuery } = props;
 
@@ -121,8 +120,9 @@ function createStore<
     if (
       state.hasInitialFetch &&
       (state.isFetching || state.count <= state.data.length)
-    )
+    ) {
       return;
+    }
 
     setState({ isFetching: true });
 
@@ -190,31 +190,24 @@ const initialState: any = {
 
 function useInfiniteQuery<
   TData extends SupabaseTableData<T>,
-  T extends SupabaseTableName = SupabaseTableName
+  T extends SupabaseTableName = SupabaseTableName,
 >(props: UseInfiniteQueryProps<T>) {
+  const { tableName, columns, pageSize, trailingQuery } = props;
   const storeRef = useRef(createStore<TData, T>(props));
 
   const state = useSyncExternalStore(
     storeRef.current.subscribe,
     () => storeRef.current.getState(),
-    () => initialState as StoreState<TData>
+    () => initialState as StoreState<TData>,
   );
 
   useEffect(() => {
-    // Recreate store if props change
-    if (
-      storeRef.current.getState().hasInitialFetch &&
-      (props.tableName !== props.tableName ||
-        props.columns !== props.columns ||
-        props.pageSize !== props.pageSize)
-    ) {
-      storeRef.current = createStore<TData, T>(props);
-    }
-
-    if (!state.hasInitialFetch && typeof window !== "undefined") {
-      storeRef.current.initialize();
-    }
-  }, [props.tableName, props.columns, props.pageSize, state.hasInitialFetch]);
+    // Recreate store and initialize when props change.
+    // The user of the hook is responsible for memoizing trailingQuery
+    // with `useCallback` to prevent infinite loops.
+    storeRef.current = createStore<TData, T>(props);
+    storeRef.current.initialize();
+  }, [tableName, columns, pageSize, trailingQuery]);
 
   return {
     data: state.data,
@@ -229,9 +222,9 @@ function useInfiniteQuery<
 }
 
 export {
-  useInfiniteQuery,
   type SupabaseQueryHandler,
   type SupabaseTableData,
   type SupabaseTableName,
+  useInfiniteQuery,
   type UseInfiniteQueryProps,
 };
