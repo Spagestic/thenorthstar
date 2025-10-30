@@ -95,7 +95,7 @@ async function JobList() {
     query = query.textSearch("title", search, { config: "english" });
   }
 
-  const { data, error } = await query.limit(45);
+  const { data, error } = await query.limit(150);
 
   if (!data || data.length === 0) {
     return (
