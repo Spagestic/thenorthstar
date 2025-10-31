@@ -58,7 +58,7 @@ export function InfiniteJobList({
         companies!inner (name),
         industry!inner (name)
       `,
-      pageSize: 150,
+      pageSize: 90,
       trailingQuery,
     });
 
