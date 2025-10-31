@@ -8,6 +8,13 @@ import { JobsFilters } from "@/components/jobs/jobs-filters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { jobSearchParamsCache } from "@/components/jobs/searchParams";
 import type { SearchParams } from "nuqs/server";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface PageProps {
   searchParams: Promise<SearchParams>;
@@ -58,6 +65,7 @@ export default async function page({ searchParams }: PageProps) {
           >
             <JobList />
           </Suspense>
+          <JobPagination className="pt-8" />
         </div>
       </div>
     </div>
@@ -95,7 +103,7 @@ async function JobList() {
     query = query.textSearch("title", search, { config: "english" });
   }
 
-  const { data, error } = await query.limit(150);
+  const { data, error } = await query.limit(9);
 
   if (!data || data.length === 0) {
     return (
@@ -116,3 +124,24 @@ async function JobList() {
     </div>
   );
 }
+
+const JobPagination = ({ className }: { className?: string }) => {
+  return (
+    <Pagination className={className}>
+      <PaginationContent className="w-full justify-between">
+        <PaginationItem>
+          <PaginationPrevious href="#" className="border" />
+        </PaginationItem>
+        <PaginationItem>
+          <p className="text-muted-foreground text-sm" aria-live="polite">
+            Page <span className="text-foreground">2</span> of{" "}
+            <span className="text-foreground">5</span>
+          </p>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationNext href="#" className="border" />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
+};
