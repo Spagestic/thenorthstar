@@ -3,7 +3,7 @@ import type * as React from "react";
 import { Suspense } from "react";
 import { NavInterviews } from "@/components/sidebar/nav-interviews";
 import { NavMain } from "@/components/sidebar/nav-main";
-import { NavUser } from "@/components/sidebar/nav-user";
+import { LoadingUser, NavUser } from "@/components/sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -50,7 +50,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </Suspense>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <Suspense fallback={<LoadingUser />}>
+          <NavUser />
+        </Suspense>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
