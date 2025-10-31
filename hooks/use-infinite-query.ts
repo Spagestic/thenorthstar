@@ -2,8 +2,8 @@
 
 import { createClient } from "@/lib/supabase/client";
 import {
-  type PostgrestClientOptions,
   PostgrestQueryBuilder,
+  type PostgrestClientOptions,
 } from "@supabase/postgrest-js";
 import { type SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useRef, useSyncExternalStore } from "react";
@@ -202,12 +202,20 @@ function useInfiniteQuery<
   );
 
   useEffect(() => {
-    // Recreate store and initialize when props change.
-    // The user of the hook is responsible for memoizing trailingQuery
-    // with `useCallback` to prevent infinite loops.
-    storeRef.current = createStore<TData, T>(props);
-    storeRef.current.initialize();
-  }, [tableName, columns, pageSize, trailingQuery]);
+    // Recreate store if props change
+    if (
+      storeRef.current.getState().hasInitialFetch &&
+      (props.tableName !== props.tableName ||
+        props.columns !== props.columns ||
+        props.pageSize !== props.pageSize)
+    ) {
+      storeRef.current = createStore<TData, T>(props);
+    }
+
+    if (!state.hasInitialFetch && typeof window !== "undefined") {
+      storeRef.current.initialize();
+    }
+  }, [props.tableName, props.columns, props.pageSize, state.hasInitialFetch]);
 
   return {
     data: state.data,

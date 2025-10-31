@@ -49,6 +49,7 @@ export function JobsPageFilters({
       industry: parseAsString,
       company: parseAsString,
       seniority: parseAsString,
+      page: parseAsString,
     },
     {
       shallow: false, // Notify server
@@ -60,14 +61,14 @@ export function JobsPageFilters({
 
   const updateFilter = (key: keyof typeof filters, value: string | null) => {
     if (value && value !== "all") {
-      setFilters({ [key]: value });
+      setFilters({ [key]: value, page: null }); // Reset to page 1 when filter changes
     } else {
-      setFilters({ [key]: null });
+      setFilters({ [key]: null, page: null });
     }
   };
 
   const removeFilter = (key: keyof typeof filters) => {
-    setFilters({ [key]: null });
+    setFilters({ [key]: null, page: null }); // Reset to page 1 when removing filter
   };
 
   const resetAllFilters = () => {
@@ -76,6 +77,7 @@ export function JobsPageFilters({
       industry: null,
       company: null,
       seniority: null,
+      page: null,
     });
   };
 

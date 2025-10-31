@@ -62,7 +62,26 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-4. Run the development server:
+4. Generate TypeScript types from your Supabase database:
+
+```bash
+# Install Supabase CLI as a dev dependency
+bun i supabase@">=1.8.1" --save-dev
+
+# Login with your Personal Access Token
+npx supabase login
+
+# Initialize Supabase project (first time only)
+npx supabase init
+
+# Generate types from your remote Supabase project
+npx supabase gen types typescript --project-id "$PROJECT_REF" --schema public > database.types.ts
+
+# OR for local development:
+npx supabase gen types typescript --local > database.types.ts
+```
+
+5. Run the development server:
 
 ```bash
 bun dev
@@ -70,7 +89,7 @@ bun dev
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+6. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## 📁 Project Structure
 
