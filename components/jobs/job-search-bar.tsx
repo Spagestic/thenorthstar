@@ -18,6 +18,14 @@ export function JobSearchBar() {
     })
   );
 
+  // Reset page when search changes
+  const [, setPage] = useQueryState("page");
+
+  const handleSearchChange = (value: string | null) => {
+    setSearch(value);
+    setPage(null); // Reset to page 1 when search changes
+  };
+
   return (
     <div className="relative">
       {isPending ? (
@@ -28,7 +36,7 @@ export function JobSearchBar() {
       <Input
         aria-label="Search job titles"
         className="pl-9"
-        onChange={(e) => setSearch(e.target.value || null)}
+        onChange={(e) => handleSearchChange(e.target.value || null)}
         placeholder="Search by role, company, or skills"
         value={search ?? ""}
       />
