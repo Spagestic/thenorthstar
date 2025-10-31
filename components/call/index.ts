@@ -3,3 +3,4 @@ export { CallStatus } from "./call-status";
 export { CallControls } from "./call-controls";
 export { JobHeader } from "./job-header";
 export { CallInterface } from "./call-interface";
+export { CallInterfaceSkeleton } from "./call-interface-skeleton";
