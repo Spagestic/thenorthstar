@@ -20,6 +20,8 @@ interface PageProps {
   searchParams: Promise<SearchParams>;
 }
 
+const PAGE_SIZE = 45;
+
 export default async function page({ searchParams }: PageProps) {
   // Parse search params using nuqs cache
   const params = await jobSearchParamsCache.parse(searchParams);
@@ -80,7 +82,6 @@ async function JobList() {
     jobSearchParamsCache.all();
 
   const supabase = await createClient();
-  const PAGE_SIZE = 9;
 
   // Calculate pagination range
   const from = (page - 1) * PAGE_SIZE;
@@ -142,7 +143,6 @@ async function JobPagination({ className }: { className?: string }) {
     jobSearchParamsCache.all();
 
   const supabase = await createClient();
-  const PAGE_SIZE = 9;
 
   let countQuery = supabase.from("job_positions").select(
     `
