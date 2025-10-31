@@ -4,7 +4,7 @@ import Header from "../Header";
 import { JobCard } from "@/components/jobs/job-card";
 import { JobCardSkeleton } from "@/components/jobs/job-card-skeleton";
 import { JobSearchBar } from "@/components/jobs/job-search-bar";
-import { JobsFilters } from "@/components/jobs/jobs-filters-wrapper";
+import { JobsFilters } from "@/components/jobs/jobs-filters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { jobSearchParamsCache } from "@/components/jobs/searchParams";
 import type { SearchParams } from "nuqs/server";
