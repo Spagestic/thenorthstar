@@ -10,38 +10,53 @@ export default async function page({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ industry?: string; company?: string; job?: string }>;
 }) {
-  const { id } = await params;
-  const jobId = id;
-  const { industry, company, job: jobTitle } = await searchParams;
-
   return (
     <div>
-      <Header
-        nav={
-          industry && company && jobTitle
-            ? [
-                {
-                  label: industry,
-                  href: `/dashboard?industry=${encodeURIComponent(industry)}`,
-                },
-                {
-                  label: company,
-                  href: `/dashboard?company=${encodeURIComponent(company)}`,
-                },
-                { label: jobTitle, href: `/job/${jobId}` },
-                { label: "Call" },
-              ]
-            : [{ label: "Call" }]
-        }
-      />
+      <Suspense fallback={<Header nav={[{ label: "Call" }]} />}>
+        <DynamicHeader searchParams={searchParams} params={params} />
+      </Suspense>
       <Suspense fallback={<CallInterfaceSkeleton />}>
-        <InterviewCall jobId={jobId} />
+        <InterviewCall params={params} />
       </Suspense>
     </div>
   );
 }
 
-async function InterviewCall({ jobId }: { jobId: string }) {
+async function DynamicHeader({
+  searchParams,
+  params,
+}: {
+  searchParams: Promise<{ industry?: string; company?: string; job?: string }>;
+  params: Promise<{ id: string }>;
+}) {
+  const { industry, company, job: jobTitle } = await searchParams;
+  const { id } = await params;
+
+  return (
+    <Header
+      nav={
+        industry && company && jobTitle
+          ? [
+              {
+                label: industry,
+                href: `/dashboard?industry=${encodeURIComponent(industry)}`,
+              },
+              {
+                label: company,
+                href: `/dashboard?company=${encodeURIComponent(company)}`,
+              },
+              { label: jobTitle, href: `/job/${id}` },
+              { label: "Call" },
+            ]
+          : [{ label: "Call" }]
+      }
+    />
+  );
+}
+
+async function InterviewCall({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const jobId = id;
   const supabase = await createClient();
 
   // Get the authenticated user
