@@ -3,8 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 
-export const experimental_ppr = true;
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
