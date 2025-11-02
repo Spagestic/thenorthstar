@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Download, Clock, Calendar } from "lucide-react";
 import { Message, MessageContent } from "@/components/ui/message";
 import { Orb } from "@/components/ui/orb";
@@ -24,6 +23,8 @@ type ConversationHistoryProps = {
   companyName?: string;
   industryName?: string;
   startedAt: string | null;
+  initialConversation: ConversationResponse["conversation"] | null;
+  initialError: string | null;
 };
 
 export function ConversationHistory({
@@ -32,44 +33,15 @@ export function ConversationHistory({
   companyName,
   industryName,
   startedAt,
+  initialConversation,
+  initialError,
 }: ConversationHistoryProps) {
-  const [conversation, setConversation] = useState<
-    ConversationResponse["conversation"] | null
-  >(null);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const conversation = initialConversation;
+  const error = initialError;
 
-  useEffect(() => {
-    async function fetchConversation() {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `/api/conversations?conversation_id=${conversationId}`
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to fetch conversation");
-        }
-
-        const data: ConversationResponse = await response.json();
-        setConversation(data.conversation);
-
-        // Set the audio URL immediately after loading conversation
-        const audioApiUrl = `/api/conversations/audio?conversation_id=${conversationId}`;
-        setAudioUrl(audioApiUrl);
-      } catch (err: any) {
-        console.error("Error fetching conversation:", err);
-        setError(err.message || "Failed to load conversation");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchConversation();
-  }, [conversationId]);
+  // Set the audio URL
+  const audioUrl = `/api/conversations/audio?conversation_id=${conversationId}`;
 
   const handleDownloadAudio = async () => {
     try {
@@ -108,29 +80,6 @@ export function ConversationHistory({
     const secs = seconds % 60;
     return `${mins}m ${secs}s`;
   };
-
-  if (loading) {
-    return (
-      <div className="container mx-auto p-6 max-w-5xl">
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-4 w-96 mt-2" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-20 w-full" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -257,7 +206,7 @@ export function ConversationHistory({
                       <p className="whitespace-pre-wrap">{message.message}</p>
                     </MessageContent>
                     {message.role === "agent" && (
-                      <Orb className="size-8 shrink-0" />
+                      <Orb className="size-8 shrink-0 border rounded-full" />
                     )}
                   </Message>
                 ))}
@@ -269,29 +218,6 @@ export function ConversationHistory({
             )}
           </CardContent>
         </Card>
-
-        {/* Analysis Card (if available) */}
-        {/* {conversation?.analysis?.evaluation_criteria_results && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Evaluation Results</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {Object.entries(
-                conversation.analysis.evaluation_criteria_results
-              ).map(([key, value]) => (
-                <div key={key} className="flex justify-between items-center">
-                  <span className="text-sm font-medium capitalize">
-                    {key.replace(/_/g, " ")}
-                  </span>
-                  <Badge>{String(value)}</Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )} */}
       </div>
     </AudioPlayerProvider>
   );
