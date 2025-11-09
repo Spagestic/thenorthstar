@@ -21,19 +21,19 @@ export default function Header() {
       {/* Navigation */}
       <nav className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center space-x-2">
         <Link
-          className="rounded-full px-3 py-2 font-light text-[#37322f] text-xs transition-all duration-200 hover:bg-amber-50 hover:text-gray-900"
+          className="rounded-full px-3 py-2 font-light text-secondary-foreground text-xs transition-all duration-200 hover:bg-secondary"
           href="#features"
         >
           Features
         </Link>
         <Link
-          className="rounded-full px-3 py-2 font-light text-[#37322f] text-xs transition-all duration-200 hover:bg-amber-50 hover:text-gray-900"
+          className="rounded-full px-3 py-2 font-light text-secondary-foreground text-xs transition-all duration-200 hover:bg-secondary"
           href="#pricing"
         >
           Pricing
         </Link>
         <Link
-          className="rounded-full px-3 py-2 font-light text-[#37322f] text-xs transition-all duration-200 hover:bg-amber-50 hover:text-gray-900"
+          className="rounded-full px-3 py-2 font-light text-secondary-foreground text-xs transition-all duration-200 hover:bg-secondary"
           href="#faqs"
         >
           FAQs
