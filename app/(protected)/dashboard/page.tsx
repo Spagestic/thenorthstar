@@ -31,7 +31,9 @@ export default function Page({ searchParams }: PageProps) {
         <div className="sticky top-0 z-10 bg-background border-b">
           <div className="p-4 pt-8 space-y-4">
             <div className="w-full">
-              <JobSearchBar />
+              <Suspense fallback={<Skeleton className="h-10 w-full" />}>
+                <JobSearchBar />
+              </Suspense>
             </div>
             <div className="w-full">
               <Suspense
@@ -77,8 +79,6 @@ async function JobList({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  "use cache";
-
   const resolvedParams = jobSearchParamsCache.parse(await searchParams);
   const { search, industry, company, seniority, page } = resolvedParams;
 
@@ -146,7 +146,7 @@ async function JobPagination({
   className?: string;
   searchParams: Promise<SearchParams>;
 }) {
-  "use cache";
+
 
   const resolvedParams = jobSearchParamsCache.parse(await searchParams);
   const { search, industry, company, seniority, page } = resolvedParams;
