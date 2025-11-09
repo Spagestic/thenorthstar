@@ -112,7 +112,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
               )}
             </div>
             <div>
-              <CardTitle className="text-lg transition-colors group-hover:text-primary">
+              <CardTitle className="text-lg transition-colors">
                 {job.title}
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground">
