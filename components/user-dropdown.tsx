@@ -26,10 +26,11 @@ export function UserDropdown({
   const router = useRouter();
   const { isMobile } = useSidebar();
 
-  const logout = () => {
+  const logout = async () => {
     const supabase = createClient();
-    supabase.auth.signOut();
+    await supabase.auth.signOut();
     router.push("/");
+    router.refresh();
   };
 
   return (
