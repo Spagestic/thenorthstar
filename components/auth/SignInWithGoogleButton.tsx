@@ -12,13 +12,13 @@ const SignInWithGoogleButton: React.FC<SignInWithGoogleButtonProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
 
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
+      const supabase = createClient();
       const redirectUrl = new URL(`${window.location.origin}/auth/oauth`);
       redirectUrl.searchParams.set("next", "/dashboard");
 
