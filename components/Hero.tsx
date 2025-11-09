@@ -9,7 +9,7 @@ export default function Hero() {
     )}`;
 
   return (
-    <div className="relative bg-[#030611]">
+    <div className="relative min-h-screen w-full overflow-hidden">
       {/* Header */}
       <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between py-4 px-6">
         {/* Logo */}
@@ -49,9 +49,9 @@ export default function Hero() {
 
         <AuthButton />
       </header>
-      {/* Hero Section */}
-      <div className="relative overflow-hidden bg-white/5 border-white/10 border w-full h-screen">
-        <div className="absolute inset-0 bg-linear-to-tr from-blue-500/10 via-transparent to-purple-500/10 pointer-events-none"></div>
+
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
         <Image
           src="/bg-1.png"
           alt="Hero Background"
@@ -62,8 +62,12 @@ export default function Hero() {
           placeholder="blur"
           blurDataURL={rgbDataURL(25, 25, 112)}
         />
-        <div className="absolute inset-0 bg-linear-to-t from-gray-900/60 via-transparent to-transparent pointer-events-none"></div>
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/20"></div>
+      </div>
 
+      {/* Hero Section */}
+      <div className="relative z-10 flex flex-col min-h-screen">
         <div className="absolute inset-0 flex items-end">
           <div className="w-full sm:p-8 pt-6 pr-6 pb-6 pl-6">
             <div className="max-w-3xl">
