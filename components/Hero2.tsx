@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AuthButton } from "./auth-button";
 import { InteractiveHoverButton } from "./ui/interactive-hover-button";
+import { FlowButton } from "./ui/flow-button";
 
 export default function Hero2() {
   return (
@@ -76,9 +77,7 @@ export default function Hero2() {
           </p>
 
           <Link href="/dashboard">
-            <div className="relative justify-center">
-              <InteractiveHoverButton text="Get Started" className="w-48" />
-            </div>
+            <FlowButton text="Get Started"  />
           </Link>
         </div>
 
