@@ -27,6 +27,8 @@ export default function page({ params }: { params: Promise<{ id: string }> }) {
 }
 
 async function JobHeader({ params }: { params: Promise<{ id: string }> }) {
+  "use cache";
+
   const { id } = await params;
   const supabase = await createClient();
   const { data: job } = await supabase
@@ -57,6 +59,8 @@ async function JobHeader({ params }: { params: Promise<{ id: string }> }) {
 }
 
 async function JobDetails({ params }: { params: Promise<{ id: string }> }) {
+  "use cache";
+
   const { id } = await params;
   const supabase = await createClient();
   const { data: job } = await supabase

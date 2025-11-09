@@ -77,6 +77,8 @@ async function JobList({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
+  "use cache";
+
   const resolvedParams = jobSearchParamsCache.parse(await searchParams);
   const { search, industry, company, seniority, page } = resolvedParams;
 
@@ -144,6 +146,8 @@ async function JobPagination({
   className?: string;
   searchParams: Promise<SearchParams>;
 }) {
+  "use cache";
+
   const resolvedParams = jobSearchParamsCache.parse(await searchParams);
   const { search, industry, company, seniority, page } = resolvedParams;
 
