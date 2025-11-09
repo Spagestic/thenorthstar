@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AuthButton } from "./auth-button";
+import { InteractiveHoverButton } from "./ui/interactive-hover-button";
 
 export default function Hero2() {
   return (
@@ -75,24 +76,9 @@ export default function Hero2() {
           </p>
 
           <Link href="/dashboard">
-            <button className="bg-white text-black px-8 py-3 rounded-full font-medium hover:bg-gray-100 transition-colors flex items-center gap-2 text-lg">
-              Get Started
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                className="text-black"
-              >
-                <path
-                  d="M6 12L10 8L6 4"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+            <div className="relative justify-center">
+              <InteractiveHoverButton text="Get Started" className="w-48" />
+            </div>
           </Link>
         </div>
 

@@ -1,14 +1,12 @@
 import FAQ from "@/components/faq-section";
 import { Features } from "@/components/features";
-import Header from "@/components/header";
 import PricingSection from "@/components/pricing-section";
-import HeroSection from "@/components/hero-section";
-import Hero from "@/components/Hero";
+import Hero2 from "@/components/Hero2";
 
 export default function Home() {
   return (
     <div>
-      <Hero />
+      <Hero2 />
       <Features />
       <PricingSection />
       <FAQ />
