@@ -77,7 +77,7 @@ export default function Hero2() {
           </p>
 
           <Link href="/dashboard">
-            <FlowButton text="Get Started"  />
+            <FlowButton text="Get Started" />
           </Link>
         </div>
 
