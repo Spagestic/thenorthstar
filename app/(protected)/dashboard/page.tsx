@@ -22,10 +22,7 @@ interface PageProps {
 
 const PAGE_SIZE = 45;
 
-export default async function page({ searchParams }: PageProps) {
-  // Parse search params using nuqs cache
-  const params = await jobSearchParamsCache.parse(searchParams);
-
+export default function Page({ searchParams }: PageProps) {
   return (
     <div className="container mx-auto flex flex-col h-screen">
       <Header nav={["Jobs"]} />
@@ -58,17 +55,16 @@ export default async function page({ searchParams }: PageProps) {
         {/* Scrollable job list */}
         <div className="flex-1 overflow-y-auto p-4">
           <Suspense
-            key={JSON.stringify(params)}
             fallback={
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 <JobCardSkeleton count={9} />
               </div>
             }
           >
-            <JobList />
+            <JobList searchParams={searchParams} />
           </Suspense>
           <Suspense fallback={<div className="h-12" />}>
-            <JobPagination className="pt-8" />
+            <JobPagination className="pt-8" searchParams={searchParams} />
           </Suspense>
         </div>
       </div>
@@ -76,10 +72,13 @@ export default async function page({ searchParams }: PageProps) {
   );
 }
 
-async function JobList() {
-  // Access parsed search params from the cache
-  const { search, industry, company, seniority, page } =
-    jobSearchParamsCache.all();
+async function JobList({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const resolvedParams = jobSearchParamsCache.parse(await searchParams);
+  const { search, industry, company, seniority, page } = resolvedParams;
 
   const supabase = await createClient();
 
@@ -138,10 +137,15 @@ async function JobList() {
   );
 }
 
-async function JobPagination({ className }: { className?: string }) {
-  // Access parsed search params from the cache
-  const { search, industry, company, seniority, page } =
-    jobSearchParamsCache.all();
+async function JobPagination({
+  className,
+  searchParams,
+}: {
+  className?: string;
+  searchParams: Promise<SearchParams>;
+}) {
+  const resolvedParams = jobSearchParamsCache.parse(await searchParams);
+  const { search, industry, company, seniority, page } = resolvedParams;
 
   const supabase = await createClient();
 
