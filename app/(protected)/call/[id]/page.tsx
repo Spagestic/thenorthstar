@@ -3,7 +3,7 @@ import Header from "../../Header";
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
 
-export default async function page({
+export default function page({
   params,
   searchParams,
 }: {
