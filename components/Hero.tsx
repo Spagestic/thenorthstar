@@ -5,7 +5,7 @@ import { AuthButton } from "./auth-button";
 export default function Hero() {
   const rgbDataURL = (r: number, g: number, b: number): string =>
     `data:image/svg+xml;base64,${btoa(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="rgb(25,25,112)"/></svg>`
+      `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="rgb(3, 6, 12)"/></svg>`
     )}`;
 
   return (
