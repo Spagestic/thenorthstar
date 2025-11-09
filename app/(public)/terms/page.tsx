@@ -1,8 +1,10 @@
+import Header from "@/components/header";
 import React from "react";
 
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-background">
+      <Header />
       <main className="container mx-auto px-4 py-16 max-w-4xl">
         <h1 className="text-4xl font-bold mb-8">Terms of Service</h1>
         <p className="text-muted-foreground mb-8">
