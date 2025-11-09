@@ -15,14 +15,12 @@ interface CallStatusProps {
   agentName: string;
   agentState: AgentState;
   errorMessage: string | null;
-  isDataLoaded?: boolean;
 }
 
 export function CallStatus({
   agentName,
   agentState,
   errorMessage,
-  isDataLoaded = true,
 }: CallStatusProps) {
   const isTransitioning =
     agentState === "connecting" || agentState === "disconnecting";
@@ -31,17 +29,7 @@ export function CallStatus({
     <div className="flex flex-col items-center gap-2">
       <h2 className="text-xl font-semibold">{agentName}</h2>
       <AnimatePresence mode="wait">
-        {!isDataLoaded ? (
-          <motion.p
-            key="loading"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="text-muted-foreground text-sm"
-          >
-            <ShimmeringText text="Loading interview data..." />
-          </motion.p>
-        ) : errorMessage ? (
+        {errorMessage ? (
           <motion.p
             key="error"
             initial={{ opacity: 0, y: -10 }}

@@ -72,8 +72,6 @@ async function InterviewCall({ params }: { params: Promise<{ id: string }> }) {
     .eq("id", jobId)
     .single();
 
-  // Check if essential data is loaded
-  const isDataLoaded = !!(job?.title && job?.company?.name);
   return (
     <CallInterface
       userId={user?.id}
@@ -86,7 +84,6 @@ async function InterviewCall({ params }: { params: Promise<{ id: string }> }) {
       company_culture={job?.company?.culture || undefined}
       company_values={job?.company?.values as string[] | undefined}
       industry_name={job?.industry?.name || undefined}
-      isDataLoaded={isDataLoaded}
     />
   );
 }

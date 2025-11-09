@@ -14,14 +14,9 @@ type AgentState =
 interface CallControlsProps {
   agentState: AgentState;
   onCall: () => void;
-  isDataLoaded?: boolean;
 }
 
-export function CallControls({
-  agentState,
-  onCall,
-  isDataLoaded = true,
-}: CallControlsProps) {
+export function CallControls({ agentState, onCall }: CallControlsProps) {
   const isCallActive = agentState === "connected";
   const isTransitioning =
     agentState === "connecting" || agentState === "disconnecting";
@@ -29,7 +24,7 @@ export function CallControls({
   return (
     <Button
       onClick={onCall}
-      disabled={isTransitioning || !isDataLoaded}
+      disabled={isTransitioning}
       size="icon"
       variant={isCallActive ? "secondary" : "default"}
       className="h-12 w-12 rounded-full"
