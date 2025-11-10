@@ -218,7 +218,7 @@ export default function PricingSection() {
     >
       {/* Header Section */}
       <div className="flex items-center justify-center gap-6 self-stretch px-6 md:px-24">
-        <div className="flex w-full max-w-[586px] flex-col items-center justify-start gap-4 overflow-hidden rounded-lg px-6 pt-12">
+        <div className="flex w-full max-w-[586px] flex-col items-center justify-start gap-4 overflow-hidden rounded-lg px-6 pt-8">
           {/* Pricing Badge */}
           {/* <div className="flex items-center justify-start gap-[8px] overflow-hidden rounded-[90px] border border-[rgba(2,6,23,0.08)] bg-white px-[14px] py-[6px]">
             <div className="relative flex h-[14px] w-[14px] items-center justify-center overflow-hidden">
