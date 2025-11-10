@@ -66,7 +66,7 @@ export function Footer({
               {mainLinks.map((link, i) => (
                 <li className="mx-2 my-1 shrink-0" key={i as number}>
                   <a
-                    className="text-primary text-sm underline-offset-4 hover:underline"
+                    className="text-secondary-foreground text-sm underline-offset-4 hover:underline"
                     href={link.href}
                   >
                     {link.label}

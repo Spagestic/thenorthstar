@@ -1,6 +1,12 @@
-import Header from "@/components/header";
 import { Footer } from "@/components/footer-section";
-import { IconBrandGithub } from "@tabler/icons-react";
+import {
+  IconBrandGithub,
+  IconBrandX,
+  IconBrandLinkedin,
+  IconBrandInstagram,
+  IconBrandFacebook,
+  IconBrandYoutube,
+} from "@tabler/icons-react";
 import Image from "next/image";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -26,20 +32,38 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             width={40}
           />
         }
-        mainLinks={
-          [
-            // { href: "/products", label: "Products" },
-            // { href: "/about", label: "About" },
-            // { href: "/blog", label: "Blog" },
-            // { href: "/contact", label: "Contact" },
-          ]
-        }
+        mainLinks={[
+          { href: "#products", label: "Products" },
+          { href: "#about", label: "About" },
+          { href: "#blog", label: "Blog" },
+          { href: "#contact", label: "Contact" },
+        ]}
         socialLinks={[
-          //   {
-          //     icon: <Twitter className="h-5 w-5" />,
-          //     href: "https://twitter.com",
-          //     label: "Twitter",
-          //   },
+          {
+            icon: <IconBrandYoutube className="h-5 w-5" />,
+            href: "https://youtube.com/",
+            label: "YouTube",
+          },
+          {
+            icon: <IconBrandX className="h-5 w-5" />,
+            href: "https://x.com",
+            label: "X",
+          },
+          {
+            icon: <IconBrandInstagram className="h-5 w-5" />,
+            href: "https://instagram.com/",
+            label: "Instagram",
+          },
+          {
+            icon: <IconBrandFacebook className="h-5 w-5" />,
+            href: "https://facebook.com/",
+            label: "Facebook",
+          },
+          {
+            icon: <IconBrandLinkedin className="h-5 w-5" />,
+            href: "https://linkedin.com/company/",
+            label: "LinkedIn",
+          },
           {
             icon: <IconBrandGithub className="h-5 w-5" />,
             href: "https://github.com/Spagestic/thenorthstar",
