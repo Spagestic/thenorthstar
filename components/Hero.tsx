@@ -1,13 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AuthButton } from "./auth-button";
+import { rgbDataURL } from "@/lib/utils";
 
 export default function Hero() {
-  const rgbDataURL = (r: number, g: number, b: number): string =>
-    `data:image/svg+xml;base64,${btoa(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="rgb(3, 6, 12)"/></svg>`
-    )}`;
-
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
       {/* Header */}

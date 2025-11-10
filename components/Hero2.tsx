@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AuthButton } from "./auth-button";
-import { InteractiveHoverButton } from "./ui/interactive-hover-button";
 import { FlowButton } from "./ui/flow-button";
+import { rgbDataURL } from "@/lib/utils";
 
 export default function Hero2() {
   return (
@@ -16,6 +16,8 @@ export default function Hero2() {
           loading="lazy"
           width={1920}
           height={1080}
+          placeholder="blur"
+          blurDataURL={rgbDataURL(25, 25, 112)}
         />
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-black/20"></div>
