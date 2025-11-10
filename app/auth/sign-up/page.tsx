@@ -37,6 +37,7 @@ export default function SignUpPage() {
                 &ldquo;This platform has transformed how I prepare for
                 interviews and helped me land my dream job.&rdquo;
               </p>
+              <p>— John Due</p>
             </blockquote>
           </div>
         </div>

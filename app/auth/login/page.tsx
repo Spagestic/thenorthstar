@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/login-form";
+import { TypingAnimation } from "@/components/ui/typing-animation";
 
 export default function LoginPage() {
   return (
@@ -35,6 +36,7 @@ export default function LoginPage() {
                 &ldquo;This platform has transformed how I prepare for
                 interviews and helped me land my dream job.&rdquo;
               </p>
+              <p>— John Due</p>
             </blockquote>
           </div>
         </div>
