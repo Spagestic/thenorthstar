@@ -1,20 +1,25 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { FieldSeparator } from "@/components/ui/field";
-import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import SignInWithGoogleButton from "./SignInWithGoogleButton";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 
 export function LoginForm({
   className,
-}: React.ComponentPropsWithoutRef<"div">) {
+  ...props
+}: React.ComponentProps<"form">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +38,6 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
       router.push("/dashboard");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
@@ -44,67 +48,63 @@ export function LoginForm({
 
   return (
     <form
-      onSubmit={handleLogin}
       className={cn("flex flex-col gap-6", className)}
+      {...props}
+      onSubmit={handleLogin}
     >
-      <div className="flex flex-col items-center gap-2 text-center">
-        <Link href="/" className="flex flex-col items-center gap-2 font-medium">
-          <div className="flex items-center justify-center rounded-md aspect-square">
-            <Image
-              alt="Logo"
-              className="size-14 aspect-square"
-              height={64}
-              src={"/logo_light.png"}
-              width={64}
-            />
-          </div>
-          <span className="sr-only">NorthStar</span>
-        </Link>
-        <h1 className="text-xl font-bold">Welcome to NorthStar</h1>
-      </div>
-      <div className="flex flex-col gap-6">
-        <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
+      <FieldGroup>
+        <div className="flex flex-col items-center gap-1 text-center">
+          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <p className="text-muted-foreground text-sm text-balance">
+            Enter your email below to login to your account
+          </p>
+        </div>
+        <Field>
+          <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input
             id="email"
-            onChange={(e) => setEmail(e.target.value)}
+            type="email"
             placeholder="m@example.com"
             required
-            type="email"
             value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
-        </div>
-        <div className="grid gap-2">
+        </Field>
+        <Field>
           <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
+            <FieldLabel htmlFor="password">Password</FieldLabel>
             <Link
-              className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
               href="/auth/forgot-password"
+              className="ml-auto text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?
             </Link>
           </div>
           <Input
             id="password"
-            onChange={(e) => setPassword(e.target.value)}
-            required
             type="password"
+            required
             value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
-        </div>
+        </Field>
         {error && <p className="text-red-500 text-sm">{error}</p>}
-        <Button className="w-full" disabled={isLoading} type="submit">
-          {isLoading ? "Logging in..." : "Login"}
-        </Button>
+        <Field>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Logging in..." : "Login"}
+          </Button>
+        </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
-        <SignInWithGoogleButton />
-      </div>
-      <div className="text-center text-sm">
-        Don&apos;t have an account?{" "}
-        <Link className="underline underline-offset-4" href="/auth/sign-up">
-          Sign up
-        </Link>
-      </div>
+        <Field>
+          <SignInWithGoogleButton />
+          <FieldDescription className="text-center">
+            Don&apos;t have an account?{" "}
+            <Link href="/auth/sign-up" className="underline underline-offset-4">
+              Sign up
+            </Link>
+          </FieldDescription>
+        </Field>
+      </FieldGroup>
     </form>
   );
 }
