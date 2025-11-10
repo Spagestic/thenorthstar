@@ -5,7 +5,7 @@ import {
   IconBrandLinkedin,
   IconBrandInstagram,
   IconBrandFacebook,
-  IconBrandYoutube,
+  IconBrandDiscord,
 } from "@tabler/icons-react";
 import Image from "next/image";
 
@@ -40,9 +40,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ]}
         socialLinks={[
           {
-            icon: <IconBrandYoutube className="h-5 w-5" />,
-            href: "https://youtube.com/",
-            label: "YouTube",
+            icon: <IconBrandDiscord className="h-5 w-5" />,
+            href: "https://discord.com/",
+            label: "Discord",
           },
           {
             icon: <IconBrandX className="h-5 w-5" />,
