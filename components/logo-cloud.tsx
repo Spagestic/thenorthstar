@@ -56,7 +56,10 @@ export default function LogoCloud() {
             const logo = getCompanyLogo(name);
             if (!logo) return null;
             return (
-              <div className="relative h-18 w-18 overflow-hidden rounded-md border bg-accent/20 aspect-square p-8 mr-8">
+              <div
+                key={name}
+                className="relative h-18 w-18 overflow-hidden rounded-md border bg-accent/20 aspect-square p-8 mr-8"
+              >
                 <Image
                   alt={`${name || "Company"} logo`}
                   className="h-full w-full object-contain"
@@ -72,7 +75,10 @@ export default function LogoCloud() {
             const logo = getCompanyLogo(name);
             if (!logo) return null;
             return (
-              <div className="relative  h-18 w-18 overflow-hidden rounded-md border bg-accent/20 aspect-square p-8 mr-8">
+              <div
+                key={name}
+                className="relative  h-18 w-18 overflow-hidden rounded-md border bg-accent/20 aspect-square p-8 mr-8"
+              >
                 <Image
                   alt={`${name || "Company"} logo`}
                   className="h-full w-full object-contain"
