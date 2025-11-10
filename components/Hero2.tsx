@@ -17,7 +17,7 @@ export default function Hero2() {
           width={1920}
           height={1080}
           placeholder="blur"
-          blurDataURL={rgbDataURL(25, 25, 112)}
+          blurDataURL={rgbDataURL(0, 0, 0)}
         />
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-black/20"></div>
