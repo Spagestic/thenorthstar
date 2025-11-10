@@ -1,4 +1,6 @@
-# 🌟 NorthStar
+# NorthStar
+
+[![NorthStar Thumbnail](./public/hero.png)](https://thenorthstar.vercel.app/)
 
 **NorthStar** is a GenAI role-play platform that simulates voice-based interviews and delivers targeted, actionable feedback personalized for each user. We help university students practice effectively and improve faster through AI-powered interview simulations.
 
