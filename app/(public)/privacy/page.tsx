@@ -253,8 +253,7 @@ export default function PrivacyPolicy() {
               </li>
             </ul>
             <p className="mb-4">
-              To exercise these rights, please contact us at
-              privacy@northstar.com
+              To exercise these rights, please contact us at privacy@ovoxa.com
             </p>
           </section>
 
@@ -345,8 +344,8 @@ export default function PrivacyPolicy() {
               If you have questions, concerns, or requests regarding this
               Privacy Policy or our data practices, please contact us:
             </p>
-            <p className="mb-2">Email: privacy@northstar.com</p>
-            <p className="mb-2">Data Protection Officer: dpo@northstar.com</p>
+            <p className="mb-2">Email: privacy@ovoxa.com</p>
+            <p className="mb-2">Data Protection Officer: dpo@ovoxa.com</p>
             <p>Address: [Your Company Address]</p>
           </section> */}
 

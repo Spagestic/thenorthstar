@@ -185,11 +185,11 @@ export default function TermsOfService() {
               9. Limitation of Liability
             </h2>
             <p className="mb-4">
-              TO THE MAXIMUM EXTENT PERMITTED BY LAW, NORTHSTAR SHALL NOT BE
-              LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR
-              PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER
-              INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE,
-              GOODWILL, OR OTHER INTANGIBLE LOSSES.
+              TO THE MAXIMUM EXTENT PERMITTED BY LAW, OVOXA SHALL NOT BE LIABLE
+              FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE
+              DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED
+              DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR
+              OTHER INTANGIBLE LOSSES.
             </p>
           </section>
 
@@ -232,7 +232,7 @@ export default function TermsOfService() {
               If you have any questions about these Terms of Service, please
               contact us at:
             </p>
-            <p className="mb-2">Email: legal@northstar.com</p>
+            <p className="mb-2">Email: legal@ovoxa.com</p>
             <p>Address: [Your Company Address]</p>
           </section> */}
         </div>
