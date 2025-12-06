@@ -6,8 +6,8 @@ export default function StatsSection() {
           <div>
             <p className="text-accent-foreground text-sm">
               Join thousands of candidates who have successfully landed their
-              dream roles after practicing with NorthStar's comprehensive
-              interview preparation platform.
+              dream roles after practicing with Ovoxa's comprehensive interview
+              preparation platform.
             </p>
           </div>
           <div>

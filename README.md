@@ -1,12 +1,12 @@
-# NorthStar
+# Ovoxa
 
-[![NorthStar Thumbnail](./public/hero.png)](https://thenorthstar.vercel.app/)
+[![Ovoxa Thumbnail](./public/hero.png)](https://ovoxa.vercel.app/)
 
-**NorthStar** is a GenAI role-play platform that simulates voice-based interviews and delivers targeted, actionable feedback personalized for each user. We help university students practice effectively and improve faster through AI-powered interview simulations.
+**Ovoxa** is a GenAI role-play platform that simulates voice-based interviews and delivers targeted, actionable feedback personalized for each user. We help university students practice effectively and improve faster through AI-powered interview simulations.
 
 ## 🎯 What We Do
 
-NorthStar curates company and role-specific question banks and analyzes both speech content and delivery to provide comprehensive feedback on:
+Ovoxa curates company and role-specific question banks and analyzes both speech content and delivery to provide comprehensive feedback on:
 
 - 🗣️ **Speech Content**: Relevance, structure, and completeness of answers
 - 🎤 **Speech Delivery**: Filler words, pauses, pace, and clarity
@@ -44,8 +44,8 @@ From software engineering roles at tech giants to consulting positions at top fi
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/Spagestic/thenorthstar.git
-cd thenorthstar
+git clone https://github.com/Spagestic/Ovoxa.git
+cd Ovoxa
 ```
 
 2. Install dependencies:
