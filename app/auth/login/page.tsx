@@ -26,7 +26,7 @@ export default function LoginPage() {
                 width={64}
               />
             </div>
-            NorthStar
+            Ovoxa
           </Link>
 
           {/* Testimonial with responsive text sizing */}
@@ -59,8 +59,8 @@ export default function LoginPage() {
                     width={64}
                   />
                 </div>
-                <span className="sr-only">NorthStar</span>
-                NorthStar
+                <span className="sr-only">Ovoxa</span>
+                Ovoxa
               </Link>
             </div>
 

@@ -36,7 +36,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   />
                 </div>
                 <div className="grid flex-1 text-left text-md leading-tight">
-                  <span className="truncate font-semibold">NorthStar</span>
+                  <span className="truncate font-semibold">Ovoxa</span>
                 </div>
               </Link>
             </SidebarMenuButton>
