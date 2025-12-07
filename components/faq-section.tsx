@@ -9,9 +9,9 @@ type FaqItem = {
 
 const faqData: FaqItem[] = [
   {
-    question: "What is Ovoxa and who is it for?",
+    question: "What is NorthStar and who is it for?",
     answer:
-      "Ovoxa is an AI-powered interview practice platform designed for university students preparing for job interviews. We simulate realistic voice-based interviews and provide personalized feedback to help you improve your interview skills faster.",
+      "NorthStar is an AI-powered interview practice platform designed for university students preparing for job interviews. We simulate realistic voice-based interviews and provide personalized feedback to help you improve your interview skills faster.",
   },
   {
     question: "How does the voice-based interview simulation work?",

@@ -15,13 +15,13 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
             <p className="mb-4">
-              Welcome to Ovoxa. We respect your privacy and are committed to
+              Welcome to NorthStar. We respect your privacy and are committed to
               protecting your personal data. This Privacy Policy explains how we
               collect, use, disclose, and safeguard your information when you
               use our GenAI role-play platform for interview preparation.
             </p>
             <p className="mb-4">
-              Please read this Privacy Policy carefully. By using Ovoxa, you
+              Please read this Privacy Policy carefully. By using NorthStar, you
               agree to the collection and use of information in accordance with
               this policy.
             </p>
@@ -253,7 +253,8 @@ export default function PrivacyPolicy() {
               </li>
             </ul>
             <p className="mb-4">
-              To exercise these rights, please contact us at privacy@ovoxa.com
+              To exercise these rights, please contact us at
+              privacy@northstar.com
             </p>
           </section>
 
@@ -344,15 +345,15 @@ export default function PrivacyPolicy() {
               If you have questions, concerns, or requests regarding this
               Privacy Policy or our data practices, please contact us:
             </p>
-            <p className="mb-2">Email: privacy@ovoxa.com</p>
-            <p className="mb-2">Data Protection Officer: dpo@ovoxa.com</p>
+            <p className="mb-2">Email: privacy@northstar.com</p>
+            <p className="mb-2">Data Protection Officer: dpo@northstar.com</p>
             <p>Address: [Your Company Address]</p>
           </section> */}
 
           <section className="mt-8 p-8 bg-muted rounded-lg">
             <h2 className="text-xl font-semibold mb-2">Your Privacy Matters</h2>
             <p>
-              At Ovoxa, we are committed to transparency and protecting your
+              At NorthStar, we are committed to transparency and protecting your
               privacy. We will never sell your personal data, and we only use
               your information to provide and improve our interview preparation
               platform.

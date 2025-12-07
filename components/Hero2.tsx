@@ -73,7 +73,7 @@ export default function Hero2() {
           </h1>
 
           <p className="text-secondary text-base md:text-lg lg:text-xl max-w-3xl mb-8 opacity-90">
-            Ovoxa simulates realistic voice interviews and delivers
+            NorthStar simulates realistic voice interviews and delivers
             personalized, actionable feedback on content and delivery so you can
             get interview-ready faster.
           </p>

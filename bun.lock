@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "Ovoxa",
+      "name": "NorthStar",
       "dependencies": {
         "@elevenlabs/react": "^0.8.0",
         "@hookform/resolvers": "^5.2.2",

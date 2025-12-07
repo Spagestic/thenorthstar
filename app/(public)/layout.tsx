@@ -14,9 +14,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div>
       {children}
       <Footer
-        brandName="Ovoxa"
+        brandName="NorthStar"
         copyright={{
-          text: "© 2025 Ovoxa",
+          text: "© 2025 NorthStar",
           license: "All rights reserved",
         }}
         legalLinks={[
@@ -66,7 +66,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           },
           {
             icon: <IconBrandGithub className="h-5 w-5" />,
-            href: "https://github.com/Spagestic/Ovoxa",
+            href: "https://github.com/Spagestic/NorthStar",
             label: "GitHub",
           },
         ]}

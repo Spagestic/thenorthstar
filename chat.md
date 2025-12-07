@@ -3,10 +3,11 @@
 ## AI Interaction Overview
 
 <<<<<<< HEAD
-During the development of **Ovoxa**, our GenAI-powered interview platform, we leveraged multiple AI tools, including perplexity to fuel brainstorming, and GitHub Copilot (GPT-4.1, GPT-5 mini, Grok Code Fast 1, Claude Haiku 4.5, Claude Sonnet 4.5, Gemini 2.5 Pro) for code generation, particularly for modularizing large chunks of code, and customizing templates to our project.
+During the development of **NorthStar**, our GenAI-powered interview platform, we leveraged multiple AI tools, including perplexity to fuel brainstorming, and GitHub Copilot (GPT-4.1, GPT-5 mini, Grok Code Fast 1, Claude Haiku 4.5, Claude Sonnet 4.5, Gemini 2.5 Pro) for code generation, particularly for modularizing large chunks of code, and customizing templates to our project.
 =======
 During the development of **NorthStar**, our GenAI-powered interview platform, we leveraged multiple AI tools, including perplexity to fuel brainstorming, and GitHub Copilot (GPT-4.1, GPT-5 mini, Grok Code Fast 1, Claude Haiku 4.5, Claude Sonnet 4.5, Gemini 2.5 Pro) for code generation.
->>>>>>> parent of 2ec3f5f (added more prompts)
+
+> > > > > > > parent of 2ec3f5f (added more prompts)
 
 ## Prompting Details
 

@@ -71,7 +71,7 @@ export default function Hero() {
                 Master your Interview Skills
               </h2>
               <p className="sm:text-lg leading-relaxed text-lg font-normal text-white/90 font-geist mt-3 drop-shadow-sm">
-                Ovoxa simulates realistic voice interviews and delivers
+                NorthStar simulates realistic voice interviews and delivers
                 personalized, actionable feedback on content and delivery so you
                 can get interview-ready faster.
               </p>

@@ -27,7 +27,7 @@ export default function SignUpPage() {
                 width={64}
               />
             </div>
-            Ovoxa
+            NorthStar
           </Link>
 
           {/* Testimonial with responsive text sizing */}
@@ -60,8 +60,8 @@ export default function SignUpPage() {
                     width={64}
                   />
                 </div>
-                <span className="sr-only">Ovoxa</span>
-                Ovoxa
+                <span className="sr-only">NorthStar</span>
+                NorthStar
               </Link>
             </div>
 

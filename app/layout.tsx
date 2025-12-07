@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ovoxa",
+  title: "NorthStar",
   description: "AI-powered interview preparation platform",
 };
 
