@@ -2,7 +2,11 @@
 
 ## AI Interaction Overview
 
+<<<<<<< HEAD
 During the development of **Ovoxa**, our GenAI-powered interview platform, we leveraged multiple AI tools, including perplexity to fuel brainstorming, and GitHub Copilot (GPT-4.1, GPT-5 mini, Grok Code Fast 1, Claude Haiku 4.5, Claude Sonnet 4.5, Gemini 2.5 Pro) for code generation, particularly for modularizing large chunks of code, and customizing templates to our project.
+=======
+During the development of **NorthStar**, our GenAI-powered interview platform, we leveraged multiple AI tools, including perplexity to fuel brainstorming, and GitHub Copilot (GPT-4.1, GPT-5 mini, Grok Code Fast 1, Claude Haiku 4.5, Claude Sonnet 4.5, Gemini 2.5 Pro) for code generation.
+>>>>>>> parent of 2ec3f5f (added more prompts)
 
 ## Prompting Details
 
@@ -15,22 +19,6 @@ _"I have a business idea about creating an GenAI role-play platform for training
 
 **Summary of AI Response:**  
 The AI generated a comprehensive landing page structure with clear sections such as Hero, Problem, Features, How It Works, Pricing, Testimonials, FAQ, and CTA. We adapted some of this structure directly into our README.md and website content, ensuring clarity in our value proposition and technical details.
-
-### Prompt 2: Copywriting for UI Components
-
-**Prompt:**  
-_"Customize the content of the `Features`, `PricingSection`, and `FAQ` components to better align with our project, see the `Readme.md` file."_
-
-**Summary of AI Response:**  
-The AI provided tailored content for each of the specified components. This helped us quickly refine our UI text to resonate with potential users.
-
-### Prompt 3: Customizing Logo Cloud Component
-
-**Prompt:**  
-_"for `ScrollVelocityContainer` in logo-cloud.tsx, let's display the company logos using `getCompanyLogo` from `@/lib/company-logos.ts`"_
-
-**Summary of AI Response:**
-The AI provided a code snippet that integrated the `getCompanyLogo` function to render company logos within the `ScrollVelocityContainer`.
 
 ## Project Evolution
 
