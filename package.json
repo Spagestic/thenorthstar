@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@ai-sdk/mistral": "^3.0.2",
     "@elevenlabs/react": "^0.8.0",
     "@hookform/resolvers": "^5.2.2",
     "@mendable/firecrawl-js": "^4.10.0",
@@ -45,6 +46,7 @@
     "@supabase/supabase-js": "^2.75.1",
     "@tabler/icons-react": "^3.35.0",
     "@types/three": "^0.180.0",
+    "ai": "^6.0.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -66,7 +68,7 @@
     "three": "^0.180.0",
     "use-stick-to-bottom": "^1.1.1",
     "vaul": "^1.1.2",
-    "zod": "^4.1.12"
+    "zod": "^4.3.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
