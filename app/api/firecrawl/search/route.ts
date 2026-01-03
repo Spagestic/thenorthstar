@@ -1,4 +1,4 @@
-// app/api/search/route.ts
+// app/api/firecrawl/search/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { firecrawl } from "../firecrawlClient";
 

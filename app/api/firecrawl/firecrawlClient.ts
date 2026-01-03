@@ -1,4 +1,4 @@
-// app/api/firecrawlClient.ts
+// app/api/firecrawl/firecrawlClient.ts
 import FirecrawlApp from "@mendable/firecrawl-js";
 
 if (!process.env.FIRECRAWL_API_KEY) {
