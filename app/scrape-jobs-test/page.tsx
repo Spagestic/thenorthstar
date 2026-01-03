@@ -13,7 +13,7 @@ export default function ScrapeJobsTestPage() {
     setError("");
     setMarkdown("");
     try {
-      const res = await fetch("/api/scrape-jobs", {
+      const res = await fetch("/api/firecrawl/scrape", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),

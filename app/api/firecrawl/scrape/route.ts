@@ -1,13 +1,12 @@
+// app/api/scrape/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import FirecrawlApp from "@mendable/firecrawl-js";
-
-const app = new FirecrawlApp({ apiKey: process.env.FIRECRAWL_API_KEY });
+import { firecrawl } from "../firecrawlClient";
 
 export async function POST(request: NextRequest) {
     const { url } = await request.json();
 
     // Scrape with actions to handle dynamic content
-    const scrapeResult = await app.scrape(url, {
+    const scrapeResult = await firecrawl.scrape(url, {
         formats: ["markdown"],
         actions: [
             { type: "wait", milliseconds: 2000 },
