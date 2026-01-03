@@ -1,7 +1,7 @@
 // app/api/extract/details/route.ts
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { mistralModel } from "@/app/api/ai/mistralClient";
+import { mistral } from "@ai-sdk/mistral";
 import { NextRequest, NextResponse } from "next/server";
 
 // Define the schema you want for your UI
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const { markdown } = await req.json();
 
     const result = await generateText({
-        model: mistralModel,
+        model: mistral("mistral-large-latest"),
         output: Output.object({
             schema: JobPostSchema,
         }),

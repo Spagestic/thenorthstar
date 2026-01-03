@@ -1,8 +1,8 @@
 // app/api/extract/links/route.ts
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { mistralModel } from "@/app/api/ai/mistralClient";
 import { NextRequest, NextResponse } from "next/server";
+import { mistral } from "@ai-sdk/mistral";
 
 const JobLinksSchema = z.object({
     jobLinks: z
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const { markdown, baseUrl } = await req.json();
 
     const result = await generateText({
-        model: mistralModel,
+        model: mistral("mistral-large-latest"),
         output: Output.object({
             schema: JobLinksSchema,
         }),
