@@ -7,6 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+// Import the new component
+import { ScraperProgress, ScraperStep } from "@/components/scraper-progress";
+import { CircleX } from "lucide-react";
 
 // Define the shape of our extracted job data
 type Job = {
@@ -17,26 +20,63 @@ type Job = {
   applyLink?: string;
 };
 
+// Initial state for the UI steps
+const INITIAL_STEPS: ScraperStep[] = [
+  {
+    id: "1",
+    title: "Scrape Career Page",
+    description: "Fetching raw HTML and markdown from the main careers page.",
+    status: "pending",
+  },
+  {
+    id: "2",
+    title: "Identify Job Links",
+    description:
+      "Using AI to analyze the page and extract valid job posting URLs.",
+    status: "pending",
+  },
+  {
+    id: "3",
+    title: "Batch Scrape Details",
+    description: "Crawling individual job pages in parallel.",
+    status: "pending",
+  },
+  {
+    id: "4",
+    title: "Extract Structured Data",
+    description: "Converting raw job descriptions into structured JSON.",
+    status: "pending",
+  },
+];
+
 export default function ScrapeJobsTestPage() {
   const [url, setUrl] = useState("");
-  // We store the structured jobs here, not raw markdown
   const [jobs, setJobs] = useState<Job[]>([]);
-  // 'status' helps the user know what's happening during the multi-step process
-  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleScrape(e: React.FormEvent) {
-    e.preventDefault(); // CRITICAL: Prevents page reload on form submit
+  // Replaces the simple 'status' string with a structured array
+  const [steps, setSteps] = useState<ScraperStep[]>(INITIAL_STEPS);
 
+  // Helper to update a specific step's status and optional details
+  const updateStep = (id: string, updates: Partial<ScraperStep>) => {
+    setSteps((prev) =>
+      prev.map((step) => (step.id === id ? { ...step, ...updates } : step))
+    );
+  };
+
+  async function handleScrape(e: React.FormEvent) {
+    e.preventDefault();
     setLoading(true);
     setError("");
     setJobs([]);
-    setStatus("Starting scrape...");
+    // Reset steps to initial state
+    setSteps(INITIAL_STEPS);
 
     try {
-      // 1. Scrape Overview
-      setStatus("Step 1/4: Scraping main career page...");
+      // --- STEP 1: Scrape Overview ---
+      updateStep("1", { status: "in-progress" });
+
       const scrapeRes = await fetch("/api/firecrawl/scrape", {
         method: "POST",
         body: JSON.stringify({ url }),
@@ -45,8 +85,14 @@ export default function ScrapeJobsTestPage() {
       if (!scrapeRes.ok) throw new Error("Failed to fetch overview page");
       const { markdown } = await scrapeRes.json();
 
-      // 2. Extract Links with Mistral
-      setStatus("Step 2/4: AI is identifying job links...");
+      updateStep("1", {
+        status: "completed",
+        details: [`Extracted ${markdown.length} chars of markdown`],
+      });
+
+      // --- STEP 2: Extract Links ---
+      updateStep("2", { status: "in-progress" });
+
       const linksRes = await fetch("/api/ai/extract/links", {
         method: "POST",
         body: JSON.stringify({ markdown, baseUrl: url }),
@@ -56,16 +102,21 @@ export default function ScrapeJobsTestPage() {
       const { jobLinks } = await linksRes.json();
 
       if (!jobLinks || jobLinks.length === 0) {
-        throw new Error(
-          "No job links found. The page might be empty or require different selectors."
-        );
+        throw new Error("No job links found.");
       }
 
-      setStatus(
-        `Step 3/4: Found ${jobLinks.length} links. Batch scraping details...`
-      );
+      updateStep("2", {
+        status: "completed",
+        description: `Found ${jobLinks.length} potential job links.`,
+        details: jobLinks.slice(0, 3).map((l: string) => `Found: ${l}...`),
+      });
 
-      // 3. Batch Scrape Details
+      // --- STEP 3: Batch Scrape ---
+      updateStep("3", {
+        status: "in-progress",
+        description: `Crawling ${jobLinks.length} pages...`,
+      });
+
       const batchRes = await fetch("/api/firecrawl/batch-scrape", {
         method: "POST",
         body: JSON.stringify({ urls: jobLinks }),
@@ -73,16 +124,22 @@ export default function ScrapeJobsTestPage() {
 
       if (!batchRes.ok) throw new Error("Batch scrape failed");
       const batchData = await batchRes.json();
-      const jobDocs = batchData.data || []; // Firecrawl usually returns { success: true, data: [...] }
+      const jobDocs = batchData.data || [];
 
-      // 4. Extract Details (in parallel)
-      setStatus(
-        `Step 4/4: Extracting structured data from ${jobDocs.length} pages...`
-      );
+      updateStep("3", {
+        status: "completed",
+        details: [`Successfully crawled ${jobDocs.length} pages`],
+      });
+
+      // --- STEP 4: Extract Details ---
+      updateStep("4", {
+        status: "in-progress",
+        description: `Processing ${jobDocs.length} documents...`,
+      });
 
       const jobsData = await Promise.all(
         jobDocs.map(async (doc: any) => {
-          if (!doc.markdown) return null; // Skip if a specific page failed
+          if (!doc.markdown) return null;
           try {
             const detailRes = await fetch("/api/ai/extract/details", {
               method: "POST",
@@ -96,15 +153,27 @@ export default function ScrapeJobsTestPage() {
         })
       );
 
-      // Filter out any failed extractions (nulls)
       const validJobs = jobsData.filter((j): j is Job => j !== null);
-
       setJobs(validJobs);
-      setStatus("Done!");
+
+      updateStep("4", {
+        status: "completed",
+        description: `Extracted ${validJobs.length} valid jobs.`,
+        details: [`Final count: ${validJobs.length} jobs`],
+      });
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Something went wrong during the scrape.");
-      setStatus("");
+      const errorMessage = err.message || "Something went wrong.";
+      setError(errorMessage);
+
+      // Mark the currently running step as failed
+      setSteps((prev) =>
+        prev.map((s) =>
+          s.status === "in-progress"
+            ? { ...s, status: "failed", details: [errorMessage] }
+            : s
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -139,18 +208,16 @@ export default function ScrapeJobsTestPage() {
         </Button>
       </form>
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6 border border-red-200">
-          Error: {error}
-        </div>
+      {/* NEW: Replaces the simple status div */}
+      {(loading || steps.some((s) => s.status !== "pending")) && (
+        <ScraperProgress steps={steps} />
       )}
 
-      {/* Progress Status */}
-      {status && (
-        <div className="bg-blue-50 text-blue-700 p-3 rounded-md mb-6 text-sm font-medium flex items-center">
-          {loading && <span className="animate-spin mr-2">⏳</span>}
-          {status}
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6 border border-red-200 flex items-center">
+          <CircleX className="w-5 h-5 mr-2" />
+          {error}
         </div>
       )}
 
@@ -196,12 +263,6 @@ export default function ScrapeJobsTestPage() {
           </Card>
         ))}
       </div>
-
-      {!loading && jobs.length === 0 && !error && !status && (
-        <div className="text-center text-gray-400 py-12 border-2 border-dashed rounded-lg">
-          No jobs found yet. Enter a URL above to begin.
-        </div>
-      )}
     </div>
   );
 }
