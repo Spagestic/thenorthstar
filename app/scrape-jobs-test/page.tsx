@@ -5,11 +5,17 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 // Import the new component
 import { ScraperProgress, ScraperStep } from "@/components/scraper-progress";
-import { CircleX } from "lucide-react";
+import { CircleX, DollarSign } from "lucide-react";
 
 // Define the shape of our extracted job data
 type Job = {
@@ -226,7 +232,7 @@ export default function ScrapeJobsTestPage() {
       <div className="grid gap-4">
         {jobs.map((job, idx) => (
           <Card key={idx} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
+            <CardHeader className="">
               <div className="space-y-2">
                 <div className="flex justify-between items-start gap-4">
                   <CardTitle className="text-lg font-semibold flex-1">
@@ -242,8 +248,9 @@ export default function ScrapeJobsTestPage() {
                     ))}
                 </div>
                 {job.salary && (
-                  <div className="text-sm font-semibold text-green-600">
-                    💰 {job.salary}
+                  <div className="text-sm font-semibold text-green-600 flex items-center ">
+                    <DollarSign className="w-4 h-4 mr-1" />
+                    {job.salary}
                   </div>
                 )}
               </div>
@@ -268,7 +275,8 @@ export default function ScrapeJobsTestPage() {
                   </ul>
                 </div>
               )}
-
+            </CardContent>
+            <CardFooter>
               {job.applyLink && (
                 <Button className="w-full" size="sm" asChild>
                   <a
@@ -280,7 +288,7 @@ export default function ScrapeJobsTestPage() {
                   </a>
                 </Button>
               )}
-            </CardContent>
+            </CardFooter>
           </Card>
         ))}
       </div>
