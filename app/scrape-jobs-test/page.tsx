@@ -47,7 +47,7 @@ export default function ScrapeJobsTestPage() {
 
       // 2. Extract Links with Mistral
       setStatus("Step 2/4: AI is identifying job links...");
-      const linksRes = await fetch("/api/extract/links", {
+      const linksRes = await fetch("/api/ai/extract/links", {
         method: "POST",
         body: JSON.stringify({ markdown, baseUrl: url }),
       });
@@ -84,7 +84,7 @@ export default function ScrapeJobsTestPage() {
         jobDocs.map(async (doc: any) => {
           if (!doc.markdown) return null; // Skip if a specific page failed
           try {
-            const detailRes = await fetch("/api/extract/details", {
+            const detailRes = await fetch("/api/ai/extract/details", {
               method: "POST",
               body: JSON.stringify({ markdown: doc.markdown }),
             });

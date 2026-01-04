@@ -1,4 +1,4 @@
-// app/api/extract/links/route.ts
+// app/api/ai/extract/links/route.ts
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";

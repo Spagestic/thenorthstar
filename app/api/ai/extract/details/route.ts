@@ -1,4 +1,4 @@
-// app/api/extract/details/route.ts
+// app/api/ai/extract/details/route.ts
 import { generateText, Output } from "ai";
 import { z } from "zod";
 import { mistral } from "@ai-sdk/mistral";
