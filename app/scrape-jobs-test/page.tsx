@@ -14,9 +14,10 @@ import { CircleX } from "lucide-react";
 // Define the shape of our extracted job data
 type Job = {
   title: string;
-  location: string;
+  locations: string[];
   salary?: string;
   description: string;
+  requirements?: string[];
   applyLink?: string;
 };
 
@@ -224,41 +225,65 @@ export default function ScrapeJobsTestPage() {
       {/* Results Grid */}
       <div className="grid gap-4">
         {jobs.map((job, idx) => (
-          <Card key={idx}>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg font-semibold">
-                  {job.title}
-                </CardTitle>
-                {job.location && (
-                  <Badge variant="secondary" className="ml-2 shrink-0">
-                    {job.location}
-                  </Badge>
+          <Card key={idx} className="hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="space-y-2">
+                <div className="flex justify-between items-start gap-4">
+                  <CardTitle className="text-lg font-semibold flex-1">
+                    {job.title}
+                  </CardTitle>
+                </div>
+                <div className="flex flex-wrap gap-1 justify-start">
+                  {job.locations && job.locations.map((loc, idx) => (
+                    <Badge key={idx} variant="secondary" className="text-xs">
+                      📍 {loc}
+                    </Badge>
+                  ))}
+                </div>
+                {job.salary && (
+                  <div className="text-sm font-semibold text-green-600">
+                    💰 {job.salary}
+                  </div>
                 )}
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-sm text-gray-600 mb-4 line-clamp-3">
+            <CardContent className="space-y-4">
+              <div className="text-sm text-gray-600 line-clamp-3">
                 {job.description}
               </div>
 
-              <div className="flex items-center justify-between mt-4">
-                <span className="text-sm font-medium text-green-700">
-                  {job.salary ? `💰 ${job.salary}` : ""}
-                </span>
+              {job.requirements && job.requirements.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold mb-2 text-gray-700">
+                    Key Requirements:
+                  </h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    {job.requirements.slice(0, 3).map((req, idx) => (
+                      <li key={idx} className="flex items-start">
+                        <span className="mr-2">✓</span>
+                        <span className="line-clamp-1">{req}</span>
+                      </li>
+                    ))}
+                    {job.requirements.length > 3 && (
+                      <li className="text-gray-500 italic">
+                        +{job.requirements.length - 3} more
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
 
-                {job.applyLink && (
-                  <Button variant="outline" size="sm" asChild>
-                    <a
-                      href={job.applyLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Apply Now ↗
-                    </a>
-                  </Button>
-                )}
-              </div>
+              {job.applyLink && (
+                <Button className="w-full" size="sm" asChild>
+                  <a
+                    href={job.applyLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Apply Now ↗
+                  </a>
+                </Button>
+              )}
             </CardContent>
           </Card>
         ))}

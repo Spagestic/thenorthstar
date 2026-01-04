@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 // Define the schema you want for your UI
 const JobPostSchema = z.object({
     title: z.string(),
-    location: z.string(),
+    locations: z.array(z.string()).optional(),
     salary: z.string().optional(),
     description: z.string().describe("A brief summary of the role"),
     requirements: z.array(z.string()).optional(),
