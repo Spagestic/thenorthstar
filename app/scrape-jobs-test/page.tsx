@@ -234,11 +234,12 @@ export default function ScrapeJobsTestPage() {
                   </CardTitle>
                 </div>
                 <div className="flex flex-wrap gap-1 justify-start">
-                  {job.locations && job.locations.map((loc, idx) => (
-                    <Badge key={idx} variant="secondary" className="text-xs">
-                      📍 {loc}
-                    </Badge>
-                  ))}
+                  {job.locations &&
+                    job.locations.map((loc, idx) => (
+                      <Badge key={idx} variant="secondary" className="text-xs">
+                        {loc}
+                      </Badge>
+                    ))}
                 </div>
                 {job.salary && (
                   <div className="text-sm font-semibold text-green-600">
@@ -258,17 +259,12 @@ export default function ScrapeJobsTestPage() {
                     Key Requirements:
                   </h4>
                   <ul className="text-xs text-gray-600 space-y-1">
-                    {job.requirements.slice(0, 3).map((req, idx) => (
+                    {job.requirements.map((req, idx) => (
                       <li key={idx} className="flex items-start">
                         <span className="mr-2">✓</span>
                         <span className="line-clamp-1">{req}</span>
                       </li>
                     ))}
-                    {job.requirements.length > 3 && (
-                      <li className="text-gray-500 italic">
-                        +{job.requirements.length - 3} more
-                      </li>
-                    )}
                   </ul>
                 </div>
               )}
@@ -280,7 +276,7 @@ export default function ScrapeJobsTestPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Apply Now ↗
+                    Apply Now
                   </a>
                 </Button>
               )}
