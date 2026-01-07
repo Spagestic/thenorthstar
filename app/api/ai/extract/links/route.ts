@@ -24,7 +24,7 @@ The base URL is: ${baseUrl} (use this to resolve relative links if needed).
 
 MARKDOWN CONTENT:
 ${
-            markdown.substring(0, 30000)
+            markdown
         } // Truncate to avoid context limits if page is huge
 `,
     });
