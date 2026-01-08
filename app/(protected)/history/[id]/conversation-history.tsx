@@ -2,10 +2,27 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Clock, Calendar } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import {
+  Download,
+  Clock,
+  Calendar,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+  FileText,
+  Activity,
+} from "lucide-react";
 import { Message, MessageContent } from "@/components/ui/message";
 import { Orb } from "@/components/ui/orb";
 import {
@@ -16,7 +33,10 @@ import {
   AudioPlayerDuration,
   AudioPlayerSpeed,
 } from "@/components/ui/audio-player";
-import type { ConversationResponse } from "@/types/elevenlabs";
+import type {
+  ConversationResponse,
+  EvaluationCriterionResult,
+} from "@/types/elevenlabs";
 
 type ConversationHistoryProps = {
   conversationId: string;
@@ -43,6 +63,42 @@ export function ConversationHistory({
 
   // Set the audio URL
   const audioUrl = `/api/conversations/audio?conversation_id=${conversationId}`;
+
+  // Helper for Success/Failure Icons
+  const getStatusIcon = (result: "success" | "failure" | "unknown") => {
+    switch (result) {
+      case "success":
+        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      case "failure":
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      default:
+        return <HelpCircle className="h-5 w-5 text-yellow-500" />;
+    }
+  };
+
+  // Helper to format data collection values
+  const renderDataValue = (key: string, value: any) => {
+    if (typeof value === "boolean") {
+      return value ? (
+        <Badge className="bg-green-600">Yes</Badge>
+      ) : (
+        <Badge variant="destructive">No</Badge>
+      );
+    }
+    // Handle 1-10 scores specifically if key contains "score"
+    if (typeof value === "number" && key.includes("score")) {
+      return (
+        <div className="flex items-center gap-2 w-full max-w-[200px]">
+          <span className="font-bold text-lg">{value}/10</span>
+          <Progress value={value * 10} className="h-2" />
+        </div>
+      );
+    }
+    if (typeof value === "number") {
+      return <span className="font-mono">{value}</span>;
+    }
+    return <span className="text-sm">{String(value)}</span>;
+  };
 
   const handleDownloadAudio = async () => {
     try {
@@ -96,6 +152,10 @@ export function ConversationHistory({
       </div>
     );
   }
+
+  const analysis = conversation?.analysis;
+  const evaluationResults = analysis?.evaluation_criteria_results;
+  const dataCollection = analysis?.data_collection_results;
 
   return (
     <AudioPlayerProvider>
@@ -189,6 +249,80 @@ export function ConversationHistory({
             </div>
           </CardContent>
         </Card>
+
+        {/* Analysis & Feedback Section */}
+        {(evaluationResults || dataCollection) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left Col: Success Criteria */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5" />
+                  Success Criteria
+                </CardTitle>
+                <CardDescription>Automated pass/fail checks</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {evaluationResults ? (
+                  Object.entries(evaluationResults).map(([key, item]) => (
+                    <div
+                      key={key}
+                      className="flex flex-col space-y-1 pb-3 border-b last:border-0 last:pb-0"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium capitalize">
+                          {key.replace(/_/g, " ")}
+                        </span>
+                        {getStatusIcon(item.result)}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {item.rationale}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No evaluation criteria found.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Right Col: Data Collection */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Extracted Data
+                </CardTitle>
+                <CardDescription>
+                  Key details from the interview
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {dataCollection ? (
+                  Object.entries(dataCollection).map(([key, item]) => (
+                    <div
+                      key={key}
+                      className="flex flex-col space-y-1 pb-3 border-b last:border-0 last:pb-0"
+                    >
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                        {key.replace(/_/g, " ")}
+                      </span>
+                      <div className="mt-1">
+                        {renderDataValue(key, item.value)}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No data collected.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Transcript Card */}
         <Card>
