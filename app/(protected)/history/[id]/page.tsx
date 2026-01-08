@@ -1,3 +1,4 @@
+// @/app/(protected)/history/[id]/page.tsx
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import Header from "../../Header";

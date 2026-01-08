@@ -1,3 +1,4 @@
+// @/types/elevenlabs.ts
 export type ConversationMessage = {
   role: "user" | "agent";
   message: string;

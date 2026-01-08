@@ -1,3 +1,4 @@
+// app/api/conversations/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
@@ -10,14 +11,14 @@ export async function GET(request: NextRequest) {
   if (!ELEVENLABS_API_KEY) {
     return NextResponse.json(
       { error: "API key not configured" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
   if (!conversation_id) {
     return NextResponse.json(
       { error: "Missing conversation_id parameter" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -30,14 +31,14 @@ export async function GET(request: NextRequest) {
           "xi-api-key": ELEVENLABS_API_KEY,
         },
         cache: "no-store",
-      }
+      },
     );
 
     if (!transcriptRes.ok) {
       const errorData = await transcriptRes.json().catch(() => ({}));
       return NextResponse.json(
         { error: errorData.detail || "Failed to fetch conversation" },
-        { status: transcriptRes.status }
+        { status: transcriptRes.status },
       );
     }
 
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching conversation:", err);
     return NextResponse.json(
       { error: err?.message || "Unknown error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
