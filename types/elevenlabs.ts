@@ -2,7 +2,7 @@
 export type ConversationMessage = {
   role: "user" | "agent";
   message: string;
-  timestamp?: number;
+  time_in_call_secs?: number;
 };
 
 export type ConversationMetadata = {
@@ -10,16 +10,30 @@ export type ConversationMetadata = {
   agent_id: string;
   status: string;
   start_time_unix_secs?: number;
-  end_time_unix_secs?: number;
   duration_secs?: number;
+};
+
+export type EvaluationCriterionResult = {
+  criteria_id: string;
+  result: "success" | "failure" | "unknown";
+  rationale: string;
+};
+
+export type DataCollectionResult = {
+  data_collection_id: string;
+  value: any; // String, number, boolean, or array depending on config
+  json_schema?: any;
+};
+
+export type ConversationAnalysis = {
+  evaluation_criteria_results?: Record<string, EvaluationCriterionResult>;
+  data_collection_results?: Record<string, DataCollectionResult>;
 };
 
 export type ConversationTranscript = {
   transcript: ConversationMessage[];
   metadata: ConversationMetadata;
-  analysis?: {
-    evaluation_criteria_results?: Record<string, any>;
-  };
+  analysis?: ConversationAnalysis;
 };
 
 export type ConversationResponse = {
