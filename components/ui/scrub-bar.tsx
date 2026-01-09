@@ -1,51 +1,52 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   createContext,
   useCallback,
   useContext,
   useRef,
+  useState,
   type ComponentProps,
   type HTMLAttributes,
-} from "react"
+} from "react";
 
-import { cn } from "@/lib/utils"
-import { Progress } from "@/components/ui/progress"
+import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
 
 function formatTimestamp(value: number) {
-  if (!Number.isFinite(value) || value < 0) return "0:00"
-  const totalSeconds = Math.floor(value)
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`
+  if (!Number.isFinite(value) || value < 0) return "0:00";
+  const totalSeconds = Math.floor(value);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
 interface ScrubBarContextValue {
-  duration: number
-  value: number
-  progress: number
-  onScrub?: (time: number) => void
-  onScrubStart?: () => void
-  onScrubEnd?: () => void
+  duration: number;
+  value: number;
+  progress: number;
+  onScrub?: (time: number) => void;
+  onScrubStart?: () => void;
+  onScrubEnd?: () => void;
 }
 
-const ScrubBarContext = createContext<ScrubBarContextValue | null>(null)
+const ScrubBarContext = createContext<ScrubBarContextValue | null>(null);
 
 function useScrubBarContext() {
-  const context = useContext(ScrubBarContext)
+  const context = useContext(ScrubBarContext);
   if (!context) {
-    throw new Error("useScrubBarContext must be used within a ScrubBar.Root")
+    throw new Error("useScrubBarContext must be used within a ScrubBar.Root");
   }
-  return context
+  return context;
 }
 
 interface ScrubBarContainerProps extends HTMLAttributes<HTMLDivElement> {
-  duration: number
-  value: number
-  onScrub?: (time: number) => void
-  onScrubStart?: () => void
-  onScrubEnd?: () => void
+  duration: number;
+  value: number;
+  onScrub?: (time: number) => void;
+  onScrubStart?: () => void;
+  onScrubEnd?: () => void;
 }
 
 function ScrubBarContainer({
@@ -58,16 +59,38 @@ function ScrubBarContainer({
   className,
   ...props
 }: ScrubBarContainerProps) {
-  const progress = duration > 0 ? (value / duration) * 100 : 0
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragValue, setDragValue] = useState(0);
+
+  const handleScrubStart = useCallback(() => {
+    setIsDragging(true);
+    onScrubStart?.();
+  }, [onScrubStart]);
+
+  const handleScrub = useCallback(
+    (time: number) => {
+      setDragValue(time);
+      onScrub?.(time);
+    },
+    [onScrub]
+  );
+
+  const handleScrubEnd = useCallback(() => {
+    setIsDragging(false);
+    onScrubEnd?.();
+  }, [onScrubEnd]);
+
+  const effectiveValue = isDragging ? dragValue : value;
+  const progress = duration > 0 ? (effectiveValue / duration) * 100 : 0;
 
   const contextValue: ScrubBarContextValue = {
     duration,
-    value,
+    value: effectiveValue,
     progress,
-    onScrub,
-    onScrubStart,
-    onScrubEnd,
-  }
+    onScrub: handleScrub,
+    onScrubStart: handleScrubStart,
+    onScrubEnd: handleScrubEnd,
+  };
 
   return (
     <ScrubBarContext.Provider value={contextValue}>
@@ -79,59 +102,59 @@ function ScrubBarContainer({
         {children}
       </div>
     </ScrubBarContext.Provider>
-  )
+  );
 }
-ScrubBarContainer.displayName = "ScrubBarContainer"
+ScrubBarContainer.displayName = "ScrubBarContainer";
 
-type ScrubBarTrackProps = HTMLAttributes<HTMLDivElement>
+type ScrubBarTrackProps = HTMLAttributes<HTMLDivElement>;
 
 function ScrubBarTrack({ className, children, ...props }: ScrubBarTrackProps) {
-  const trackRef = useRef<HTMLDivElement | null>(null)
+  const trackRef = useRef<HTMLDivElement | null>(null);
   const { duration, onScrub, onScrubStart, onScrubEnd, value } =
-    useScrubBarContext()
+    useScrubBarContext();
 
   const getTimeFromClientX = useCallback(
     (clientX: number) => {
-      const track = trackRef.current
-      if (!track || !duration) return null
-      const rect = track.getBoundingClientRect()
-      const ratio = (clientX - rect.left) / rect.width
-      const clamped = Math.min(Math.max(ratio, 0), 1)
-      return duration * clamped
+      const track = trackRef.current;
+      if (!track || !duration) return null;
+      const rect = track.getBoundingClientRect();
+      const ratio = (clientX - rect.left) / rect.width;
+      const clamped = Math.min(Math.max(ratio, 0), 1);
+      return duration * clamped;
     },
     [duration]
-  )
+  );
 
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      if (!duration) return
-      event.preventDefault()
-      onScrubStart?.()
-      const time = getTimeFromClientX(event.clientX)
+      if (!duration) return;
+      event.preventDefault();
+      onScrubStart?.();
+      const time = getTimeFromClientX(event.clientX);
       if (time != null) {
-        onScrub?.(time)
+        onScrub?.(time);
       }
 
       const handleMove = (moveEvent: PointerEvent) => {
-        const nextTime = getTimeFromClientX(moveEvent.clientX)
+        const nextTime = getTimeFromClientX(moveEvent.clientX);
         if (nextTime != null) {
-          onScrub?.(nextTime)
+          onScrub?.(nextTime);
         }
-      }
+      };
 
       const handleUp = () => {
-        onScrubEnd?.()
-        window.removeEventListener("pointermove", handleMove)
-        window.removeEventListener("pointerup", handleUp)
-      }
+        onScrubEnd?.();
+        window.removeEventListener("pointermove", handleMove);
+        window.removeEventListener("pointerup", handleUp);
+      };
 
-      window.addEventListener("pointermove", handleMove)
-      window.addEventListener("pointerup", handleUp, { once: true })
+      window.addEventListener("pointermove", handleMove);
+      window.addEventListener("pointerup", handleUp, { once: true });
     },
     [duration, getTimeFromClientX, onScrub, onScrubEnd, onScrubStart]
-  )
+  );
 
-  const clampedValue = Math.min(Math.max(value, 0), duration || 0)
+  const clampedValue = Math.min(Math.max(value, 0), duration || 0);
 
   return (
     <div
@@ -150,14 +173,14 @@ function ScrubBarTrack({ className, children, ...props }: ScrubBarTrackProps) {
     >
       {children}
     </div>
-  )
+  );
 }
-ScrubBarTrack.displayName = "ScrubBarTrack"
+ScrubBarTrack.displayName = "ScrubBarTrack";
 
-type ScrubBarProgressProps = Omit<ComponentProps<typeof Progress>, "value">
+type ScrubBarProgressProps = Omit<ComponentProps<typeof Progress>, "value">;
 
 function ScrubBarProgress({ className, ...props }: ScrubBarProgressProps) {
-  const { progress } = useScrubBarContext()
+  const { progress } = useScrubBarContext();
 
   return (
     <Progress
@@ -166,14 +189,14 @@ function ScrubBarProgress({ className, ...props }: ScrubBarProgressProps) {
       className={cn("absolute h-full [&>div]:transition-none", className)}
       {...props}
     />
-  )
+  );
 }
-ScrubBarProgress.displayName = "ScrubBarProgress"
+ScrubBarProgress.displayName = "ScrubBarProgress";
 
-type ScrubBarThumbProps = HTMLAttributes<HTMLDivElement>
+type ScrubBarThumbProps = HTMLAttributes<HTMLDivElement>;
 
 function ScrubBarThumb({ className, children, ...props }: ScrubBarThumbProps) {
-  const { progress } = useScrubBarContext()
+  const { progress } = useScrubBarContext();
   return (
     <div
       data-slot="scrub-bar-thumb"
@@ -186,13 +209,13 @@ function ScrubBarThumb({ className, children, ...props }: ScrubBarThumbProps) {
     >
       {children}
     </div>
-  )
+  );
 }
-ScrubBarThumb.displayName = "ScrubBarThumb"
+ScrubBarThumb.displayName = "ScrubBarThumb";
 
 interface ScrubBarTimeLabelProps extends HTMLAttributes<HTMLSpanElement> {
-  time: number
-  format?: (time: number) => string
+  time: number;
+  format?: (time: number) => string;
 }
 
 function ScrubBarTimeLabel({
@@ -209,9 +232,9 @@ function ScrubBarTimeLabel({
     >
       {format(time)}
     </span>
-  )
+  );
 }
-ScrubBarTimeLabel.displayName = "ScrubBarTimeLabel"
+ScrubBarTimeLabel.displayName = "ScrubBarTimeLabel";
 
 export {
   ScrubBarContainer,
@@ -219,4 +242,4 @@ export {
   ScrubBarProgress,
   ScrubBarThumb,
   ScrubBarTimeLabel,
-}
+};
