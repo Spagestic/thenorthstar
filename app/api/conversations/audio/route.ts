@@ -1,3 +1,4 @@
+// app/api/conversations/audio/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
@@ -10,45 +11,49 @@ export async function GET(request: NextRequest) {
   if (!ELEVENLABS_API_KEY) {
     return NextResponse.json(
       { error: "API key not configured" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
   if (!conversation_id) {
     return NextResponse.json(
       { error: "Missing conversation_id parameter" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   try {
-    // Get audio file from ElevenLabs
     const audioRes = await fetch(
       `${ELEVENLABS_BASE_URL}/${conversation_id}/audio`,
       {
+        method: "GET",
         headers: {
           "xi-api-key": ELEVENLABS_API_KEY,
         },
         cache: "no-store",
-      }
+      },
     );
 
     if (!audioRes.ok) {
-      const errorData = await audioRes.json().catch(() => ({}));
+      let errorData: any = {};
+      try {
+        errorData = await audioRes.json();
+      } catch {
+        // ignore
+      }
       return NextResponse.json(
         { error: errorData.detail || "Failed to fetch audio" },
-        { status: audioRes.status }
+        { status: audioRes.status },
       );
     }
 
-    // Get the audio blob
-    const audioBlob = await audioRes.blob();
+    const arrayBuffer = await audioRes.arrayBuffer();
 
-    // Return the audio file directly
-    return new NextResponse(audioBlob, {
+    return new NextResponse(arrayBuffer, {
       headers: {
         "Content-Type": audioRes.headers.get("Content-Type") || "audio/mpeg",
-        "Content-Disposition": `inline; filename="conversation_${conversation_id}.mp3"`,
+        "Content-Disposition":
+          `inline; filename="conversation_${conversation_id}.mp3"`,
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
@@ -56,7 +61,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching audio:", err);
     return NextResponse.json(
       { error: err?.message || "Unknown error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
