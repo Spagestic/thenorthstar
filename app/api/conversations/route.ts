@@ -23,30 +23,27 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Get transcript & metadata
-    const transcriptRes = await fetch(
-      `${ELEVENLABS_BASE_URL}/${conversation_id}`,
-      {
-        headers: {
-          "xi-api-key": ELEVENLABS_API_KEY,
-        },
-        cache: "no-store",
+    const res = await fetch(`${ELEVENLABS_BASE_URL}/${conversation_id}`, {
+      method: "GET",
+      headers: {
+        "xi-api-key": ELEVENLABS_API_KEY,
+        "Content-Type": "application/json",
       },
-    );
+      cache: "no-store",
+    });
 
-    if (!transcriptRes.ok) {
-      const errorData = await transcriptRes.json().catch(() => ({}));
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
       return NextResponse.json(
         { error: errorData.detail || "Failed to fetch conversation" },
-        { status: transcriptRes.status },
+        { status: res.status },
       );
     }
 
-    const conversationData = await transcriptRes.json();
+    const conversationData = await res.json();
 
-    return NextResponse.json({
-      conversation: conversationData,
-    });
+    // This already contains agent_id, transcript, metadata, analysis, etc.
+    return NextResponse.json(conversationData);
   } catch (err: any) {
     console.error("Error fetching conversation:", err);
     return NextResponse.json(
