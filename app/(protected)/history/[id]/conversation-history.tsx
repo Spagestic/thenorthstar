@@ -138,21 +138,6 @@ export function ConversationHistory({
     return `${mins}m ${secs}s`;
   };
 
-  if (error) {
-    return (
-      <div className="container mx-auto p-6 max-w-5xl">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-destructive">Error</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">{error}</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const analysis = conversation?.analysis;
   const evaluationResults = analysis?.evaluation_criteria_results;
   const dataCollection = analysis?.data_collection_results;
