@@ -63,9 +63,10 @@ function ScrubBarContainer({
   const [dragValue, setDragValue] = useState(0);
 
   const handleScrubStart = useCallback(() => {
+    setDragValue(value);
     setIsDragging(true);
     onScrubStart?.();
-  }, [onScrubStart]);
+  }, [onScrubStart, value]);
 
   const handleScrub = useCallback(
     (time: number) => {
