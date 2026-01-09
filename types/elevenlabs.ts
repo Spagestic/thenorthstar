@@ -1,4 +1,5 @@
 // @/types/elevenlabs.ts
+
 export type ConversationMessage = {
   role: "user" | "agent";
   message: string;
@@ -6,11 +7,9 @@ export type ConversationMessage = {
 };
 
 export type ConversationMetadata = {
-  conversation_id: string;
-  agent_id: string;
-  status: string;
   start_time_unix_secs?: number;
-  duration_secs?: number;
+  call_duration_secs?: number;
+  // add other metadata fields as needed
 };
 
 export type EvaluationCriterionResult = {
@@ -21,24 +20,38 @@ export type EvaluationCriterionResult = {
 
 export type DataCollectionResult = {
   data_collection_id: string;
-  value: any; // String, number, boolean, or array depending on config
+  value: any;
   json_schema?: any;
 };
 
 export type ConversationAnalysis = {
+  call_successful?: "success" | "failure" | "unknown";
+  transcript_summary?: string;
   evaluation_criteria_results?: Record<string, EvaluationCriterionResult>;
   data_collection_results?: Record<string, DataCollectionResult>;
+  call_summary_title?: string | null;
 };
 
-export type ConversationTranscript = {
+export type Conversation = {
+  agent_id: string;
+  conversation_id: string;
+  status: "initiated" | "in-progress" | "processing" | "done" | "failed";
   transcript: ConversationMessage[];
   metadata: ConversationMetadata;
-  analysis?: ConversationAnalysis;
+  has_audio: boolean;
+  has_user_audio: boolean;
+  has_response_audio: boolean;
+  user_id: string | null;
+  branch_id: string | null;
+  version_id: string | null;
+  analysis: ConversationAnalysis | null;
+  // optionally add:
+  // conversation_initiation_client_data?: any;
+  // source_info?: any;
+  // dynamic_variables?: Record<string, string | number | boolean | null>;
 };
 
-export type ConversationResponse = {
-  conversation: ConversationTranscript;
-};
+export type ConversationResponse = Conversation;
 
 export type AudioResponse = {
   audio_url: string;

@@ -1,7 +1,7 @@
 // @/app/(protected)/history/[id]/actions.ts
 "use server";
 
-import type { ConversationResponse } from "@/types/elevenlabs";
+import type { Conversation } from "@/types/elevenlabs";
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 const ELEVENLABS_BASE_URL = "https://api.elevenlabs.io/v1/convai/conversations";
@@ -35,8 +35,7 @@ export async function getConversation(conversationId: string) {
         const conversationData = await transcriptRes.json();
 
         return {
-            conversation:
-                conversationData as ConversationResponse["conversation"],
+            conversation: conversationData as Conversation,
         };
     } catch (err: any) {
         console.error("Error fetching conversation:", err);
