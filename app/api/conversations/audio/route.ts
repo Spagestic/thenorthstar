@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(arrayBuffer, {
       headers: {
         "Content-Type": audioRes.headers.get("Content-Type") || "audio/mpeg",
+        "Content-Length": arrayBuffer.byteLength.toString(),
         "Content-Disposition":
           `inline; filename="conversation_${conversation_id}.mp3"`,
         "Cache-Control": "public, max-age=31536000, immutable",

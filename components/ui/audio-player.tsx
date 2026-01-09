@@ -13,7 +13,6 @@ import {
   useRef,
   useState,
 } from "react";
-import * as SliderPrimitive from "@radix-ui/react-slider";
 import { Check, PauseIcon, PlayIcon, Settings } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -24,6 +23,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  ScrubBarContainer,
+  ScrubBarProgress,
+  ScrubBarThumb,
+  ScrubBarTrack,
+} from "./scrub-bar";
 
 enum ReadyState {
   HAVE_NOTHING = 0,
@@ -47,7 +52,7 @@ function formatTime(seconds: number) {
     !Number.isFinite(seconds) ||
     Number.isNaN(seconds)
   ) {
-    return "--:--";
+    return "0:00";
   }
 
   const hrs = Math.floor(seconds / 3600);
@@ -279,7 +284,19 @@ export function AudioPlayerProvider<TData = unknown>({
   return (
     <AudioPlayerContext.Provider value={api as AudioPlayerApi<unknown>}>
       <AudioPlayerTimeContext.Provider value={time}>
-        <audio ref={audioRef} className="hidden" crossOrigin="anonymous" />
+        <audio
+          ref={audioRef}
+          className="hidden"
+          crossOrigin="anonymous"
+          preload="auto"
+          onLoadedMetadata={(e) => {
+            setDuration(e.currentTarget.duration);
+            setReadyState(e.currentTarget.readyState);
+          }}
+          onDurationChange={(e) => {
+            setDuration(e.currentTarget.duration);
+          }}
+        />
         {children}
       </AudioPlayerTimeContext.Provider>
     </AudioPlayerContext.Provider>
@@ -287,70 +304,64 @@ export function AudioPlayerProvider<TData = unknown>({
 }
 
 export const AudioPlayerProgress = ({
+  className,
   ...otherProps
 }: Omit<
-  ComponentProps<typeof SliderPrimitive.Root>,
-  "min" | "max" | "value"
+  ComponentProps<typeof ScrubBarContainer>,
+  "value" | "duration" | "onScrub"
 >) => {
   const player = useAudioPlayer();
   const time = useAudioPlayerTime();
   const wasPlayingRef = useRef(false);
 
-  const duration = Number.isFinite(player.duration ?? NaN)
-    ? (player.duration as number)
-    : 0;
-
-  const safeTime = duration > 0 ? Math.min(Math.max(time, 0), duration) : 0;
+  const duration =
+    player.duration !== undefined &&
+    player.duration !== null &&
+    Number.isFinite(player.duration)
+      ? player.duration
+      : 0;
 
   return (
-    <SliderPrimitive.Root
-      {...otherProps}
-      value={[safeTime]}
-      min={0}
-      max={duration}
-      step={otherProps.step || 0.25}
-      onPointerDown={(e) => {
-        wasPlayingRef.current = player.isPlaying;
-        player.pause();
-        otherProps.onPointerDown?.(e);
+    <ScrubBarContainer
+      value={time}
+      duration={duration}
+      onScrub={(value) => {
+        player.seek(value);
       }}
-      onPointerUp={(e) => {
+      onScrubStart={() => {
+        wasPlayingRef.current = player.isPlaying;
+        if (player.isPlaying) {
+          player.pause();
+        }
+      }}
+      onScrubEnd={() => {
         if (wasPlayingRef.current) {
           player.play();
         }
-        otherProps.onPointerUp?.(e);
       }}
       className={cn(
-        "group/player relative flex h-4 touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
-        otherProps.className
+        "group/player relative flex h-4 touch-none items-center select-none",
+        className
       )}
       onKeyDown={(e) => {
         if (e.key === " ") {
           e.preventDefault();
-          if (!player.isPlaying) {
-            player.play();
-          } else {
+          if (player.isPlaying) {
             player.pause();
+          } else {
+            player.play();
           }
         }
-        otherProps.onKeyDown?.(e);
+        otherProps.onKeyDown?.(e as any);
       }}
-      disabled={
-        player.duration === undefined ||
-        !Number.isFinite(player.duration) ||
-        Number.isNaN(player.duration)
-      }
+      tabIndex={0}
+      {...otherProps}
     >
-      <SliderPrimitive.Track className="bg-muted relative h-[4px] w-full grow overflow-hidden rounded-full">
-        <SliderPrimitive.Range className="bg-primary absolute h-full" />
-      </SliderPrimitive.Track>
-      <SliderPrimitive.Thumb
-        className="relative flex h-0 w-0 items-center justify-center opacity-0 group-hover/player:opacity-100 focus-visible:opacity-100 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
-        data-slot="slider-thumb"
-      >
-        <div className="bg-foreground absolute size-3 rounded-full" />
-      </SliderPrimitive.Thumb>
-    </SliderPrimitive.Root>
+      <ScrubBarTrack className="h-1 group-hover/player:h-2 transition-all duration-300">
+        <ScrubBarProgress className="bg-primary" />
+        <ScrubBarThumb className="opacity-0 group-hover/player:opacity-100 transition-opacity" />
+      </ScrubBarTrack>
+    </ScrubBarContainer>
   );
 };
 
@@ -374,19 +385,13 @@ export const AudioPlayerDuration = ({
   ...otherProps
 }: HTMLProps<HTMLSpanElement>) => {
   const player = useAudioPlayer();
-  const duration =
-    player.duration !== undefined &&
-    player.duration !== null &&
-    Number.isFinite(player.duration)
-      ? (player.duration as number)
-      : null;
 
   return (
     <span
       {...otherProps}
       className={cn("text-muted-foreground text-sm tabular-nums", className)}
     >
-      {duration !== null ? formatTime(duration) : "--:--"}
+      {formatTime(player.duration ?? 0)}
     </span>
   );
 };
