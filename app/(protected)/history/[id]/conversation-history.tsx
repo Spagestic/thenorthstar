@@ -8,11 +8,11 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import {
   Download,
   Clock,
@@ -33,10 +33,7 @@ import {
   AudioPlayerDuration,
   AudioPlayerSpeed,
 } from "@/components/ui/audio-player";
-import type {
-  ConversationResponse,
-  EvaluationCriterionResult,
-} from "@/types/elevenlabs";
+import type { Conversation } from "@/types/elevenlabs";
 
 type ConversationHistoryProps = {
   conversationId: string;
@@ -44,7 +41,7 @@ type ConversationHistoryProps = {
   companyName?: string;
   industryName?: string;
   startedAt: string | null;
-  initialConversation: ConversationResponse["conversation"] | null;
+  initialConversation: Conversation | null;
   initialError: string | null;
 };
 
@@ -141,7 +138,7 @@ export function ConversationHistory({
   const analysis = conversation?.analysis;
   const evaluationResults = analysis?.evaluation_criteria_results;
   const dataCollection = analysis?.data_collection_results;
-
+  const transcriptSummary = analysis?.transcript_summary;
   return (
     <AudioPlayerProvider>
       <div className="container mx-auto p-6 max-w-5xl space-y-6">
@@ -182,28 +179,25 @@ export function ConversationHistory({
                   <p className="text-sm font-medium">{formatDate(startedAt)}</p>
                 </div>
               </div>
-              {conversation?.metadata?.duration_secs && (
+              {conversation?.metadata?.call_duration_secs && (
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">Duration</p>
                     <p className="text-sm font-medium">
-                      {formatDuration(conversation.metadata.duration_secs)}
+                      {formatDuration(conversation.metadata.call_duration_secs)}
                     </p>
                   </div>
                 </div>
               )}
-              <div className="flex items-center gap-2">
-                <Badge
-                  variant={
-                    conversation?.metadata?.status === "done"
-                      ? "default"
-                      : "secondary"
-                  }
-                >
-                  {conversation?.metadata?.status || "Unknown"}
-                </Badge>
-              </div>
+
+              <Badge
+                variant={
+                  conversation?.status === "done" ? "default" : "secondary"
+                }
+              >
+                {conversation?.status || "Unknown"}
+              </Badge>
             </div>
 
             {/* Audio Player */}
@@ -233,6 +227,11 @@ export function ConversationHistory({
               </div>
             </div>
           </CardContent>
+          <CardFooter>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              {transcriptSummary}
+            </p>
+          </CardFooter>
         </Card>
 
         {/* Analysis & Feedback Section */}
