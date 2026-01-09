@@ -5,9 +5,8 @@ import { firecrawl } from "../firecrawlClient";
 export async function POST(request: NextRequest) {
     const { url } = await request.json();
 
-    // Scrape with actions to handle dynamic content
     const scrapeResult = await firecrawl.scrape(url, {
-        formats: ["markdown"],
+        formats: ["markdown", "branding"],
         actions: [
             { type: "wait", milliseconds: 2000 },
             { type: "scroll", direction: "down" },
@@ -18,5 +17,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
         markdown: scrapeResult.markdown,
+        metadata: scrapeResult.metadata, // Contains title, description, ogImage
+        branding: scrapeResult.branding, // Contains strict logo, colors, fonts
     });
 }

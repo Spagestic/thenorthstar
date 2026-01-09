@@ -90,11 +90,16 @@ export default function ScrapeJobsTestPage() {
       });
 
       if (!scrapeRes.ok) throw new Error("Failed to fetch overview page");
-      const { markdown } = await scrapeRes.json();
+
+      const { markdown, branding, metadata } = await scrapeRes.json();
+      const companyLogo = branding?.logo || metadata?.ogImage;
 
       updateStep("1", {
         status: "completed",
-        details: [`Extracted ${markdown.length} chars of markdown`],
+        details: [
+          `Extracted ${markdown.length} chars of markdown`,
+          `Logo found: ${companyLogo ? "Yes" : "No"}`,
+        ],
       });
 
       // --- STEP 2: Extract Links ---
