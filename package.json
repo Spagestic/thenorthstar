@@ -68,6 +68,7 @@
     "three": "^0.182.0",
     "use-stick-to-bottom": "^1.1.1",
     "vaul": "^1.1.2",
+    "wavesurfer.js": "^7.12.1",
     "zod": "^4.3.5"
   },
   "devDependencies": {
