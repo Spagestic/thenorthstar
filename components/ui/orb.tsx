@@ -220,15 +220,21 @@ function Scene({
   useEffect(() => {
     const canvas = gl.domElement;
     if (!canvas) return;
+
     const onContextLost = (event: Event) => {
       event.preventDefault();
       setTimeout(() => {
+        if (gl && !gl.getContext().isContextLost()) return;
         gl.forceContextRestore();
       }, 1);
     };
+
     canvas.addEventListener("webglcontextlost", onContextLost, false);
-    return () =>
-      canvas.removeEventListener("webglcontextlost", onContextLost, false);
+    return () => {
+      if (canvas) {
+        canvas.removeEventListener("webglcontextlost", onContextLost, false);
+      }
+    };
   }, [gl]);
 
   const uniforms = useMemo(() => {
