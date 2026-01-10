@@ -7,6 +7,7 @@ import { getConversation } from "./actions";
 import { AudioPlayerSection } from "./components/audio-player-section"; // Client
 import { AnalysisSection } from "./components/analysis-section"; // Server
 import { TranscriptSection } from "./components/transcript-section"; // Server
+import { ErrorToaster } from "./components/error-toaster";
 
 export default async function Page({
   params,
@@ -15,7 +16,6 @@ export default async function Page({
 }) {
   return (
     <Suspense fallback={<PageSkeleton />}>
-      {/* All dynamic logic is pushed down into this component */}
       <ConversationContainer params={params} />
     </Suspense>
   );
@@ -44,22 +44,19 @@ export async function ConversationContainer({
     .eq("conversation_id", id)
     .single();
 
-  if (!conversation) {
-    return (
-      <div>
-        <Header nav={[{ label: "History" }, { label: "Not Found" }]} />
-        <div className="flex h-[84vh] items-center justify-center">
-          <p>Conversation not found.</p>
-        </div>
-      </div>
-    );
-  }
+  const { conversation: elevenlabs, error } = await getConversation(id);
+  const finalError = !conversation ? "Conversation not found in database." : error;
 
-  const jobData = conversation.job as any;
-  const { conversation: elevenlabs } = await getConversation(id);
+  const jobData = (conversation?.job as any) || {
+    id: "unknown",
+    title: "Unknown Position",
+    company: { name: "Unknown Company" },
+    industry: { name: "Unknown Industry" },
+  };
 
   return (
     <div>
+      <ErrorToaster error={finalError} />
       <Header
         nav={[
           { label: "History", href: "/dashboard" },
@@ -70,7 +67,7 @@ export async function ConversationContainer({
       <div className="container mx-auto p-6 max-w-6xl space-y-6">
         <AudioPlayerSection
           conversationId={id}
-          startedAt={conversation.started_at}
+          startedAt={conversation?.started_at || new Date().toISOString()}
           jobTitle={jobData.title}
           companyName={jobData.company.name}
           industryName={jobData.industry.name}
