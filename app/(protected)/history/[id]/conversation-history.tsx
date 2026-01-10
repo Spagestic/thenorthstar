@@ -200,7 +200,6 @@ export function ConversationHistory({
               </Badge>
             </div>
 
-            {/* Audio Player */}
             <div className="bg-muted/50 rounded-lg p-4">
               <div className="flex items-center gap-4">
                 <AudioPlayerButton
@@ -237,7 +236,6 @@ export function ConversationHistory({
         {/* Analysis & Feedback Section */}
         {(evaluationResults || dataCollection) && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Col: Success Criteria */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -272,7 +270,6 @@ export function ConversationHistory({
               </CardContent>
             </Card>
 
-            {/* Right Col: Data Collection */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -308,7 +305,6 @@ export function ConversationHistory({
           </div>
         )}
 
-        {/* Transcript Card */}
         <Card>
           <CardHeader>
             <CardTitle>Conversation Transcript</CardTitle>
