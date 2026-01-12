@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@ai-sdk/mistral": "^3.0.5",
+    "@elevenlabs/elevenlabs-js": "^2.30.0",
     "@elevenlabs/react": "^0.12.3",
     "@hookform/resolvers": "^5.2.2",
     "@mendable/firecrawl-js": "^4.10.0",
