@@ -1,4 +1,4 @@
-import { CallInterface, CallInterfaceSkeleton } from "@/components/call";
+import { CallInterface, CallInterfaceSkeleton } from "./components/index";
 import Header from "../../Header";
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
