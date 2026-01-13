@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import Header from "../Header";
-import { JobCard } from "@/components/jobs/job-card";
-import { JobCardSkeleton } from "@/components/jobs/job-card-skeleton";
-import { JobSearchBar } from "@/components/jobs/job-search-bar";
-import { JobsFilters } from "@/components/jobs/jobs-filters";
+import { JobCard } from "./components/job-card";
+import { JobCardSkeleton } from "./components/job-card-skeleton";
+import { JobSearchBar } from "./components/job-search-bar";
+import { JobsFilters } from "./components/jobs-filters";
+import { jobSearchParamsCache } from "./components/searchParams";
 import { Skeleton } from "@/components/ui/skeleton";
-import { jobSearchParamsCache } from "@/components/jobs/searchParams";
 import type { SearchParams } from "nuqs/server";
 import {
   Pagination,
@@ -40,10 +40,10 @@ export default function Page({ searchParams }: PageProps) {
                 fallback={
                   <div className="space-y-4">
                     <div className="flex gap-3">
-                      <Skeleton className="h-10 w-[200px]" />
-                      <Skeleton className="h-10 w-[200px]" />
-                      <Skeleton className="h-10 w-[200px]" />
-                      <Skeleton className="h-10 w-[160px]" />
+                      <Skeleton className="h-10 w-50" />
+                      <Skeleton className="h-10 w-50" />
+                      <Skeleton className="h-10 w-50" />
+                      <Skeleton className="h-10 w-40" />
                     </div>
                   </div>
                 }
@@ -146,8 +146,6 @@ async function JobPagination({
   className?: string;
   searchParams: Promise<SearchParams>;
 }) {
-
-
   const resolvedParams = jobSearchParamsCache.parse(await searchParams);
   const { search, industry, company, seniority, page } = resolvedParams;
 
