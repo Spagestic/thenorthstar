@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Building2, CheckCircle2 } from "lucide-react";
 import { getCompanyLogo } from "@/lib/company-logos";
+import { JobDialog } from "./job-dialog";
 
 export interface JobCardData {
   id: string;
@@ -23,8 +26,8 @@ export interface JobCardData {
   company_id: string | null;
   industry_id: string | null;
   // Joined relations
-  companies: Array<{ name: string }>;
-  industry: Array<{ name: string }>;
+  companies: any;
+  industry: any;
 }
 
 interface JobCardProps {
@@ -86,6 +89,7 @@ const getSeniorityBadgeStyles = (level: string | null): string => {
 };
 
 export const JobCard: React.FC<JobCardProps> = ({ job }) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const requirements = normalizeList(job.typical_requirements);
   const responsibilities = normalizeList(job.typical_responsibilities);
   // @ts-ignore
@@ -95,95 +99,108 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
   const industryName = job.industry?.name || null;
 
   return (
-    <Card className="group flex h-full cursor-pointer flex-col transition-shadow hover:shadow-lg">
-      <CardHeader>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="relative h-16 w-16 overflow-hidden rounded-md border bg-accent/20 aspect-square p-8">
-              {companyLogo ? (
-                <Image
-                  alt={`${companyName || "Company"} logo`}
-                  className="h-full w-full object-contain"
-                  fill
-                  src={companyLogo}
-                />
-              ) : (
-                <Building2 className="h-6 w-6 text-muted-foreground" />
-              )}
+    <>
+      <JobDialog job={job} isOpen={isDialogOpen} onClose={setIsDialogOpen} />
+      <Card
+        className="group flex h-full cursor-pointer flex-col transition-shadow hover:shadow-lg"
+        onClick={() => setIsDialogOpen(true)}
+      >
+        <CardHeader>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="relative h-16 w-16 overflow-hidden rounded-md border bg-accent/20 aspect-square p-8">
+                {companyLogo ? (
+                  <Image
+                    alt={`${companyName || "Company"} logo`}
+                    className="h-full w-full object-contain"
+                    fill
+                    src={companyLogo}
+                  />
+                ) : (
+                  <Building2 className="h-6 w-6 text-muted-foreground" />
+                )}
+              </div>
+              <div>
+                <CardTitle className="text-lg transition-colors">
+                  {job.title}
+                </CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  {companyName || "Company coming soon"}
+                  {industryName ? ` • ${industryName}` : ""}
+                </CardDescription>
+                {job.category && (
+                  <p className="text-xs text-muted-foreground">
+                    {job.category}
+                  </p>
+                )}
+              </div>
             </div>
-            <div>
-              <CardTitle className="text-lg transition-colors">
-                {job.title}
-              </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                {companyName || "Company coming soon"}
-                {industryName ? ` • ${industryName}` : ""}
-              </CardDescription>
-              {job.category && (
-                <p className="text-xs text-muted-foreground">{job.category}</p>
-              )}
-            </div>
+            {job.seniority_level && (
+              <Badge
+                className={`${getSeniorityBadgeStyles(
+                  job.seniority_level
+                )} text-xs`}
+              >
+                {job.seniority_level}
+              </Badge>
+            )}
           </div>
-          {job.seniority_level && (
-            <Badge
-              className={`${getSeniorityBadgeStyles(
-                job.seniority_level
-              )} text-xs`}
-            >
-              {job.seniority_level}
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col space-y-4">
-        <div className="flex-1 space-y-4">
-          {requirements.length > 0 && (
-            <div>
-              <p className="mb-2 text-sm font-medium text-foreground">
-                Requirements
-              </p>
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                {requirements.slice(0, 3).map((item, index) => (
-                  <li
-                    className="flex items-start gap-2"
-                    key={`${job.id}-req-${index}`}
-                  >
-                    <CheckCircle2 className="h-3 w-3 shrink-0 self-center text-primary" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+        </CardHeader>
+        <CardContent className="flex flex-1 flex-col space-y-4">
+          <div className="flex-1 space-y-4">
+            {requirements.length > 0 && (
+              <div>
+                <p className="mb-2 text-sm font-medium text-foreground">
+                  Requirements
+                </p>
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  {requirements.slice(0, 3).map((item, index) => (
+                    <li
+                      className="flex items-start gap-2"
+                      key={`${job.id}-req-${index}`}
+                    >
+                      <CheckCircle2 className="h-3 w-3 shrink-0 self-center text-primary" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
-          {responsibilities.length > 0 && (
-            <div>
-              <p className="mb-2 text-sm font-medium text-foreground">
-                Responsibilities
-              </p>
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                {responsibilities.slice(0, 3).map((item, index) => (
-                  <li
-                    className="flex items-start gap-2 "
-                    key={`${job.id}-resp-${index}`}
-                  >
-                    <CheckCircle2 className="h-3 w-3 shrink-0 self-center text-primary" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+            {responsibilities.length > 0 && (
+              <div>
+                <p className="mb-2 text-sm font-medium text-foreground">
+                  Responsibilities
+                </p>
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  {responsibilities.slice(0, 3).map((item, index) => (
+                    <li
+                      className="flex items-start gap-2 "
+                      key={`${job.id}-resp-${index}`}
+                    >
+                      <CheckCircle2 className="h-3 w-3 shrink-0 self-center text-primary" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
 
-        <Button asChild className="w-full" size="sm">
-          <Link
-            href={`/call/${job.id}?industry=${industryName}&company=${companyName}&job=${job.title}`}
+          <Button
+            asChild
+            className="w-full"
+            size="sm"
+            onClick={(e) => e.stopPropagation()}
           >
-            Start Interview
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
+            <Link
+              href={`/call/${job.id}?industry=${industryName}&company=${companyName}&job=${job.title}`}
+            >
+              Start Interview
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+    </>
   );
 };

@@ -92,7 +92,7 @@ async function JobList({
     `
     id, title, category, seniority_level, typical_requirements, 
     typical_responsibilities, industry_id, company_id,
-    companies!inner (name),
+    companies!inner (*),
     industry!inner (name)
   `,
     { count: "exact" }
@@ -132,7 +132,6 @@ async function JobList({
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
       {data.map((job) => (
-        // @ts-expect-error Server Component
         <JobCard key={job.id} job={job} />
       ))}
     </div>
