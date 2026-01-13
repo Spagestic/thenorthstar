@@ -77,6 +77,6 @@ ${JSON.stringify(analysis ?? {}, null, 2)}
 
     return NextResponse.json({
         conversationId,
-        ...result.output, // typed FeedbackSchema
+        ...(result.output as z.infer<typeof FeedbackSchema>),
     });
 }
