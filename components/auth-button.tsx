@@ -27,7 +27,7 @@ async function AuthButtonContent() {
         userEmail={user.email}
         userImageUrl={user.picture}
         userName={
-          user.user_metadata.full_name || user.user_metadata.email || "User"
+          user.user_metadata?.full_name || user.user_metadata?.email || "User"
         }
       />
     </div>
