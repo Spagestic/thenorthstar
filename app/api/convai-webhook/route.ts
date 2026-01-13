@@ -16,8 +16,12 @@ async function saveFeedbackToDb(data: {
 
 async function constructWebhookEvent(req: NextRequest, secret?: string) {
     const body = await req.text();
-    const signatureHeader = req.headers.get("ElevenLabs-Signature");
-    return elevenlabs.webhooks.constructEvent(body, signatureHeader, secret);
+    const signatureHeader = req.headers.get("ElevenLabs-Signature") ?? "";
+    return elevenlabs.webhooks.constructEvent(
+        body,
+        signatureHeader,
+        secret ?? "",
+    );
 }
 
 export async function POST(req: NextRequest) {
