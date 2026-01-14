@@ -3,8 +3,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -13,9 +11,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-// Import the new component
 import { ScraperProgress, ScraperStep } from "@/components/scraper-progress";
 import { CircleX, DollarSign } from "lucide-react";
+import { LinkPreview } from "./link-preview";
 
 // Define the shape of our extracted job data
 type Job = {
@@ -201,19 +199,8 @@ export default function ScrapeJobsTestPage() {
       </div>
 
       <form onSubmit={handleScrape} className="flex gap-4 mb-8">
-        <div className="grid w-full items-center gap-1.5">
-          <Label htmlFor="url-input" className="sr-only">
-            URL
-          </Label>
-          <Input
-            id="url-input"
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://x.ai/careers/open-roles"
-            required
-            disabled={loading}
-          />
+        <div className="grid w-full items-center gap-1.5 flex-1">
+          <LinkPreview value={url} onChange={setUrl} />
         </div>
         <Button type="submit" disabled={loading}>
           {loading ? "Scraping..." : "Start Scrape"}
