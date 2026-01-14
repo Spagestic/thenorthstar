@@ -45,7 +45,9 @@ export async function ConversationContainer({
     .single();
 
   const { conversation: elevenlabs, error } = await getConversation(id);
-  const finalError = !conversation ? "Conversation not found in database." : error;
+  const finalError = !conversation
+    ? "Conversation not found in database."
+    : error;
 
   const jobData = (conversation?.job as any) || {
     id: "unknown",
@@ -76,7 +78,10 @@ export async function ConversationContainer({
           transcriptSummary={elevenlabs.analysis?.transcript_summary}
         />
         <AnalysisSection analysis={elevenlabs.analysis} />
-        <TranscriptSection transcript={elevenlabs.transcript} />
+        <TranscriptSection
+          transcript={elevenlabs.transcript}
+          conversationId={id}
+        />
       </div>
     </div>
   );
