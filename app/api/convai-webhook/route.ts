@@ -1,6 +1,7 @@
 // app/api/convai-webhook/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
+import { createClient } from "@/lib/supabase/server";
 
 const elevenlabs = new ElevenLabsClient({
     apiKey: process.env.ELEVENLABS_API_KEY,
@@ -11,7 +12,15 @@ async function saveFeedbackToDb(data: {
     conversationId: string;
     feedback: any;
 }) {
-    // TODO: implement persistence
+    const supabase = await createClient();
+    const { error } = await supabase
+        .from("voice_conversations")
+        .update({ feedback: data.feedback })
+        .eq("conversation_id", data.conversationId);
+
+    if (error) {
+        console.error("Error saving feedback to DB:", error);
+    }
 }
 
 async function constructWebhookEvent(req: NextRequest, secret?: string) {

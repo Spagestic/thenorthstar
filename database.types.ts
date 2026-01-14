@@ -423,6 +423,7 @@ export type Database = {
           agent_id: string | null;
           conversation_id: string;
           created_at: string;
+          feedback: Json | null;
           id: string;
           job_id: string;
           started_at: string | null;
@@ -432,6 +433,7 @@ export type Database = {
           agent_id?: string | null;
           conversation_id: string;
           created_at?: string;
+          feedback?: Json | null;
           id?: string;
           job_id: string;
           started_at?: string | null;
@@ -441,6 +443,7 @@ export type Database = {
           agent_id?: string | null;
           conversation_id?: string;
           created_at?: string;
+          feedback?: Json | null;
           id?: string;
           job_id?: string;
           started_at?: string | null;

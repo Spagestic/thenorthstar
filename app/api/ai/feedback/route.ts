@@ -40,6 +40,8 @@ const FeedbackSchema = z.object({
     summary: z.string().describe("Short overall summary in 2-3 sentences"),
 });
 
+export type Feedback = z.infer<typeof FeedbackSchema>;
+
 export async function POST(req: NextRequest) {
     const { transcript, analysis, conversationId } = await req.json();
 
