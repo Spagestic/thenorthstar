@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScraperProgress, ScraperStep } from "@/components/scraper-progress";
 import { CircleX, DollarSign } from "lucide-react";
-import { LinkPreview } from "./link-preview";
+import { UrlInput } from "./url-input";
 
 // Define the shape of our extracted job data
 type Job = {
@@ -200,7 +200,7 @@ export default function ScrapeJobsTestPage() {
 
       <form onSubmit={handleScrape} className="flex gap-4 mb-8">
         <div className="grid w-full items-center gap-1.5 flex-1">
-          <LinkPreview value={url} onChange={setUrl} />
+          <UrlInput value={url} onChange={setUrl} />
         </div>
         <Button type="submit" disabled={loading}>
           {loading ? "Scraping..." : "Start Scrape"}
