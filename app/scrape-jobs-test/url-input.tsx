@@ -28,8 +28,26 @@ export function UrlInput({
 
   const debouncedDomain = useDebounce(inputValue, 500);
 
-  const fetchLogoForDomain = async (domain: string) => {
-    const isDomainLike = /^[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(domain);
+  // Extract domain from a full URL or just use the input if it's already a domain
+  const extractDomain = (input: string): string | null => {
+    try {
+      // If input starts with protocol, use URL API
+      if (/^https?:\/\//i.test(input)) {
+        return new URL(input).hostname;
+      }
+      // If input is just domain/path, prepend protocol for parsing
+      if (/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(input)) {
+        return new URL(`https://${input}`).hostname;
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  };
+
+  const fetchLogoForDomain = async (input: string) => {
+    const domain = extractDomain(input);
+    const isDomainLike = !!domain;
     setIsValidDomain(isDomainLike);
 
     if (!isDomainLike) {
