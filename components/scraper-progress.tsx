@@ -61,7 +61,7 @@ export function ScraperProgress({ steps }: ScraperProgressProps) {
                       }`}
                     >
                       {/* Icon Section */}
-                      <div className="mr-3 flex-shrink-0">
+                      <div className="mr-3 shrink-0">
                         {isCompleted ? (
                           <CheckCircle2 className="h-5 w-5 text-green-500" />
                         ) : isFailed ? (
