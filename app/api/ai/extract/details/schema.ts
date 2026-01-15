@@ -3,34 +3,38 @@ import { z } from "zod";
 
 const MonetaryAmountSchema = z.object({
     // Remove default("USD") to avoid silent data corruption
-    currency: z.string().nullable().describe(
+    currency: z.string().nullable().optional().describe(
         "ISO 4217 currency code e.g. USD, EUR",
     ),
-    minValue: z.number().nullable(),
-    maxValue: z.number().nullable(),
+    minValue: z.number().nullable().optional(),
+    maxValue: z.number().nullable().optional(),
     // loose string allows for "Project", "Day", etc.
-    unitText: z.enum(["HOUR", "WEEK", "MONTH", "YEAR"]).or(z.string())
-        .optional(),
+    unitText: z.string().nullable().optional(),
 });
 
 export const JobPostingSchema = z.object({
     // Core Identity
-    title: z.string(),
-    companyName: z.string(),
+    title: z.string().nullable().optional().describe("The official job title"),
+    companyName: z.string().nullable().optional().describe(
+        "Name of the hiring organization",
+    ),
 
     // URL is critical for unique identification and re-scraping
-    url: z.string().describe("The canonical URL of the job post").optional(),
+    url: z.string().describe("The canonical URL of the job post").nullable()
+        .optional(),
 
     // Location & Work Mode
     jobLocation: z.object({
-        city: z.string().optional(),
-        state: z.string().optional(),
-        country: z.string().optional(),
-        rawAddress: z.string().optional(),
-    }).optional(),
+        city: z.string().nullable().optional(),
+        state: z.string().nullable().optional(),
+        country: z.string().nullable().optional(),
+        rawAddress: z.string().nullable().optional(),
+    }).nullable().optional(),
 
     // Replaces boolean isRemote. Matches real-world filtering needs better.
     workMode: z.enum(["REMOTE", "HYBRID", "ONSITE", "UNKNOWN"])
+        .nullable()
+        .optional()
         .default("UNKNOWN")
         .describe("Inferred work arrangement"),
 
@@ -43,23 +47,26 @@ export const JobPostingSchema = z.object({
         "INTERN",
         "VOLUNTEER",
         "OTHER",
-    ]).optional(),
+    ]).nullable().optional(),
 
     // Description & Requirements
     // CRITICAL: Always keep the raw HTML/markdown as a fallback
-    rawDescription: z.string().describe("Raw content of the job body"),
+    rawDescription: z.string().nullable().optional().describe(
+        "Raw content of the job body",
+    ),
 
     // Make extraction best-effort (optional)
-    responsibilities: z.array(z.string()).optional(),
-    qualifications: z.array(z.string()).optional(),
+    responsibilities: z.array(z.string()).nullable().optional(),
+    qualifications: z.array(z.string()).nullable().optional(),
 
     // Compensation
-    baseSalary: MonetaryAmountSchema.optional(),
+    baseSalary: MonetaryAmountSchema.nullable().optional(),
 
     // Meta
     datePosted: z.string().nullable().optional(), // Keep as string, normalize to Date object in DB layer
     validThrough: z.string().nullable().optional(),
-    directApplyUrl: z.string().url().nullable().optional(),
+    // Relaxed URL check because AI sometimes fails format
+    directApplyUrl: z.string().nullable().optional(),
 });
 
 export type JobPosting = z.infer<typeof JobPostingSchema>;
