@@ -15,3 +15,13 @@ export const rgbDataURL = (r: number, g: number, b: number): string =>
 // This check can be removed, it is just for tutorial purposes
 export const hasEnvVars = process.env.NEXT_PUBLIC_SUPABASE_URL &&
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+export function normalizeUrl(input: string): string {
+  if (!input) return "";
+  // If input starts with protocol, return as is
+  if (/^https?:\/\//i.test(input)) return input;
+  // If input looks like a domain, prepend protocol
+  if (/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(input)) return `https://${input}`;
+  // Otherwise, treat as path (not recommended, but fallback)
+  return `https://${input}`;
+}
