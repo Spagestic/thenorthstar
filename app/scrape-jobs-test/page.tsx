@@ -34,18 +34,12 @@ const INITIAL_STEPS: ScraperStep[] = [
   },
   {
     id: "3",
-    title: "Batch Scrape Details",
-    description: "Crawling individual job pages in parallel.",
+    title: "Extract Job Details",
+    description: "Crawling and analyzing individual postings in parallel.",
     status: "pending",
   },
   {
     id: "4",
-    title: "Extract Structured Data",
-    description: "Converting raw job descriptions into structured JSON.",
-    status: "pending",
-  },
-  {
-    id: "5",
     title: "Save to Database",
     description: "Upserting extracted jobs into Supabase.",
     status: "pending",
@@ -144,7 +138,33 @@ export default function ScrapeJobsTestPage() {
 
       updateStep("3", {
         status: "in-progress",
-        description: `Crawling ${jobLinks.length} pages...`,
+        description: `Fetching metadata & crawling ${jobLinks.length} pages...`,
+      });
+
+      // Prepare initial details with [Pending] status immediately
+      const currentDetails = jobLinks.map((link: string) => {
+        const name = link.split("/").pop() || "Job page";
+        return `${name} - [Pending...]`;
+      });
+      updateStep("3", { details: currentDetails.slice(0, 8) });
+
+      // Background: Fetch titles via link-preview to show real names while crawling
+      jobLinks.forEach((link: string, index: number) => {
+        fetch(`/api/link-preview?url=${encodeURIComponent(link)}`)
+          .then((r) => r.json())
+          .then((meta) => {
+            if (meta.title && currentDetails[index].includes("[Pending...]")) {
+              currentDetails[index] = `${meta.title} - [Pending...]`;
+              setSteps((prev) =>
+                prev.map((s) =>
+                  s.id === "3"
+                    ? { ...s, details: [...currentDetails.slice(0, 8)] }
+                    : s
+                )
+              );
+            }
+          })
+          .catch(() => {});
       });
 
       const batchRes = await fetch("/api/firecrawl/batch-scrape", {
@@ -157,39 +177,36 @@ export default function ScrapeJobsTestPage() {
       const jobDocs = batchData.data || [];
 
       updateStep("3", {
-        status: "completed",
-        details: [
-          `Crawled ${jobDocs.length} URLs`,
-          ...jobDocs
-            .slice(0, 3)
-            .map((doc: any) => `✓ ${doc.url?.split("/").pop() || "Job page"}`),
-        ],
-      });
-
-      updateStep("4", {
-        status: "in-progress",
-        description: `Processing ${jobDocs.length} documents...`,
+        description: `Analyzing ${jobDocs.length} job descriptions...`,
       });
 
       const jobsData = await Promise.all(
-        jobDocs.map(async (doc: any) => {
+        jobDocs.map(async (doc: any, index: number) => {
           if (!doc.markdown) return null;
           try {
             const detailRes = await fetch("/api/ai/extract/details", {
               method: "POST",
               body: JSON.stringify({
                 markdown: doc.markdown,
-                url: doc.url || doc.metadata?.sourceURL, // pass original URL
+                url: doc.url || doc.metadata?.sourceURL,
               }),
             });
 
-            if (!detailRes.ok) {
-              const errorText = await detailRes.text();
-              console.error(`API Error (${detailRes.status}):`, errorText);
-              return null;
-            }
+            if (!detailRes.ok) return null;
 
-            return await detailRes.json();
+            const job = await detailRes.json();
+
+            // Update UI live as each job finishes - use extracted title
+            currentDetails[index] = `${job.title || "Job"} - [Extracted]`;
+            setSteps((prev) =>
+              prev.map((s) =>
+                s.id === "3"
+                  ? { ...s, details: [...currentDetails.slice(0, 8)] }
+                  : s
+              )
+            );
+
+            return job;
           } catch (err) {
             console.error("Failed to extract single job:", err);
             return null;
@@ -200,43 +217,36 @@ export default function ScrapeJobsTestPage() {
       const validJobs = jobsData.filter((j): j is JobPosting => j !== null);
       setJobs(validJobs);
 
-      updateStep("4", {
+      updateStep("3", {
         status: "completed",
-        description: `Extracted ${validJobs.length} valid jobs.`,
+        description: `Successfully extracted ${validJobs.length} jobs.`,
         details: [
-          ...validJobs
-            .slice(0, 5)
-            .map(
-              (j) =>
-                `Job found: ${j.title} (${
-                  j.jobLocation?.rawAddress || j.workMode
-                })`
-            ),
-          validJobs.length > 5 ? `...and ${validJobs.length - 5} more` : null,
+          ...currentDetails.slice(0, 8),
+          validJobs.length > 8 ? `...and ${validJobs.length - 8} others` : null,
         ].filter(Boolean) as string[],
       });
 
-      // --- STEP 5: Save to DB ---
+      // --- STEP 4: Save to DB ---
       if (validJobs.length > 0) {
-        updateStep("5", { status: "in-progress" });
+        updateStep("4", { status: "in-progress" });
         const saveRes = await saveJobsToSupabase(validJobs, {
           replaceCompanyJobs: true, // Delete old jobs for this company first
         });
         if (saveRes.success) {
-          updateStep("5", {
+          updateStep("4", {
             status: "completed",
             details: [
               `Saved ${saveRes.count} jobs (Refreshed company listing)`,
             ],
           });
         } else {
-          updateStep("5", {
+          updateStep("4", {
             status: "failed",
             details: [saveRes.error || "Unknown error"],
           });
         }
       } else {
-        updateStep("5", {
+        updateStep("4", {
           status: "completed",
           details: ["No jobs to save"],
         });
