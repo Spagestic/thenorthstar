@@ -104,9 +104,13 @@ export default function ScrapeJobsTestPage() {
       updateStep("1", {
         status: "completed",
         details: [
-          `Extracted ${markdown.length} chars of markdown`,
-          `Logo found: ${companyLogo ? "Yes" : "No"}`,
-        ],
+          metadata?.title ? `Page Title: ${metadata.title}` : null,
+          metadata?.description
+            ? `Description: ${metadata.description.substring(0, 80)}...`
+            : null,
+          `Extracted ${markdown.length.toLocaleString()} chars`,
+          companyLogo ? `IMG:${companyLogo}` : "No logo found",
+        ].filter(Boolean) as string[],
       });
 
       updateStep("2", { status: "in-progress" });
@@ -125,8 +129,11 @@ export default function ScrapeJobsTestPage() {
 
       updateStep("2", {
         status: "completed",
-        description: `Found ${jobLinks.length} potential job links.`,
-        details: jobLinks.slice(0, 3).map((l: string) => `Found: ${l}...`),
+        description: `Found ${jobLinks.length} job links.`,
+        details: jobLinks.slice(0, 5).map((l: string) => {
+          const path = l.split("/").filter(Boolean).slice(-2).join("/");
+          return `Link: .../${path}`;
+        }),
       });
 
       updateStep("3", {
@@ -145,7 +152,12 @@ export default function ScrapeJobsTestPage() {
 
       updateStep("3", {
         status: "completed",
-        details: [`Successfully crawled ${jobDocs.length} pages`],
+        details: [
+          `Crawled ${jobDocs.length} URLs`,
+          ...jobDocs
+            .slice(0, 3)
+            .map((doc: any) => `✓ ${doc.url?.split("/").pop() || "Job page"}`),
+        ],
       });
 
       updateStep("4", {
@@ -185,7 +197,17 @@ export default function ScrapeJobsTestPage() {
       updateStep("4", {
         status: "completed",
         description: `Extracted ${validJobs.length} valid jobs.`,
-        details: [`Final count: ${validJobs.length} jobs`],
+        details: [
+          ...validJobs
+            .slice(0, 5)
+            .map(
+              (j) =>
+                `Job found: ${j.title} (${
+                  j.jobLocation?.rawAddress || j.workMode
+                })`
+            ),
+          validJobs.length > 5 ? `...and ${validJobs.length - 5} more` : null,
+        ].filter(Boolean) as string[],
       });
 
       // --- STEP 5: Save to DB ---

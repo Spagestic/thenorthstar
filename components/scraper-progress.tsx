@@ -121,15 +121,31 @@ export function ScraperProgress({ steps }: ScraperProgressProps) {
                             {/* Render extracted details or logs if available */}
                             {step.details && step.details.length > 0 && (
                               <div className="mt-2 space-y-1">
-                                {step.details.map((detail, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="flex items-start gap-2 text-xs font-mono bg-muted/50 p-1.5 rounded"
-                                  >
-                                    <span className="text-blue-500">→</span>
-                                    <span>{detail}</span>
-                                  </div>
-                                ))}
+                                {step.details.map((detail, idx) => {
+                                  // Simple rich content detection
+                                  const isImage = detail.startsWith("IMG:");
+                                  const content = isImage
+                                    ? detail.replace("IMG:", "")
+                                    : detail;
+
+                                  return (
+                                    <div
+                                      key={idx}
+                                      className="flex items-start gap-2 text-xs font-mono bg-muted/50 p-1.5 rounded"
+                                    >
+                                      <span className="text-blue-500">→</span>
+                                      {isImage ? (
+                                        <img
+                                          src={content}
+                                          alt="Extracted logo"
+                                          className="h-8 w-auto object-contain bg-white rounded p-0.5"
+                                        />
+                                      ) : (
+                                        <span>{content}</span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>
