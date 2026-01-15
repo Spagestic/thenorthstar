@@ -37,19 +37,17 @@ export function useJobScraper() {
             if (!scrapeRes.ok) throw new Error("Failed to fetch overview page");
 
             const { markdown, branding, metadata } = await scrapeRes.json();
-            const companyLogo = branding?.logo || metadata?.ogImage;
+            const companyLogo = branding?.logos?.[0] || null;
 
             updateStep("1", {
                 status: "completed",
                 details: [
-                    metadata?.title ? `Page Title: ${metadata.title}` : null,
+                    metadata?.title ? `${metadata.title}` : null,
                     metadata?.description
-                        ? `Description: ${
-                            metadata.description.substring(0, 80)
-                        }...`
+                        ? `${metadata.description.substring(0, 80)}...`
                         : null,
                     `Extracted ${markdown.length.toLocaleString()} chars`,
-                    companyLogo ? `IMG:${companyLogo}` : "No logo found",
+                    // companyLogo ? `IMG:${companyLogo}` : "No logo found",
                 ].filter(Boolean) as string[],
             });
 
