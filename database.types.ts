@@ -259,6 +259,69 @@ export type Database = {
           },
         ];
       };
+      job_postings: {
+        Row: {
+          company_name: string;
+          created_at: string | null;
+          description_html: string | null;
+          description_text: string | null;
+          direct_apply_url: string | null;
+          employment_type: string | null;
+          id: string;
+          location: Json | null;
+          posted_at: string | null;
+          salary_currency: string | null;
+          salary_max: number | null;
+          salary_min: number | null;
+          salary_period: string | null;
+          title: string;
+          updated_at: string | null;
+          url: string;
+          valid_through: string | null;
+          work_mode: string | null;
+        };
+        Insert: {
+          company_name: string;
+          created_at?: string | null;
+          description_html?: string | null;
+          description_text?: string | null;
+          direct_apply_url?: string | null;
+          employment_type?: string | null;
+          id?: string;
+          location?: Json | null;
+          posted_at?: string | null;
+          salary_currency?: string | null;
+          salary_max?: number | null;
+          salary_min?: number | null;
+          salary_period?: string | null;
+          title: string;
+          updated_at?: string | null;
+          url: string;
+          valid_through?: string | null;
+          work_mode?: string | null;
+        };
+        Update: {
+          company_name?: string;
+          created_at?: string | null;
+          description_html?: string | null;
+          description_text?: string | null;
+          direct_apply_url?: string | null;
+          employment_type?: string | null;
+          id?: string;
+          location?: Json | null;
+          posted_at?: string | null;
+          salary_currency?: string | null;
+          salary_max?: number | null;
+          salary_min?: number | null;
+          salary_period?: string | null;
+          title?: string;
+          updated_at?: string | null;
+          url?: string;
+          valid_through?: string | null;
+          work_mode?: string | null;
+        };
+        Relationships: [];
+      };
       licenses_certifications: {
         Row: {
           created_at: string | null;
