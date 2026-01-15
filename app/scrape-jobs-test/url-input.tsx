@@ -121,7 +121,7 @@ export function UrlInput({
           id={id}
           className="peer ps-22 pe-9 font-mono text-sm" // Monospace font helps with URL reading
           placeholder="x.ai/careers/open-roles"
-          type="url"
+          type="text"
           autoComplete="off" // Disable browser history autocomplete covering your custom UI
           spellCheck={false}
           value={inputValue}
