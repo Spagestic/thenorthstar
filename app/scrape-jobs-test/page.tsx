@@ -70,21 +70,32 @@ export default function ScrapeJobsTestPage() {
     );
   };
 
+  // Normalize the input so the backend always receives a valid full URL
+  function normalizeUrl(input: string): string {
+    if (!input) return "";
+    // If input starts with protocol, return as is
+    if (/^https?:\/\//i.test(input)) return input;
+    // If input looks like a domain, prepend protocol
+    if (/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(input)) return `https://${input}`;
+    // Otherwise, treat as path (not recommended, but fallback)
+    return `https://${input}`;
+  }
+
   async function handleScrape(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
     setJobs([]);
-    // Reset steps to initial state
     setSteps(INITIAL_STEPS);
 
+    const normalizedUrl = normalizeUrl(url);
+
     try {
-      // --- STEP 1: Scrape Overview ---
       updateStep("1", { status: "in-progress" });
 
       const scrapeRes = await fetch("/api/firecrawl/scrape", {
         method: "POST",
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: normalizedUrl }),
       });
 
       if (!scrapeRes.ok) throw new Error("Failed to fetch overview page");
@@ -100,12 +111,11 @@ export default function ScrapeJobsTestPage() {
         ],
       });
 
-      // --- STEP 2: Extract Links ---
       updateStep("2", { status: "in-progress" });
 
       const linksRes = await fetch("/api/ai/extract/links", {
         method: "POST",
-        body: JSON.stringify({ markdown, baseUrl: url }),
+        body: JSON.stringify({ markdown, baseUrl: normalizedUrl }),
       });
 
       if (!linksRes.ok) throw new Error("Failed to extract links");
@@ -121,7 +131,6 @@ export default function ScrapeJobsTestPage() {
         details: jobLinks.slice(0, 3).map((l: string) => `Found: ${l}...`),
       });
 
-      // --- STEP 3: Batch Scrape ---
       updateStep("3", {
         status: "in-progress",
         description: `Crawling ${jobLinks.length} pages...`,
@@ -141,7 +150,6 @@ export default function ScrapeJobsTestPage() {
         details: [`Successfully crawled ${jobDocs.length} pages`],
       });
 
-      // --- STEP 4: Extract Details ---
       updateStep("4", {
         status: "in-progress",
         description: `Processing ${jobDocs.length} documents...`,
@@ -176,7 +184,6 @@ export default function ScrapeJobsTestPage() {
       const errorMessage = err.message || "Something went wrong.";
       setError(errorMessage);
 
-      // Mark the currently running step as failed
       setSteps((prev) =>
         prev.map((s) =>
           s.status === "in-progress"
