@@ -19,7 +19,7 @@ export const JobPostingSchema = z.object({
     companyName: z.string(),
 
     // URL is critical for unique identification and re-scraping
-    url: z.url().describe("The canonical URL of the job post"),
+    url: z.string().describe("The canonical URL of the job post").optional(),
 
     // Location & Work Mode
     jobLocation: z.object({
@@ -57,9 +57,9 @@ export const JobPostingSchema = z.object({
     baseSalary: MonetaryAmountSchema.optional(),
 
     // Meta
-    datePosted: z.string().optional(), // Keep as string, normalize to Date object in DB layer
-    validThrough: z.string().optional(),
-    directApplyUrl: z.url().optional(),
+    datePosted: z.string().nullable().optional(), // Keep as string, normalize to Date object in DB layer
+    validThrough: z.string().nullable().optional(),
+    directApplyUrl: z.string().url().nullable().optional(),
 });
 
 export type JobPosting = z.infer<typeof JobPostingSchema>;

@@ -12,18 +12,10 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScraperProgress, ScraperStep } from "@/components/scraper-progress";
-import { CircleX, DollarSign } from "lucide-react";
+import { CircleX, DollarSign, MapPin } from "lucide-react";
 import { UrlInput } from "./url-input";
-
-// Define the shape of our extracted job data
-type Job = {
-  title: string;
-  locations: string[];
-  salary?: string;
-  description: string;
-  requirements?: string[];
-  applyLink?: string;
-};
+import { JobPosting } from "../api/ai/extract/details/schema";
+import { saveJobsToSupabase } from "../actions/save-jobs";
 
 // Initial state for the UI steps
 const INITIAL_STEPS: ScraperStep[] = [
@@ -52,11 +44,17 @@ const INITIAL_STEPS: ScraperStep[] = [
     description: "Converting raw job descriptions into structured JSON.",
     status: "pending",
   },
+  {
+    id: "5",
+    title: "Save to Database",
+    description: "Upserting extracted jobs into Supabase.",
+    status: "pending",
+  },
 ];
 
 export default function ScrapeJobsTestPage() {
   const [url, setUrl] = useState("");
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -161,8 +159,18 @@ export default function ScrapeJobsTestPage() {
           try {
             const detailRes = await fetch("/api/ai/extract/details", {
               method: "POST",
-              body: JSON.stringify({ markdown: doc.markdown }),
+              body: JSON.stringify({
+                markdown: doc.markdown,
+                url: doc.url || doc.metadata?.sourceURL, // pass original URL
+              }),
             });
+
+            if (!detailRes.ok) {
+              const errorText = await detailRes.text();
+              console.error(`API Error (${detailRes.status}):`, errorText);
+              return null;
+            }
+
             return await detailRes.json();
           } catch (err) {
             console.error("Failed to extract single job:", err);
@@ -171,7 +179,7 @@ export default function ScrapeJobsTestPage() {
         })
       );
 
-      const validJobs = jobsData.filter((j): j is Job => j !== null);
+      const validJobs = jobsData.filter((j): j is JobPosting => j !== null);
       setJobs(validJobs);
 
       updateStep("4", {
@@ -179,6 +187,28 @@ export default function ScrapeJobsTestPage() {
         description: `Extracted ${validJobs.length} valid jobs.`,
         details: [`Final count: ${validJobs.length} jobs`],
       });
+
+      // --- STEP 5: Save to DB ---
+      if (validJobs.length > 0) {
+        updateStep("5", { status: "in-progress" });
+        const saveRes = await saveJobsToSupabase(validJobs);
+        if (saveRes.success) {
+          updateStep("5", {
+            status: "completed",
+            details: [`Saved ${saveRes.count} jobs`],
+          });
+        } else {
+          updateStep("5", {
+            status: "failed",
+            details: [saveRes.error || "Unknown error"],
+          });
+        }
+      } else {
+        updateStep("5", {
+          status: "completed",
+          details: ["No jobs to save"],
+        });
+      }
     } catch (err: any) {
       console.error(err);
       const errorMessage = err.message || "Something went wrong.";
@@ -239,33 +269,48 @@ export default function ScrapeJobsTestPage() {
                   </CardTitle>
                 </div>
                 <div className="flex flex-wrap gap-1 justify-start">
-                  {job.locations &&
-                    job.locations.map((loc, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-xs">
-                        {loc}
-                      </Badge>
-                    ))}
+                  {/* Location rendering */}
+                  {job.jobLocation?.rawAddress && (
+                    <Badge variant="secondary" className="text-xs">
+                      <MapPin className="w-3 h-3 mr-1" />
+                      {job.jobLocation.rawAddress}
+                    </Badge>
+                  )}
+                  {/* Work mode */}
+                  <Badge variant="outline" className="text-xs">
+                    {job.workMode}
+                  </Badge>
                 </div>
-                {job.salary && (
+
+                {/* Salary rendering */}
+                {job.baseSalary && (
                   <div className="text-sm font-semibold text-green-600 flex items-center ">
                     <DollarSign className="w-4 h-4 mr-1" />
-                    {job.salary}
+                    {job.baseSalary.currency}{" "}
+                    {job.baseSalary.minValue?.toLocaleString()} -{" "}
+                    {job.baseSalary.maxValue?.toLocaleString()} /{" "}
+                    {job.baseSalary.unitText}
                   </div>
                 )}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-sm text-gray-600 line-clamp-3">
-                {job.description}
+                {/* Remove HTML tags for preview */}
+                {job.rawDescription
+                  ?.replace(/<[^>]*>?/gm, "") // strip tags
+                  .substring(0, 200)}
+                ...
               </div>
 
-              {job.requirements && job.requirements.length > 0 && (
+              {/* Combined requirements/qualifications */}
+              {(job.responsibilities?.length || 0) > 0 && (
                 <div>
                   <h4 className="text-sm font-semibold mb-2 text-gray-700">
-                    Key Requirements:
+                    Responsibilities:
                   </h4>
                   <ul className="text-xs text-gray-600 space-y-1">
-                    {job.requirements.map((req, idx) => (
+                    {job.responsibilities?.slice(0, 3).map((req, idx) => (
                       <li key={idx} className="flex items-start">
                         <span className="mr-2">✓</span>
                         <span className="line-clamp-1">{req}</span>
@@ -276,10 +321,10 @@ export default function ScrapeJobsTestPage() {
               )}
             </CardContent>
             <CardFooter>
-              {job.applyLink && (
+              {job.directApplyUrl && (
                 <Button className="w-full" size="sm" asChild>
                   <a
-                    href={job.applyLink}
+                    href={job.directApplyUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

@@ -6,18 +6,33 @@ import { NextRequest, NextResponse } from "next/server";
 import { JobPostingSchema } from "./schema";
 
 export async function POST(req: NextRequest) {
-    const { markdown } = await req.json();
+    try {
+        const { markdown, url } = await req.json();
 
-    const result = await generateText({
-        model: mistral("mistral-large-latest"),
-        output: Output.object({
-            schema: JobPostingSchema,
-        }),
-        prompt:
-            `You are an expert HR data extractor. precise JSON from this job posting markdown:\n\n
-        ${markdown}`,
-    });
+        const result = await generateText({
+            model: mistral("mistral-large-latest"),
+            output: Output.object({
+                schema: JobPostingSchema,
+            }),
+            prompt:
+                `You are an expert HR data extractor. Extract precise JSON from this job posting markdown.
+                If a value is not found, use null or omit the key.
+                ${url ? `The URL of this job is: ${url}` : ""}
+                Markdown:\n\n${markdown}`,
+        });
 
-    // result.output is the typed object according to JobPostSchema
-    return NextResponse.json(result.output);
+        const output = result.output;
+        // Ensure URL is present if passed in but missing in extraction
+        if (!output.url && url) {
+            output.url = url;
+        }
+
+        return NextResponse.json(output);
+    } catch (error: any) {
+        console.error("Extraction error:", error);
+        return NextResponse.json(
+            { error: "Failed to extract job details", details: error.message },
+            { status: 500 },
+        );
+    }
 }
