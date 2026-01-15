@@ -11,11 +11,35 @@ export type SaveJobResult = {
 
 export async function saveJobsToSupabase(
     jobs: JobPosting[],
+    options: { replaceCompanyJobs?: boolean } = {},
 ): Promise<SaveJobResult> {
     const supabase = await createClient();
 
     // Map the Zod schema to the Database table structure
     const validJobs = jobs.filter((j) => !!j.url);
+
+    if (validJobs.length === 0) {
+        return { success: true, count: 0 };
+    }
+
+    // Optional: Delete existing jobs for this company before inserting new ones
+    if (options.replaceCompanyJobs) {
+        // We assume all jobs being saved at once belong to the same company
+        // or we take the company name from the first valid job.
+        const companyName = validJobs[0].companyName;
+        if (companyName) {
+            const { error: deleteError } = await supabase
+                .from("job_postings" as any)
+                .delete()
+                .eq("company_name", companyName);
+
+            if (deleteError) {
+                console.error("Failed to clear existing jobs:", deleteError);
+                // We'll continue anyway to try and save the new data,
+                // but we should log it.
+            }
+        }
+    }
 
     const dbRows = validJobs.map((job) => {
         // 1. Flatten Salary
@@ -36,11 +60,14 @@ export async function saveJobsToSupabase(
 
         return {
             url: job.url!,
-            title: job.title,
-            company_name: job.companyName,
-            description_html: job.rawDescription,
+            title: job.title || "Unknown Title",
+            company_name: job.companyName || "Unknown Company",
+            description_html: job.rawDescription || "",
             // Simple strip tags for text preview if needed, or leave null to let DB/backend handle later
-            description_text: job.rawDescription.replace(/<[^>]*>?/gm, ""),
+            description_text: (job.rawDescription || "").replace(
+                /<[^>]*>?/gm,
+                "",
+            ),
             location: job.jobLocation, // JSONB column
             work_mode: job.workMode,
             employment_type: job.employmentType,

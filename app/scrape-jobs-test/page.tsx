@@ -131,8 +131,14 @@ export default function ScrapeJobsTestPage() {
         status: "completed",
         description: `Found ${jobLinks.length} job links.`,
         details: jobLinks.slice(0, 5).map((l: string) => {
-          const path = l.split("/").filter(Boolean).slice(-2).join("/");
-          return `Link: .../${path}`;
+          try {
+            const urlObj = new URL(l);
+            const segments = urlObj.pathname.split("/").filter(Boolean);
+            const lastTwo = segments.slice(-2).join("/");
+            return `${urlObj.hostname}/${lastTwo}`;
+          } catch {
+            return l;
+          }
         }),
       });
 
@@ -213,11 +219,15 @@ export default function ScrapeJobsTestPage() {
       // --- STEP 5: Save to DB ---
       if (validJobs.length > 0) {
         updateStep("5", { status: "in-progress" });
-        const saveRes = await saveJobsToSupabase(validJobs);
+        const saveRes = await saveJobsToSupabase(validJobs, {
+          replaceCompanyJobs: true, // Delete old jobs for this company first
+        });
         if (saveRes.success) {
           updateStep("5", {
             status: "completed",
-            details: [`Saved ${saveRes.count} jobs`],
+            details: [
+              `Saved ${saveRes.count} jobs (Refreshed company listing)`,
+            ],
           });
         } else {
           updateStep("5", {
