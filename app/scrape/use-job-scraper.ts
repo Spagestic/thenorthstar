@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScraperStep } from "@/app/scrape-jobs-test/components/scraper-progress";
+import { ScraperStep } from "@/app/scrape/components/scraper-progress";
 import { JobPosting } from "@/app/api/ai/extract/details/schema";
 import { INITIAL_STEPS } from "./initial-steps";
 import { normalizeUrl } from "@/lib/utils";

@@ -63,9 +63,8 @@ export async function saveJobsToSupabase(
             title: job.title || "Unknown Title",
             company_name: job.companyName || "Unknown Company",
             description_html: job.rawDescription || "",
-            // Simple strip tags for text preview if needed, or leave null to let DB/backend handle later
             description_text: (job.rawDescription || "").replace(
-                /<[^>]*>?/gm,
+                /<[^>]*>?/gm, // Remove HTML tags
                 "",
             ),
             location: job.jobLocation, // JSONB column

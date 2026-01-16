@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { ScraperProgress } from "@/app/scrape-jobs-test/components/scraper-progress";
+import { ScraperProgress } from "@/app/scrape/components/scraper-progress";
 import { useJobScraper } from "./use-job-scraper";
 import { ScraperHeader } from "./components/scraper-header";
 import { ScrapeForm } from "./components/scrape-form";
