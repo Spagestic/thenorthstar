@@ -25,29 +25,49 @@ export function useJobScraper() {
         setJobs([]);
         setSteps(INITIAL_STEPS);
         const normalizedUrl = normalizeUrl(rawUrl);
+        let companyMetadata:
+            | { name: string; website: string; logoUrl?: string }
+            | null = null;
 
         try {
             updateStep("1", { status: "in-progress" });
 
-            const scrapeRes = await fetch("/api/firecrawl/scrape", {
-                method: "POST",
-                body: JSON.stringify({ url: normalizedUrl }),
-            });
+            // Fetch company metadata in parallel with the main scrape
+            const [scrapeRes, previewRes] = await Promise.all([
+                fetch("/api/firecrawl/scrape", {
+                    method: "POST",
+                    body: JSON.stringify({ url: normalizedUrl }),
+                }),
+                fetch(
+                    `/api/link-preview?url=${
+                        encodeURIComponent(new URL(normalizedUrl).origin)
+                    }`,
+                )
+                    .then((r) => r.ok ? r.json() : null)
+                    .catch(() => null),
+            ]);
 
             if (!scrapeRes.ok) throw new Error("Failed to fetch overview page");
 
-            const { markdown, branding, metadata } = await scrapeRes.json();
-            const companyLogo = branding?.logos?.[0] || null;
+            const { markdown, branding, metadata: firecrawlMetadata } =
+                await scrapeRes.json();
+
+            // Prefer metadata from link-preview, fallback to firecrawl
+            companyMetadata = {
+                name: previewRes?.title || firecrawlMetadata?.title ||
+                    "Unknown Company",
+                website: new URL(normalizedUrl).origin,
+                logoUrl: previewRes?.logo || branding?.logos?.[0],
+            };
 
             updateStep("1", {
                 status: "completed",
                 details: [
-                    metadata?.title ? `${metadata.title}` : null,
-                    metadata?.description
-                        ? `${metadata.description.substring(0, 80)}...`
+                    companyMetadata.name,
+                    firecrawlMetadata?.description
+                        ? `${firecrawlMetadata.description.substring(0, 80)}...`
                         : null,
                     `Extracted ${markdown.length.toLocaleString()} chars`,
-                    // companyLogo ? `IMG:${companyLogo}` : "No logo found",
                 ].filter(Boolean) as string[],
             });
 
@@ -201,6 +221,7 @@ export function useJobScraper() {
                 updateStep("4", { status: "in-progress" });
                 const saveRes = await saveJobsToSupabase(validJobs, {
                     replaceCompanyJobs: true, // Delete old jobs for this company first
+                    companyInfo: companyMetadata || undefined,
                 });
                 if (saveRes.success) {
                     updateStep("4", {

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Bookmark, MapPin, DollarSign, Clock, Building2 } from "lucide-react";
-import { JobPosting } from "@/app/api/ai/extract/details/schema";
+import { Card, CardContent } from "@/components/ui/card";
+import { Bookmark, MapPin, Building2 } from "lucide-react";
+import { JobPosting } from "@/types/job-posting";
 import Link from "next/link";
 
 function formatTimeAgo(dateString?: string | null) {
@@ -76,7 +76,13 @@ export function JobCard({ job }: { job: JobPosting }) {
       <CardContent>
         <div className="flex items-start justify-center gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/50 overflow-hidden">
-            {job.companyName ? (
+            {job.companyLogo ? (
+              <img
+                src={job.companyLogo}
+                alt={`${job.companyName || "Company"} logo`}
+                className="h-full w-full object-contain"
+              />
+            ) : job.companyName ? (
               <span className="text-xl font-bold text-muted-foreground select-none">
                 {job.companyName.charAt(0)}
               </span>
@@ -91,9 +97,6 @@ export function JobCard({ job }: { job: JobPosting }) {
                 <h3 className="text-sm font-semibold text-foreground/90 truncate">
                   {job.companyName || "Unknown Company"}
                 </h3>
-                <p className="text-xs text-muted-foreground truncate">
-                  Internet & Software
-                </p>
               </div>
               <Button
                 variant="ghost"

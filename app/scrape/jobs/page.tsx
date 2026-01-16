@@ -23,18 +23,19 @@ export async function JobList() {
   // This blocking fetch now happens inside the Suspense boundary
   const { data: jobs } = await supabase
     .from("job_postings")
-    .select("*")
+    .select("*, company:companies(name, website, logo_url)")
     .limit(10);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {jobs?.map((job) => (
+      {jobs?.map((job: any) => (
         <JobCard
           key={job.id}
           job={{
             ...job,
             workMode: job.work_mode as any,
-            companyName: job.company_name,
+            companyName: job.company?.name || "Unknown Company",
+            companyLogo: job.company?.logo_url || undefined,
             directApplyUrl: job.direct_apply_url,
             employmentType: job.employment_type as any,
             datePosted: job.posted_at,

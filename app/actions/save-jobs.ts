@@ -9,11 +9,44 @@ export type SaveJobResult = {
     error?: string;
 };
 
+export type CompanyInfo = {
+    name: string;
+    website: string;
+    logoUrl?: string;
+};
+
 export async function saveJobsToSupabase(
     jobs: JobPosting[],
-    options: { replaceCompanyJobs?: boolean } = {},
+    options: {
+        replaceCompanyJobs?: boolean;
+        companyInfo?: CompanyInfo;
+    } = {},
 ): Promise<SaveJobResult> {
     const supabase = await createClient();
+
+    let companyId: string | null = null;
+
+    // 1. Handle Company Upsert
+    if (options.companyInfo) {
+        const { data: companyData, error: companyError } = await supabase
+            .from("companies")
+            .upsert(
+                {
+                    name: options.companyInfo.name,
+                    website: options.companyInfo.website,
+                    logo_url: options.companyInfo.logoUrl,
+                },
+                { onConflict: "name" }, // Or 'website' if you add a unique constraint
+            )
+            .select("id")
+            .single();
+
+        if (companyError) {
+            console.error("Failed to upsert company:", companyError);
+        } else {
+            companyId = companyData.id;
+        }
+    }
 
     // Map the Zod schema to the Database table structure
     const validJobs = jobs.filter((j) => !!j.url);
@@ -24,19 +57,19 @@ export async function saveJobsToSupabase(
 
     // Optional: Delete existing jobs for this company before inserting new ones
     if (options.replaceCompanyJobs) {
-        // We assume all jobs being saved at once belong to the same company
-        // or we take the company name from the first valid job.
-        const companyName = validJobs[0].companyName;
-        if (companyName) {
-            const { error: deleteError } = await supabase
+        if (companyId) {
+            await supabase
                 .from("job_postings" as any)
                 .delete()
-                .eq("company_name", companyName);
-
-            if (deleteError) {
-                console.error("Failed to clear existing jobs:", deleteError);
-                // We'll continue anyway to try and save the new data,
-                // but we should log it.
+                .eq("company_id", companyId);
+        } else {
+            // Fallback to name-based deletion if company record didn't link
+            const companyName = validJobs[0].companyName;
+            if (companyName) {
+                await supabase
+                    .from("job_postings" as any)
+                    .delete()
+                    .eq("company_name", companyName);
             }
         }
     }
@@ -61,7 +94,9 @@ export async function saveJobsToSupabase(
         return {
             url: job.url!,
             title: job.title || "Unknown Title",
-            company_name: job.companyName || "Unknown Company",
+            company_name: job.companyName || options.companyInfo?.name ||
+                "Unknown Company",
+            company_id: companyId, // Link to the companies table
             description: job.description || "",
             location: job.jobLocation, // JSONB column
             work_mode: job.workMode,
