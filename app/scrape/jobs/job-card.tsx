@@ -74,7 +74,7 @@ export function JobCard({ job }: { job: JobPosting }) {
   return (
     <Card className="group relative overflow-hidden border-border bg-card hover:shadow-md transition-all duration-300 rounded-xl">
       <CardContent>
-        <div className="flex items-start justify-center gap-4">
+        <div className="flex items-center justify-center gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/50 overflow-hidden">
             {job.companyLogo ? (
               <img
@@ -94,7 +94,7 @@ export function JobCard({ job }: { job: JobPosting }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-foreground/90 truncate">
+                <h3 className="text-lg font-semibold text-foreground/90 truncate">
                   {job.companyName || "Unknown Company"}
                 </h3>
               </div>
@@ -103,7 +103,7 @@ export function JobCard({ job }: { job: JobPosting }) {
                 size="icon"
                 className="h-8 w-8 -mr-2 -mt-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors rounded-full"
               >
-                <Bookmark className="h-5 w-5" />
+                <Bookmark className="h-6 w-6" />
                 <span className="sr-only">Bookmark</span>
               </Button>
             </div>
@@ -125,12 +125,12 @@ export function JobCard({ job }: { job: JobPosting }) {
             )}
           </div>
 
-          <div className="flex items-center text-sm text-muted-foreground pt-1">
-            <MapPin className="inline-block w-4 h-4 mr-1" />
-            <span className="truncate">{location}</span>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <MapPin className="w-4 h-4" />
+            <span>{location}</span>
             {timeAgo && (
               <>
-                <span>·</span>
+                <span className="text-muted-foreground/50">•</span>
                 <span>{timeAgo}</span>
               </>
             )}
