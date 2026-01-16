@@ -44,7 +44,7 @@ export function JobCard({ job }: { job: JobPosting }) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-sm text-gray-600 line-clamp-3">
-          {job.rawDescription?.replace(/<[^>]*>?/gm, "").substring(0, 200)}...
+          {job.description?.substring(0, 200)}...
         </div>
         {(job.responsibilities?.length || 0) > 0 && (
           <div>

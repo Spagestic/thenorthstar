@@ -50,9 +50,9 @@ export const JobPostingSchema = z.object({
     ]).nullable().optional(),
 
     // Description & Requirements
-    // CRITICAL: Always keep the raw HTML/markdown as a fallback
-    rawDescription: z.string().nullable().optional().describe(
-        "Raw content of the job body",
+    // CRITICAL: Always keep the markdown as the primary content
+    description: z.string().nullable().optional().describe(
+        "Content of the job body in markdown",
     ),
 
     // Make extraction best-effort (optional)

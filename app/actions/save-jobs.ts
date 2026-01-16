@@ -62,11 +62,7 @@ export async function saveJobsToSupabase(
             url: job.url!,
             title: job.title || "Unknown Title",
             company_name: job.companyName || "Unknown Company",
-            description_html: job.rawDescription || "",
-            description_text: (job.rawDescription || "").replace(
-                /<[^>]*>?/gm, // Remove HTML tags
-                "",
-            ),
+            description: job.description || "",
             location: job.jobLocation, // JSONB column
             work_mode: job.workMode,
             employment_type: job.employmentType,
