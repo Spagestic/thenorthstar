@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { formatEmploymentType, formatWorkMode } from "@/lib/utils";
 
 interface JobPostingsFiltersProps {
   employmentTypes: string[];
@@ -76,7 +77,7 @@ export function JobPostingsFilters({
             <SelectItem value="all">All Types</SelectItem>
             {employmentTypes.map((type) => (
               <SelectItem key={type} value={type}>
-                {type}
+                {formatEmploymentType(type)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -94,7 +95,7 @@ export function JobPostingsFilters({
             <SelectItem value="all">All Modes</SelectItem>
             {workModes.map((mode) => (
               <SelectItem key={mode} value={mode}>
-                {mode}
+                {formatWorkMode(mode)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -117,7 +118,7 @@ export function JobPostingsFilters({
         <div className="flex flex-wrap gap-2">
           {employmentType && (
             <Badge variant="secondary" className="rounded-sm px-1 font-normal">
-              Type: {employmentType}
+              Type: {formatEmploymentType(employmentType)}
               <Button
                 variant="ghost"
                 size="icon"
@@ -130,7 +131,7 @@ export function JobPostingsFilters({
           )}
           {workMode && (
             <Badge variant="secondary" className="rounded-sm px-1 font-normal">
-              Mode: {workMode}
+              Mode: {formatWorkMode(workMode)}
               <Button
                 variant="ghost"
                 size="icon"
