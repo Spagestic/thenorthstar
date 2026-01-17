@@ -20,8 +20,7 @@ export const JobPostingSchema = z.object({
     ),
 
     // URL is critical for unique identification and re-scraping
-    url: z.string().describe("The canonical URL of the job post").nullable()
-        .optional(),
+    url: z.string().describe("The canonical URL of the job post"),
 
     // Location & Work Mode
     // Updated to array to support multiple locations (e.g. Los Angeles, CA; New York, NY)
