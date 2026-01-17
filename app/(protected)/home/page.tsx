@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ScraperInterface } from "./scraper-interface";
+import { ScraperDialog } from "./components/scraper-dialog";
 import Header from "../Header";
 import { createClient } from "@/lib/supabase/server";
 import { JobCard } from "./components/job-card";
@@ -25,13 +25,9 @@ interface PageProps {
 export default function HomePage({ searchParams }: PageProps) {
   return (
     <div className="flex flex-col h-screen">
-      <Header nav={["Manage Jobs"]} />
+      <Header nav={["Manage Jobs"]} rightContent={<ScraperDialog />} />
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto py-10 px-6 space-y-6">
-          <section className="bg-card p-8 rounded-xl border shadow-sm">
-            <ScraperInterface />
-          </section>
-
+        <div className="mx-auto  px-6 space-y-6">
           <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 py-4 -mx-6 px-6 border-b">
             <div className="space-y-4 mx-auto">
               <Suspense fallback={<Skeleton className="h-10 w-full" />}>
