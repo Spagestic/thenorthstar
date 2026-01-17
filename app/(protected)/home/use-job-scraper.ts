@@ -1,9 +1,58 @@
 import { useState } from "react";
 import { ScraperStep } from "./components/scraper-progress";
-import { JobPosting } from "@/app/api/ai/extract/details/schema";
+import {
+    JobPosting,
+    JobPostingSchema,
+} from "@/app/api/ai/extract/details/schema";
 import { INITIAL_STEPS } from "./initial-steps";
 import { normalizeUrl } from "@/lib/utils";
-import { saveJobsToSupabase } from "./save-jobs";
+import { getExistingJobUrls, saveJobsToSupabase } from "./save-jobs";
+
+async function fetchWithRetry(
+    url: string,
+    options: RequestInit,
+    maxRetries = 3,
+) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            const res = await fetch(url, options);
+            if (res.status === 429) {
+                const backoff = Math.pow(2, i) * 1000;
+                await new Promise((r) => setTimeout(r, backoff));
+                continue;
+            }
+            return res;
+        } catch (err) {
+            if (i === maxRetries - 1) throw err;
+            await new Promise((r) => setTimeout(r, Math.pow(2, i) * 1000));
+        }
+    }
+    throw new Error("Failed after maximum retries");
+}
+
+function normalizeLocation(job: JobPosting): JobPosting {
+    if (!job.jobLocations) return job;
+
+    const normalized = job.jobLocations.map((loc) => ({
+        ...loc,
+        city: loc.city?.trim() || null,
+        state: loc.state?.length === 2 ? loc.state.toUpperCase() : loc.state,
+        country: loc.country || "USA", // Default heuristic if missing
+    }));
+
+    return { ...job, jobLocations: normalized };
+}
+
+function deduplicateJobs(jobs: JobPosting[]): JobPosting[] {
+    const seen = new Set<string>();
+    return jobs.filter((job) => {
+        // Use URL as primary key, fallback to title + company
+        const key = job.url || `${job.title}-${job.companyName}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
 
 export function useJobScraper() {
     const [jobs, setJobs] = useState<JobPosting[]>([]);
@@ -36,9 +85,17 @@ export function useJobScraper() {
 
             // Fetch company metadata in parallel with the main scrape
             const [scrapeRes, previewRes] = await Promise.all([
-                fetch("/api/firecrawl/scrape", {
+                fetchWithRetry("/api/firecrawl/scrape", {
                     method: "POST",
-                    body: JSON.stringify({ url: normalizedUrl }),
+                    body: JSON.stringify({
+                        url: normalizedUrl,
+                        scrapeOptions: {
+                            formats: ["markdown", "branding"],
+                            onlyMainContent: true,
+                            excludeTags: ["nav", "footer", "header", "script"],
+                            removeBase64Images: true,
+                        },
+                    }),
                 }),
                 fetch(
                     `/api/link-preview?url=${
@@ -75,7 +132,7 @@ export function useJobScraper() {
 
             updateStep("2", { status: "in-progress" });
 
-            const linksRes = await fetch("/api/ai/extract/links", {
+            const linksRes = await fetchWithRetry("/api/ai/extract/links", {
                 method: "POST",
                 body: JSON.stringify({ markdown, baseUrl: normalizedUrl }),
             });
@@ -85,39 +142,51 @@ export function useJobScraper() {
             let finalJobLinks = [...(extractedLinks || [])];
 
             // ---------------------------------------------------------
-            // PAGINATION & DISCOVERY: Use Map/Sitemap to find deep links
+            // PAGINATION & DISCOVERY: Use Crawl for comprehensive discovery
             // ---------------------------------------------------------
             if (finalJobLinks.length > 0 || isRecoveryAttempt) {
                 try {
                     updateStep("2", {
                         description:
-                            `Found ${finalJobLinks.length} links. Checking sitemap/pagination...`,
+                            `Found ${finalJobLinks.length} links. Deep crawling for more...`,
                     });
 
-                    // We aggressively search for more links using the Map endpoint
-                    // This handles cases like ?page=2, ?page=3 by finding the destination URLs directly via sitemap/crawl
-                    const mapRes = await fetch("/api/firecrawl/map", {
-                        method: "POST",
-                        body: JSON.stringify({
-                            url: normalizedUrl,
-                            search: "job career opening posting", // Heuristic to find relevant sub-pages
-                            limit: 20, // Fetch up to 20 deep links to augment our list
-                        }),
-                    });
+                    const crawlRes = await fetchWithRetry(
+                        "/api/firecrawl/crawl",
+                        {
+                            method: "POST",
+                            body: JSON.stringify({
+                                url: normalizedUrl,
+                                crawlOptions: {
+                                    prompt:
+                                        "Only find individual job postings or career opening pages. Skip main listing pages or unrelated content.",
+                                    limit: 30,
+                                    maxDiscoveryDepth: 2,
+                                    ignoreQueryParameters: true,
+                                },
+                            }),
+                        },
+                    );
 
-                    if (mapRes.ok) {
-                        const mapData = await mapRes.json();
-                        const mappedLinks = mapData.data || mapData.links || [];
+                    if (crawlRes.ok) {
+                        const crawlData = await crawlRes.json();
+                        const crawledLinks = (crawlData.data || []).map((
+                            d: any,
+                        ) => d.url).filter(Boolean);
 
                         const linkSet = new Set(finalJobLinks);
                         let newLinksCount = 0;
 
-                        mappedLinks.forEach((l: string) => {
-                            // Simple filter to avoid adding the listing page itself or obviously non-job pages
-                            // Checks if it looks like a leaf node (not just the base url)
+                        // Heuristic pattern validation for job links
+                        const jobPattern =
+                            /job|career|opening|position|posting|vacanc/i;
+
+                        crawledLinks.forEach((l: string) => {
                             if (
-                                l !== normalizedUrl && !linkSet.has(l) &&
-                                l.length > normalizedUrl.length
+                                l !== normalizedUrl &&
+                                !linkSet.has(l) &&
+                                l.length > normalizedUrl.length &&
+                                jobPattern.test(l)
                             ) {
                                 linkSet.add(l);
                                 newLinksCount++;
@@ -127,19 +196,33 @@ export function useJobScraper() {
                         finalJobLinks = Array.from(linkSet);
                         if (newLinksCount > 0) {
                             console.log(
-                                `Added ${newLinksCount} links from Map/Sitemap`,
+                                `Added ${newLinksCount} links from Crawl`,
                             );
                         }
                     }
-                } catch (mapErr) {
+                } catch (crawlErr) {
                     console.warn(
-                        "Deep mapping failed, proceeding with extracted links only",
-                        mapErr,
+                        "Deep crawl failed, proceeding with extracted links only",
+                        crawlErr,
                     );
                 }
             }
 
-            if (finalJobLinks.length === 0) {
+            // --- Incremental Scraping / Duplicate Detection ---
+            const existingUrls = await getExistingJobUrls(
+                new URL(normalizedUrl).origin,
+            );
+            const initialCount = finalJobLinks.length;
+            finalJobLinks = finalJobLinks.filter((url) =>
+                !existingUrls.includes(url)
+            );
+            const skippedCount = initialCount - finalJobLinks.length;
+
+            if (skippedCount > 0) {
+                console.log(`Skipped ${skippedCount} already scraped jobs.`);
+            }
+
+            if (finalJobLinks.length === 0 && skippedCount === 0) {
                 if (!isRecoveryAttempt) {
                     updateStep("2", {
                         description:
@@ -160,7 +243,7 @@ export function useJobScraper() {
 
                         if (mapRes.ok) {
                             const mapData = await mapRes.json();
-                            const links = mapData.data || mapData.links || []; // Check both fields just in case
+                            const links = mapData.data || mapData.links || [];
                             // Filter for likely candidates, excluding the current one
                             const candidates = links.filter((l: string) => {
                                 try {
@@ -171,6 +254,26 @@ export function useJobScraper() {
                                     return false;
                                 }
                             });
+
+                            // Try BFS for common career paths first
+                            const pathCandidates = [
+                                "/careers",
+                                "/jobs",
+                                "/work-with-us",
+                                "/openings",
+                                "/join",
+                            ];
+                            for (const path of pathCandidates) {
+                                try {
+                                    const testUrl = `${rootUrl}${path}`;
+                                    const response = await fetch(testUrl, {
+                                        method: "HEAD",
+                                    });
+                                    if (response.ok) {
+                                        return startScrape(testUrl, true);
+                                    }
+                                } catch (e) { /* ignore */ }
+                            }
 
                             // Heuristic: prefer /careers or /jobs
                             const bestCandidate = candidates.find((l: string) =>
@@ -256,91 +359,174 @@ export function useJobScraper() {
                     .catch(() => {});
             });
 
-            const batchRes = await fetch("/api/firecrawl/batch-scrape", {
-                method: "POST",
-                body: JSON.stringify({ urls: finalJobLinks }),
-            });
+            // Parallelize batch processing
+            // Instead of one big batch, chunk it
+            const BATCH_SIZE = 10;
+            const validJobs: JobPosting[] = [];
 
-            if (!batchRes.ok) throw new Error("Batch scrape failed");
-            const batchData = await batchRes.json();
-            const jobDocs = batchData.data || [];
+            for (let i = 0; i < finalJobLinks.length; i += BATCH_SIZE) {
+                const batchUrls = finalJobLinks.slice(i, i + BATCH_SIZE);
 
-            updateStep("3", {
-                description: `Analyzing ${jobDocs.length} job descriptions...`,
-            });
-
-            const jobsData = await Promise.all(
-                jobDocs.map(async (doc: any, index: number) => {
-                    if (!doc.markdown) return null;
-                    try {
-                        const detailRes = await fetch(
-                            "/api/ai/extract/details",
-                            {
-                                method: "POST",
-                                body: JSON.stringify({
-                                    markdown: doc.markdown,
-                                    url: doc.url || doc.metadata?.sourceURL,
-                                }),
+                // Get content for this batch
+                const batchRes = await fetchWithRetry(
+                    "/api/firecrawl/batch-scrape",
+                    {
+                        method: "POST",
+                        body: JSON.stringify({
+                            urls: batchUrls,
+                            scrapeOptions: {
+                                // Optimize token usage logic applied again
+                                formats: ["markdown"],
+                                onlyMainContent: true,
+                                excludeTags: [
+                                    "nav",
+                                    "footer",
+                                    "header",
+                                    "script",
+                                ],
+                                removeBase64Images: true,
                             },
-                        );
+                        }),
+                    },
+                );
 
-                        if (!detailRes.ok) return null;
+                if (!batchRes.ok) {
+                    console.error("Batch scrape failed for chunk", i);
+                    continue;
+                }
 
-                        const job = await detailRes.json();
+                const batchData = await batchRes.json();
+                const jobDocs = batchData.data || [];
 
-                        // Update UI live as each job finishes - use extracted title
-                        currentDetails[index] = `${
-                            job.title || "Job"
-                        } - [Extracted]`;
-                        setSteps((prev) =>
-                            prev.map((s) =>
-                                s.id === "3"
-                                    ? {
-                                        ...s,
-                                        details: [
-                                            ...currentDetails.slice(0, 8),
-                                        ],
+                updateStep("3", {
+                    description: `Analyzing ${
+                        Math.min(i + BATCH_SIZE, finalJobLinks.length)
+                    }/${finalJobLinks.length} job descriptions...`,
+                });
+
+                // Extract details in parallel for this batch
+                const batchJobs = await Promise.all(
+                    jobDocs.map(async (doc: any, idx: number) => {
+                        const globalIndex = i + idx;
+                        if (!doc.markdown) return null;
+
+                        try {
+                            // Enforce 30s timeout per extraction
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(
+                                () => controller.abort(),
+                                30000,
+                            );
+
+                            const detailRes = await fetch(
+                                "/api/ai/extract/details",
+                                {
+                                    method: "POST",
+                                    body: JSON.stringify({
+                                        markdown: doc.markdown,
+                                        url: doc.url || doc.metadata?.sourceURL,
+                                    }),
+                                    signal: controller.signal,
+                                },
+                            );
+                            clearTimeout(timeoutId);
+
+                            if (!detailRes.ok) return null;
+
+                            const job = await detailRes.json();
+
+                            // Schema Validation & Retry Loop
+                            const validatedJob = JobPostingSchema.safeParse(
+                                job,
+                            );
+                            let finalJob = job;
+
+                            if (!validatedJob.success) {
+                                // Retry once with error context
+                                try {
+                                    const retryRes = await fetch(
+                                        "/api/ai/extract/details",
+                                        {
+                                            method: "POST",
+                                            body: JSON.stringify({
+                                                markdown: doc.markdown,
+                                                url: doc.url ||
+                                                    doc.metadata?.sourceURL,
+                                                validationErrors:
+                                                    validatedJob.error.issues,
+                                                isRetry: true,
+                                            }),
+                                        },
+                                    );
+                                    if (retryRes.ok) {
+                                        finalJob = await retryRes.json();
                                     }
-                                    : s
-                            )
-                        );
+                                } catch (e) { /* ignore retry fail */ }
+                            }
 
-                        return job;
-                    } catch (err) {
-                        console.error("Failed to extract single job:", err);
-                        return null;
-                    }
-                }),
-            );
+                            // Normalize location
+                            finalJob = normalizeLocation(finalJob);
 
-            const validJobs = jobsData.filter((j): j is JobPosting =>
-                j !== null
-            );
+                            // Update UI live
+                            currentDetails[globalIndex] = `${
+                                finalJob.title || "Job"
+                            } - [Extracted]`;
+
+                            setSteps((prev) =>
+                                prev.map((s) =>
+                                    s.id === "3"
+                                        ? {
+                                            ...s,
+                                            details: [
+                                                ...currentDetails.slice(0, 8),
+                                            ],
+                                        }
+                                        : s
+                                )
+                            );
+
+                            return finalJob;
+                        } catch (err) {
+                            console.error("Failed to extract single job:", err);
+                            return null;
+                        }
+                    }),
+                );
+
+                validJobs.push(
+                    ...batchJobs.filter((j): j is JobPosting => j !== null),
+                );
+            }
+
             setJobs(validJobs);
+
+            // Deduplicate at extraction time
+            const deduplicatedJobsList = deduplicateJobs(validJobs);
 
             updateStep("3", {
                 status: "completed",
-                description: `Successfully extracted ${validJobs.length} jobs.`,
+                description:
+                    `Successfully extracted ${deduplicatedJobsList.length} jobs.`,
                 details: [
                     ...currentDetails.slice(0, 8),
-                    validJobs.length > 8
-                        ? `...and ${validJobs.length - 8} others`
+                    deduplicatedJobsList.length > 8
+                        ? `...and ${deduplicatedJobsList.length - 8} others`
                         : null,
                 ].filter(Boolean) as string[],
             });
 
             // --- STEP 4: Save to DB ---
-            if (validJobs.length > 0) {
+            if (deduplicatedJobsList.length > 0) {
                 updateStep("4", { status: "in-progress" });
-                const saveRes = await saveJobsToSupabase(validJobs, {
-                    replaceCompanyJobs: true, // Delete old jobs for this company first
+                const saveRes = await saveJobsToSupabase(deduplicatedJobsList, {
+                    replaceCompanyJobs: false, // Changed to false for incremental
                     companyInfo: companyMetadata || undefined,
                 });
                 if (saveRes.success) {
                     updateStep("4", {
                         status: "completed",
                         details: [
-                            `Saved ${saveRes.count} jobs (Refreshed company listing)`,
+                            `Saved ${saveRes.count} jobs`,
                         ],
                     });
                 } else {
