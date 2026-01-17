@@ -7,7 +7,7 @@ import { useJobScraper } from "./use-job-scraper";
 import { ScraperHeader } from "./components/scraper-header";
 import { ScrapeForm } from "./components/scrape-form";
 import { ScrapeError } from "./components/scrape-error";
-import { JobList as SessionJobList } from "./components/job-list";
+import { JobCard } from "./components/job-card";
 
 export function ScraperInterface() {
   const [url, setUrl] = useState("");
@@ -43,7 +43,33 @@ export function ScraperInterface() {
 
       {jobs.length > 0 && (
         <div className="space-y-0">
-          <SessionJobList jobs={jobs} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {jobs?.map((job: any) => (
+              <JobCard
+                key={job.id}
+                job={{
+                  ...job,
+                  workMode: job.work_mode as any,
+                  companyName: job.company?.name || "Unknown Company",
+                  companyLogo: job.company?.logo_url || undefined,
+                  directApplyUrl: job.direct_apply_url,
+                  employmentType: job.employment_type as any,
+                  datePosted: job.posted_at,
+                  jobLocation: job.location as any,
+                  baseSalary:
+                    job.salary_min || job.salary_max
+                      ? {
+                          minValue: job.salary_min,
+                          maxValue: job.salary_max,
+                          currency: job.salary_currency,
+                          unitText: job.salary_period,
+                        }
+                      : undefined,
+                  description: job.description,
+                }}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
