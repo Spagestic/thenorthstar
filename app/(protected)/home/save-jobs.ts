@@ -139,3 +139,28 @@ export async function saveJobsToSupabase(
         return { success: false, error: err.message };
     }
 }
+
+export async function getExistingJobUrls(
+    companyWebsite: string,
+): Promise<string[]> {
+    const supabase = await createClient();
+
+    // Heuristic: website field is stored with origin.
+    // We can also find by company name, but website/origin is more stable.
+    try {
+        const { data, error } = await supabase
+            .from("job_postings" as any)
+            .select("url")
+            .ilike("url", `%${new URL(companyWebsite).hostname}%`); // Simple heuristic
+
+        if (error) {
+            console.error("Failed to fetch existing job URLs:", error);
+            return [];
+        }
+
+        return (data as unknown as { url: string }[]).map((row) => row.url);
+    } catch (err) {
+        console.error("Error in getExistingJobUrls:", err);
+        return [];
+    }
+}
