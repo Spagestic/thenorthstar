@@ -81,9 +81,65 @@ export function useJobScraper() {
             });
 
             if (!linksRes.ok) throw new Error("Failed to extract links");
-            const { jobLinks } = await linksRes.json();
+            const { jobLinks: extractedLinks } = await linksRes.json();
+            let finalJobLinks = [...(extractedLinks || [])];
 
-            if (!jobLinks || jobLinks.length === 0) {
+            // ---------------------------------------------------------
+            // PAGINATION & DISCOVERY: Use Map/Sitemap to find deep links
+            // ---------------------------------------------------------
+            if (finalJobLinks.length > 0 || isRecoveryAttempt) {
+                try {
+                    updateStep("2", {
+                        description:
+                            `Found ${finalJobLinks.length} links. Checking sitemap/pagination...`,
+                    });
+
+                    // We aggressively search for more links using the Map endpoint
+                    // This handles cases like ?page=2, ?page=3 by finding the destination URLs directly via sitemap/crawl
+                    const mapRes = await fetch("/api/firecrawl/map", {
+                        method: "POST",
+                        body: JSON.stringify({
+                            url: normalizedUrl,
+                            search: "job career opening posting", // Heuristic to find relevant sub-pages
+                            limit: 20, // Fetch up to 20 deep links to augment our list
+                        }),
+                    });
+
+                    if (mapRes.ok) {
+                        const mapData = await mapRes.json();
+                        const mappedLinks = mapData.data || mapData.links || [];
+
+                        const linkSet = new Set(finalJobLinks);
+                        let newLinksCount = 0;
+
+                        mappedLinks.forEach((l: string) => {
+                            // Simple filter to avoid adding the listing page itself or obviously non-job pages
+                            // Checks if it looks like a leaf node (not just the base url)
+                            if (
+                                l !== normalizedUrl && !linkSet.has(l) &&
+                                l.length > normalizedUrl.length
+                            ) {
+                                linkSet.add(l);
+                                newLinksCount++;
+                            }
+                        });
+
+                        finalJobLinks = Array.from(linkSet);
+                        if (newLinksCount > 0) {
+                            console.log(
+                                `Added ${newLinksCount} links from Map/Sitemap`,
+                            );
+                        }
+                    }
+                } catch (mapErr) {
+                    console.warn(
+                        "Deep mapping failed, proceeding with extracted links only",
+                        mapErr,
+                    );
+                }
+            }
+
+            if (finalJobLinks.length === 0) {
                 if (!isRecoveryAttempt) {
                     updateStep("2", {
                         description:
@@ -144,8 +200,8 @@ export function useJobScraper() {
 
             updateStep("2", {
                 status: "completed",
-                description: `Found ${jobLinks.length} job links.`,
-                details: jobLinks.slice(0, 5).map((l: string) => {
+                description: `Found ${finalJobLinks.length} unique job links.`,
+                details: finalJobLinks.slice(0, 5).map((l: string) => {
                     try {
                         const urlObj = new URL(l);
                         const segments = urlObj.pathname.split("/").filter(
@@ -162,18 +218,18 @@ export function useJobScraper() {
             updateStep("3", {
                 status: "in-progress",
                 description:
-                    `Fetching metadata & crawling ${jobLinks.length} pages...`,
+                    `Fetching metadata & crawling ${finalJobLinks.length} pages...`,
             });
 
             // Prepare initial details with [Pending] status immediately
-            const currentDetails = jobLinks.map((link: string) => {
+            const currentDetails = finalJobLinks.map((link: string) => {
                 const name = link.split("/").pop() || "Job page";
                 return `${name} - [Pending...]`;
             });
             updateStep("3", { details: currentDetails.slice(0, 8) });
 
             // Background: Fetch titles via link-preview to show real names while crawling
-            jobLinks.forEach((link: string, index: number) => {
+            finalJobLinks.forEach((link: string, index: number) => {
                 fetch(`/api/link-preview?url=${encodeURIComponent(link)}`)
                     .then((r) => r.json())
                     .then((meta) => {
@@ -202,7 +258,7 @@ export function useJobScraper() {
 
             const batchRes = await fetch("/api/firecrawl/batch-scrape", {
                 method: "POST",
-                body: JSON.stringify({ urls: jobLinks }),
+                body: JSON.stringify({ urls: finalJobLinks }),
             });
 
             if (!batchRes.ok) throw new Error("Batch scrape failed");
