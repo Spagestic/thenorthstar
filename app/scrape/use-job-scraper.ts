@@ -299,6 +299,7 @@ export function useJobScraper() {
                     details: ["No jobs to save"],
                 });
             }
+            return true;
         } catch (err: any) {
             console.error(err);
             const errorMessage = err.message || "Something went wrong.";
@@ -311,6 +312,7 @@ export function useJobScraper() {
                         : s
                 )
             );
+            return false;
         } finally {
             setLoading(false);
         }
