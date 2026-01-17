@@ -18,6 +18,13 @@ import { JobPosting } from "@/types/job-posting";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import ReactMarkdown from "react-markdown";
+import { useMemo } from "react";
+import {
+  formatEmploymentType,
+  formatWorkMode,
+  formatSalary,
+  formatLocation,
+} from "@/lib/utils";
 import {
   TypographyH1,
   TypographyH2,
@@ -37,32 +44,10 @@ interface JobDialogProps {
 }
 
 export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
-  const salaryString =
-    job.baseSalary?.minValue || job.baseSalary?.maxValue
-      ? `${
-          job.baseSalary.currency === "USD"
-            ? "$"
-            : job.baseSalary.currency || "$"
-        }${job.baseSalary.minValue?.toLocaleString() || ""}${
-          job.baseSalary.maxValue
-            ? ` - ${job.baseSalary.maxValue.toLocaleString()}`
-            : ""
-        }/${
-          job.baseSalary.unitText
-            ? job.baseSalary.unitText
-                .toLowerCase()
-                .replace("year", "yr")
-                .replace("month", "mo")
-            : "mo"
-        }`
-      : null;
-
-  const formatLocation = (loc: any) =>
-    loc?.rawAddress || [loc?.city, loc?.country].filter(Boolean).join(", ");
-
-  const locations = job.jobLocations?.map(formatLocation).filter(Boolean) || [];
-  const location =
-    locations.length > 0 ? locations.join("; ") : job.workMode || "Remote";
+  const salaryString = useMemo(() => formatSalary(job), [job]);
+  const location = useMemo(() => formatLocation(job), [job]);
+  const employmentType = formatEmploymentType(job.employmentType);
+  const workMode = formatWorkMode(job.workMode);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -102,14 +87,14 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
             </div>
 
             <div className="flex flex-wrap gap-2 mt-6">
-              {job.employmentType && (
+              {employmentType && (
                 <Badge variant="secondary" className="font-medium">
-                  {job.employmentType.replace("_", " ")}
+                  {employmentType}
                 </Badge>
               )}
-              {job.workMode && (
+              {workMode && (
                 <Badge variant="outline" className="font-medium">
-                  {job.workMode}
+                  {workMode}
                 </Badge>
               )}
               {salaryString && (
@@ -140,7 +125,7 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
               <Button size="sm" variant="default" asChild className="w-1/2">
                 <Link
                   href={`/call/practice?title=${encodeURIComponent(
-                    job.title || ""
+                    job.title || "",
                   )}&company=${encodeURIComponent(job.companyName || "")}`}
                   className="gap-2"
                 >

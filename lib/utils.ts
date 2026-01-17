@@ -1,3 +1,4 @@
+import { JobPosting } from "@/types/job-posting";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -72,4 +73,36 @@ export function formatEmploymentType(type?: string | null) {
 export function formatWorkMode(mode?: string | null) {
   if (!mode) return null;
   return WORK_MODE_LABELS[mode] || mode;
+}
+
+export function formatSalary(job: JobPosting) {
+  const min = job.baseSalary?.minValue;
+  const max = job.baseSalary?.maxValue;
+  if (!min && !max) return null;
+
+  const currency = job.baseSalary?.currency === "USD"
+    ? "$"
+    : job.baseSalary?.currency || "$";
+
+  // Match the reference: "$150 – 220k" (no /yr text, compact)
+  const fmt = (v?: number | null) => {
+    if (!v) return "";
+    // If your data is already in "k" units remove this. Otherwise it approximates the reference style.
+    if (v >= 1000) return `${Math.round(v / 1000)}k`;
+    return v.toLocaleString();
+  };
+
+  if (min && max) return `${currency}${fmt(min)} – ${fmt(max)}`;
+  if (min) return `${currency}${fmt(min)}`;
+  return `${currency}${fmt(max)}`;
+}
+
+export function formatLocation(job: JobPosting) {
+  const firstLocation = job.jobLocations?.[0];
+  return (
+    firstLocation?.rawAddress ||
+    [firstLocation?.city, firstLocation?.country].filter(Boolean).join(", ") ||
+    formatWorkMode(job.workMode) ||
+    "Remote"
+  );
 }

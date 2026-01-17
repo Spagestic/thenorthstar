@@ -4,41 +4,15 @@ import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bookmark, Phone } from "lucide-react";
-import Link from "next/link";
 import { JobPosting } from "@/types/job-posting";
 import { JobDialog } from "./job-dialog";
-import { formatTimeAgo, formatEmploymentType } from "@/lib/utils";
-
-function formatSalary(job: JobPosting) {
-  const min = job.baseSalary?.minValue;
-  const max = job.baseSalary?.maxValue;
-  if (!min && !max) return null;
-
-  const currency =
-    job.baseSalary?.currency === "USD" ? "$" : job.baseSalary?.currency || "$";
-
-  // Match the reference: "$150 – 220k" (no /yr text, compact)
-  const fmt = (v?: number | null) => {
-    if (!v) return "";
-    // If your data is already in "k" units remove this. Otherwise it approximates the reference style.
-    if (v >= 1000) return `${Math.round(v / 1000)}k`;
-    return v.toLocaleString();
-  };
-
-  if (min && max) return `${currency}${fmt(min)} – ${fmt(max)}`;
-  if (min) return `${currency}${fmt(min)}`;
-  return `${currency}${fmt(max)}`;
-}
-
-function formatLocation(job: JobPosting) {
-  const firstLocation = job.jobLocations?.[0];
-  return (
-    firstLocation?.rawAddress ||
-    [firstLocation?.city, firstLocation?.country].filter(Boolean).join(", ") ||
-    job.workMode ||
-    "Remote"
-  );
-}
+import {
+  formatTimeAgo,
+  formatEmploymentType,
+  formatWorkMode,
+  formatSalary,
+  formatLocation,
+} from "@/lib/utils";
 
 export function JobCard({ job }: { job: JobPosting }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -118,7 +92,7 @@ export function JobCard({ job }: { job: JobPosting }) {
             )}
             {job.workMode && (
               <span className="inline-flex items-center rounded-xl bg-muted px-3 py-1 text-sm text-foreground/80">
-                {job.workMode}
+                {formatWorkMode(job.workMode)}
               </span>
             )}
           </div>
