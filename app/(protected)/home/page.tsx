@@ -28,7 +28,7 @@ export default function HomePage({ searchParams }: PageProps) {
       <Header nav={["Manage Jobs"]} rightContent={<ScraperDialog />} />
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto  px-6 space-y-6">
-          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 py-4 -mx-6 px-6 border-b">
+          <div className="sticky top-0 z-10 bg-background  py-4 -mx-6 px-6 border-b">
             <div className="space-y-4 mx-auto">
               <Suspense fallback={<Skeleton className="h-10 w-full" />}>
                 <JobSearchBar />
@@ -154,7 +154,7 @@ export async function JobList({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {jobs.map((job: any) => (
         <JobCard
           key={job.id}
