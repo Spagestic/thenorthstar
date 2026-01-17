@@ -17,9 +17,10 @@ type NavItem = {
 
 type HeaderProps = {
   nav?: (string | NavItem)[];
+  rightContent?: React.ReactNode;
 };
 
-export default function Header({ nav }: HeaderProps) {
+export default function Header({ nav, rightContent }: HeaderProps) {
   // Fallback to default nav if not provided
   const rawItems = nav && nav.length > 0 ? nav : ["Dashboard"];
 
@@ -66,6 +67,9 @@ export default function Header({ nav }: HeaderProps) {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
+      {rightContent && (
+        <div className="flex items-center gap-2 px-4">{rightContent}</div>
+      )}
     </header>
   );
 }
