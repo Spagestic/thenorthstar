@@ -14,6 +14,10 @@ import { JobPosting } from "@/types/job-posting";
 import Link from "next/link";
 import { JobDialog } from "./job-dialog";
 
+function joinMeta(parts: Array<string | null | undefined>, sep = " · ") {
+  return parts.filter(Boolean).join(sep);
+}
+
 function formatTimeAgo(dateString?: string | null) {
   if (!dateString) return null;
   const date = new Date(dateString);
@@ -95,12 +99,12 @@ export function JobCard({ job }: { job: JobPosting }) {
         onClose={(open) => setIsDialogOpen(open)}
       />
       <Card
-        className="group relative overflow-hidden border-border bg-card hover:shadow-lg transition-all duration-300 rounded-xl cursor-pointer"
+        className="group relative overflow-hidden border-border bg-card hover:shadow-lg transition-all duration-300 rounded-xl cursor-pointer gap-2"
         onClick={() => setIsDialogOpen(true)}
       >
         <CardContent>
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/50 overflow-hidden">
+          <div className="flex items-start gap-2">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border border-border bg-muted/50 overflow-hidden">
               {job.companyLogo ? (
                 <img
                   src={job.companyLogo}
@@ -108,66 +112,48 @@ export function JobCard({ job }: { job: JobPosting }) {
                   className="h-full w-full object-contain"
                 />
               ) : job.companyName ? (
-                <span className="text-xl font-bold text-muted-foreground select-none">
+                <span className="text-sm font-bold text-muted-foreground select-none">
                   {job.companyName.charAt(0)}
                 </span>
               ) : (
-                <Building2 className="h-6 w-6 text-muted-foreground" />
+                <Building2 className="h-4 w-4 text-muted-foreground" />
               )}
             </div>
 
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
+              {/* Single line header: company + title */}
               <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <h3 className="text-lg font-semibold text-foreground/90 truncate">
-                    {job.companyName || "Unknown Company"}
-                  </h3>
+                <div className="min-w-0 text-sm font-semibold text-foreground/90 leading-5 truncate">
+                  {(job.companyName || "Unknown Company") + "  "}
+                  <span className="block min-w-0 font-bold text-foreground truncate">
+                    {job.title}
+                  </span>
+                  <p className="mt-0.5 text-xs text-muted-foreground truncate">
+                    {joinMeta([employmentType, locationText, timeAgo])}
+                  </p>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 -mr-2 -mt-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Bookmark logic could go here
-                  }}
-                >
-                  <Bookmark className="h-6 w-6" />
-                  <span className="sr-only">Bookmark</span>
-                </Button>
+
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-3 right-3 z-10 h-7 w-7 rounded-full bg-card/80 backdrop-blur text-muted-foreground hover:text-foreground hover:bg-muted"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // bookmark logic
+                    }}
+                  >
+                    <Bookmark className="h-4 w-4" />
+                    <span className="sr-only">Bookmark</span>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-          <div className="mt-6 space-y-2">
-            {/* Title: always 1 line */}
-            <h2 className="text-base font-bold leading-snug text-foreground line-clamp-1 group-hover:text-primary transition-colors">
-              {job.title}
-            </h2>
-
-            {/* Meta row: also 1 line so it doesn’t wrap and change height */}
-            <div className="text-sm text-foreground/80 line-clamp-1">
-              {salaryString && (
-                <span className="font-medium">{salaryString}</span>
-              )}
-              {salaryString && employmentType && <span> · </span>}
-              {employmentType && (
-                <span className="font-medium">{employmentType} job</span>
-              )}
-            </div>
-
-            {/* Location/time: keep to 1 line too */}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
-              <MapPin className="w-4 h-4 shrink-0" />
-              <span className="line-clamp-1 min-w-0">
-                {location}
-                {timeAgo ? ` • ${timeAgo}` : ""}
-              </span>
-            </div>
-          </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="">
           {job.directApplyUrl && (
-            <div className="pt-4 border-t border-border flex gap-2 w-full">
+            <div className="pt-2 border-t border-border flex gap-2 w-full">
               <Button
                 size="sm"
                 asChild
