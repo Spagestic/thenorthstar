@@ -3,12 +3,12 @@ export type JobPosting = {
     companyName?: string | null;
     companyLogo?: string | null;
     url?: string | null;
-    jobLocation?: {
+    jobLocations?: {
         city?: string | null;
         state?: string | null;
         country?: string | null;
         rawAddress?: string | null;
-    } | null;
+    }[] | null;
     workMode?: "REMOTE" | "HYBRID" | "ONSITE" | "UNKNOWN" | null;
     employmentType?:
         | "FULL_TIME"

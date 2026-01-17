@@ -57,13 +57,12 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
         }`
       : null;
 
+  const formatLocation = (loc: any) =>
+    loc?.rawAddress || [loc?.city, loc?.country].filter(Boolean).join(", ");
+
+  const locations = job.jobLocations?.map(formatLocation).filter(Boolean) || [];
   const location =
-    job.jobLocation?.rawAddress ||
-    [job.jobLocation?.city, job.jobLocation?.country]
-      .filter(Boolean)
-      .join(", ") ||
-    job.workMode ||
-    "Remote";
+    locations.length > 0 ? locations.join("; ") : job.workMode || "Remote";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

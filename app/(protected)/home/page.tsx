@@ -58,7 +58,7 @@ export async function JobList() {
             directApplyUrl: job.direct_apply_url,
             employmentType: job.employment_type as any,
             datePosted: job.posted_at,
-            jobLocation: job.location as any,
+            jobLocations: job.location as any,
             baseSalary:
               job.salary_min || job.salary_max
                 ? {

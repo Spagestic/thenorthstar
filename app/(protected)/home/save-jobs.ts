@@ -98,7 +98,7 @@ export async function saveJobsToSupabase(
                 "Unknown Company",
             company_id: companyId, // Link to the companies table
             description: job.description || "",
-            location: job.jobLocation, // JSONB column
+            location: job.jobLocations, // JSONB column
             work_mode: job.workMode,
             employment_type: job.employmentType,
 

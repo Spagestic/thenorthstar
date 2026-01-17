@@ -24,12 +24,15 @@ export const JobPostingSchema = z.object({
         .optional(),
 
     // Location & Work Mode
-    jobLocation: z.object({
+    // Updated to array to support multiple locations (e.g. Los Angeles, CA; New York, NY)
+    jobLocations: z.array(z.object({
         city: z.string().nullable().optional(),
         state: z.string().nullable().optional(),
         country: z.string().nullable().optional(),
         rawAddress: z.string().nullable().optional(),
-    }).nullable().optional(),
+    })).nullable().optional().describe(
+        "List of physical locations where the job is available",
+    ),
 
     // Replaces boolean isRemote. Matches real-world filtering needs better.
     workMode: z.enum(["REMOTE", "HYBRID", "ONSITE", "UNKNOWN"])

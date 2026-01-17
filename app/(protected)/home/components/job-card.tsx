@@ -74,13 +74,18 @@ export function JobCard({ job }: { job: JobPosting }) {
         }`
       : null;
 
-  const location =
-    job.jobLocation?.rawAddress ||
-    [job.jobLocation?.city, job.jobLocation?.country]
-      .filter(Boolean)
-      .join(", ") ||
+  const firstLocation = job.jobLocations?.[0];
+  const locationText =
+    firstLocation?.rawAddress ||
+    [firstLocation?.city, firstLocation?.country].filter(Boolean).join(", ") ||
     job.workMode ||
     "Remote";
+
+  const additionalLocationsCount = (job.jobLocations?.length || 0) - 1;
+  const location =
+    additionalLocationsCount > 0
+      ? `${locationText} +${additionalLocationsCount} more`
+      : locationText;
 
   return (
     <div>
