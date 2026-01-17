@@ -204,24 +204,20 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
         </div>
       </DialogContent>
       <DialogFooter>
-        <div className="pt-8 border-t flex flex-wrap gap-x-8 gap-y-4 text-xs text-muted-foreground">
-          {job.datePosted && (
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span>
-                Posted: {new Date(job.datePosted).toLocaleDateString()}
-              </span>
-            </div>
-          )}
-          {job.validThrough && (
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span>
-                Expires: {new Date(job.validThrough).toLocaleDateString()}
-              </span>
-            </div>
-          )}
-        </div>
+        {job.datePosted && (
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            <span>Posted: {new Date(job.datePosted).toLocaleDateString()}</span>
+          </div>
+        )}
+        {job.validThrough && (
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            <span>
+              Expires: {new Date(job.validThrough).toLocaleDateString()}
+            </span>
+          </div>
+        )}
       </DialogFooter>
     </Dialog>
   );
