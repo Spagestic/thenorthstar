@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   Bookmark,
   MapPin,
@@ -159,8 +159,10 @@ export function JobCard({ job }: { job: JobPosting }) {
               </span>
             </div>
           </div>
+        </CardContent>
+        <CardFooter>
           {job.directApplyUrl && (
-            <div className="mt-4 pt-4 border-t border-border flex gap-2 w-full">
+            <div className="pt-4 border-t border-border flex gap-2 w-full">
               <Button
                 size="sm"
                 asChild
@@ -173,7 +175,7 @@ export function JobCard({ job }: { job: JobPosting }) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Apply Now
+                  Apply
                   <ExternalLink className="h-4 w-4" />
                 </Link>
               </Button>
@@ -186,12 +188,12 @@ export function JobCard({ job }: { job: JobPosting }) {
               >
                 <Link href={"#"}>
                   <PhoneCall className="h-4 w-4" />
-                  Practice Interview
+                  Practice
                 </Link>
               </Button>
             </div>
           )}
-        </CardContent>
+        </CardFooter>
       </Card>
     </div>
   );
