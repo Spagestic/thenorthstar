@@ -9,15 +9,15 @@ export default function HomePage() {
     <div className="flex flex-col h-screen">
       <Header nav={["Manage Jobs"]} />
       <div className="flex-1 overflow-y-auto">
-        <div className=" mx-auto py-10 px-6 ">
-          <section className="bg-card p-8 rounded-xl border shadow-sm">
+        <div className="mx-auto py-10 px-6 space-y-2">
+          <section className="bg-card p-8 rounded-xl border shadow-sm mb-8">
             <ScraperInterface />
           </section>
 
-          <section className="space-y-0">
+          <section>
             <Suspense
               fallback={
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[...Array(6)].map((_, i) => (
                     <div
                       key={i}
@@ -46,7 +46,7 @@ export async function JobList() {
     .limit(10);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {jobs?.map((job: any) => (
         <JobCard
           key={job.id}

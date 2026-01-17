@@ -90,11 +90,11 @@ export function JobCard({ job }: { job: JobPosting }) {
         onClose={(open) => setIsDialogOpen(open)}
       />
       <Card
-        className="group relative overflow-hidden border-border bg-card hover:shadow-md transition-all duration-300 rounded-xl cursor-pointer"
+        className="group relative overflow-hidden border-border bg-card hover:shadow-lg transition-all duration-300 rounded-xl cursor-pointer"
         onClick={() => setIsDialogOpen(true)}
       >
         <CardContent>
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/50 overflow-hidden">
               {job.companyLogo ? (
                 <img
@@ -133,31 +133,30 @@ export function JobCard({ job }: { job: JobPosting }) {
               </div>
             </div>
           </div>
-          <div className="mt-4 space-y-1">
-            <h2 className="text-base font-bold leading-snug text-foreground line-clamp-2 group-hover:text-primary transition-colors cursor-pointer">
+          <div className="mt-6 space-y-2">
+            {/* Title: always 1 line */}
+            <h2 className="text-base font-bold leading-snug text-foreground line-clamp-1 group-hover:text-primary transition-colors">
               {job.title}
             </h2>
-            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm text-foreground/80">
+
+            {/* Meta row: also 1 line so it doesn’t wrap and change height */}
+            <div className="text-sm text-foreground/80 line-clamp-1">
               {salaryString && (
-                <>
-                  <span className="font-medium">{salaryString}</span>
-                  <span>·</span>
-                </>
+                <span className="font-medium">{salaryString}</span>
               )}
+              {salaryString && employmentType && <span> · </span>}
               {employmentType && (
                 <span className="font-medium">{employmentType} job</span>
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPin className="w-4 h-4" />
-              <span>{location}</span>
-              {timeAgo && (
-                <>
-                  <span className="text-muted-foreground/50">•</span>
-                  <span>{timeAgo}</span>
-                </>
-              )}
+            {/* Location/time: keep to 1 line too */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+              <MapPin className="w-4 h-4 shrink-0" />
+              <span className="line-clamp-1 min-w-0">
+                {location}
+                {timeAgo ? ` • ${timeAgo}` : ""}
+              </span>
             </div>
           </div>
           {job.directApplyUrl && (
