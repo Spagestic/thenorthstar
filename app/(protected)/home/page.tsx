@@ -1,22 +1,41 @@
-import { createClient } from "@/lib/supabase/server";
-import { JobCard } from "./job-card";
 import { Suspense } from "react";
+import { ScraperInterface } from "./scraper-interface";
+import Header from "../Header";
+import { createClient } from "@/lib/supabase/server";
+import { JobCard } from "./components/job-card";
 
-export default function Page() {
+export default function HomePage() {
   return (
-    <div className="container mx-auto py-8">
-      <Suspense
-        fallback={
-          <div className="p-8 text-center text-muted-foreground">
-            Loading jobs...
-          </div>
-        }
-      >
-        <JobList />
-      </Suspense>
+    <div className="flex flex-col h-screen">
+      <Header nav={["Manage Jobs"]} />
+      <div className="flex-1 overflow-y-auto">
+        <div className=" mx-auto py-10 px-6 ">
+          <section className="bg-card p-8 rounded-xl border shadow-sm">
+            <ScraperInterface />
+          </section>
+
+          <section className="space-y-0">
+            <Suspense
+              fallback={
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-75 w-full bg-muted animate-pulse rounded-xl"
+                    />
+                  ))}
+                </div>
+              }
+            >
+              <JobList />
+            </Suspense>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }
+
 export async function JobList() {
   const supabase = await createClient();
 

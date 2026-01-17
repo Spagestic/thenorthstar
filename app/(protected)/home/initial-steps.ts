@@ -1,4 +1,4 @@
-import { ScraperStep } from "@/app/scrape/components/scraper-progress";
+import { ScraperStep } from "@/app/(protected)/home/components/scraper-progress";
 
 export const INITIAL_STEPS: ScraperStep[] = [
     {

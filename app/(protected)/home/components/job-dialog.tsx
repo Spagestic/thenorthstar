@@ -12,7 +12,6 @@ import {
   MapPin,
   Calendar,
   ExternalLink,
-  ChevronRight,
   PhoneCall,
 } from "lucide-react";
 import { JobPosting } from "@/types/job-posting";
