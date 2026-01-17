@@ -19,11 +19,13 @@ export function useJobScraper() {
         );
     };
 
-    const startScrape = async (rawUrl: string) => {
+    const startScrape = async (rawUrl: string, isRecoveryAttempt = false) => {
         setLoading(true);
         setError("");
-        setJobs([]);
-        setSteps(INITIAL_STEPS);
+        if (!isRecoveryAttempt) {
+            setJobs([]);
+            setSteps(INITIAL_STEPS);
+        }
         const normalizedUrl = normalizeUrl(rawUrl);
         let companyMetadata:
             | { name: string; website: string; logoUrl?: string }
@@ -82,6 +84,61 @@ export function useJobScraper() {
             const { jobLinks } = await linksRes.json();
 
             if (!jobLinks || jobLinks.length === 0) {
+                if (!isRecoveryAttempt) {
+                    updateStep("2", {
+                        description:
+                            "No jobs found. Searching for main careers page...",
+                        status: "in-progress",
+                    });
+
+                    try {
+                        const rootUrl = new URL(normalizedUrl).origin;
+                        const mapRes = await fetch("/api/firecrawl/map", {
+                            method: "POST",
+                            body: JSON.stringify({
+                                url: rootUrl,
+                                search: "careers jobs openings",
+                                limit: 5,
+                            }),
+                        });
+
+                        if (mapRes.ok) {
+                            const mapData = await mapRes.json();
+                            const links = mapData.data || mapData.links || []; // Check both fields just in case
+                            // Filter for likely candidates, excluding the current one
+                            const candidates = links.filter((l: string) => {
+                                try {
+                                    return l !== normalizedUrl &&
+                                        new URL(l).pathname !==
+                                            new URL(normalizedUrl).pathname;
+                                } catch {
+                                    return false;
+                                }
+                            });
+
+                            // Heuristic: prefer /careers or /jobs
+                            const bestCandidate = candidates.find((l: string) =>
+                                l.includes("/careers") || l.includes("/jobs")
+                            ) || candidates[0];
+
+                            if (bestCandidate) {
+                                updateStep("2", {
+                                    description:
+                                        `Redirecting to: ${bestCandidate}`,
+                                    status: "completed",
+                                    details: [
+                                        `Original: ${normalizedUrl}`,
+                                        `New Target: ${bestCandidate}`,
+                                    ],
+                                });
+
+                                return startScrape(bestCandidate, true);
+                            }
+                        }
+                    } catch (mapErr) {
+                        console.error("Map search failed", mapErr);
+                    }
+                }
                 throw new Error("No job links found.");
             }
 
