@@ -70,7 +70,7 @@ export function JobPostingsFilters({
           onValueChange={(value) => updateFilter("employmentType", value)}
           disabled={isPending}
         >
-          <SelectTrigger className="w-45">
+          <SelectTrigger className="w-36">
             <SelectValue placeholder="Employment Type" />
           </SelectTrigger>
           <SelectContent>
@@ -88,7 +88,7 @@ export function JobPostingsFilters({
           onValueChange={(value) => updateFilter("workMode", value)}
           disabled={isPending}
         >
-          <SelectTrigger className="w-45">
+          <SelectTrigger className="w-36">
             <SelectValue placeholder="Work Mode" />
           </SelectTrigger>
           <SelectContent>
