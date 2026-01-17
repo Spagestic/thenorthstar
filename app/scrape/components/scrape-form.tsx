@@ -15,7 +15,7 @@ export function ScrapeForm({
   loading,
 }: ScrapeFormProps) {
   return (
-    <form onSubmit={onScrape} className="flex gap-4 mb-8">
+    <form onSubmit={onScrape} className="flex gap-4">
       <div className="grid w-full items-center gap-1.5 flex-1">
         <UrlInput value={url} onChange={setUrl} />
       </div>

@@ -34,7 +34,7 @@ export function ScraperProgress({ steps }: ScraperProgressProps) {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto mb-8">
+    <div className="w-full max-w-3xl mx-auto">
       <div className="bg-card border rounded-lg shadow-sm overflow-hidden">
         <LayoutGroup>
           <div className="p-2">
@@ -91,10 +91,10 @@ export function ScraperProgress({ steps }: ScraperProgressProps) {
                               isCompleted
                                 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                                 : isInProgress
-                                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                                : isFailed
-                                ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                                : "text-muted-foreground bg-muted"
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                                  : isFailed
+                                    ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                    : "text-muted-foreground bg-muted"
                             }`}
                           >
                             {step.status === "in-progress"

@@ -86,7 +86,7 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-12 gap-y-6 mb-12 py-8 border-y bg-accent/5 -mx-6 md:-mx-8 px-6 md:px-8">
+            <div className="grid grid-cols-2 gap-x-12 gap-y-6 py-8 border-y bg-accent/5 -mx-6 md:-mx-8 px-6 md:px-8">
               <div>
                 <p className="text-xs uppercase tracking-wider font-medium text-muted-foreground mb-2">
                   Category
