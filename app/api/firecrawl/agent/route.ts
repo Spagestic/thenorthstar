@@ -1,5 +1,6 @@
 // app/api/firecrawl/agent/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { FirecrawlAgentRequestBody } from "./types";
 
 const FIRECRAWL_BASE_URL = "https://api.firecrawl.dev/v2";
 
@@ -12,14 +13,15 @@ function getApiKey() {
 // POST: start an agent job
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json();
+        const body = (await request.json()) as FirecrawlAgentRequestBody;
 
-        const prompt: string | undefined = body?.prompt;
-        const urls: string[] | undefined = body?.urls;
-        const schema: Record<string, any> | undefined = body?.schema;
-        const maxCredits: number | undefined = body?.maxCredits;
-        const strictConstrainToURLs: boolean | undefined = body
-            ?.strictConstrainToURLs;
+        const {
+            prompt,
+            urls,
+            schema,
+            maxCredits,
+            strictConstrainToURLs,
+        } = body;
 
         if (!prompt || typeof prompt !== "string") {
             return NextResponse.json(

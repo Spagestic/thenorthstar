@@ -1,19 +1,7 @@
 // app/api/firecrawl/map/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { firecrawl } from "../firecrawlClient";
-
-type SitemapMode = "include" | "skip" | "only";
-
-interface MapRequestBody {
-    url?: string;
-    limit?: number;
-    sitemap?: SitemapMode;
-    search?: string;
-    location?: {
-        country?: string; // ISO 3166-1 alpha-2, e.g. 'US'
-        languages?: string[]; // e.g. ['en', 'zh-HK']
-    };
-}
+import { MapRequestBody, SitemapMode } from "./types";
 
 export async function POST(req: NextRequest) {
     let body: MapRequestBody;
