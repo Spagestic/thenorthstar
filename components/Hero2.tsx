@@ -4,7 +4,7 @@ import { AuthButton } from "./auth-button";
 import { FlowButton } from "./ui/flow-button";
 import { rgbDataURL } from "@/lib/utils";
 import { Highlighter } from "@/components/ui/highlighter";
-import { PointerHighlight } from "@/components/ui/pointer-highlight";
+import { FloatingCursors } from "./floating-cursors";
 
 export default function Hero2() {
   return (
@@ -24,6 +24,9 @@ export default function Hero2() {
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
+
+      {/* Floating Cursors Layer */}
+      <FloatingCursors />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col min-h-screen">
