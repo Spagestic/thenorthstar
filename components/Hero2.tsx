@@ -3,6 +3,8 @@ import Link from "next/link";
 import { AuthButton } from "./auth-button";
 import { FlowButton } from "./ui/flow-button";
 import { rgbDataURL } from "@/lib/utils";
+import { Highlighter } from "@/components/ui/highlighter";
+import { PointerHighlight } from "@/components/ui/pointer-highlight";
 
 export default function Hero2() {
   return (
@@ -67,9 +69,15 @@ export default function Hero2() {
         {/* Hero Content */}
         <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">
           <h1 className="text-white font-bold mb-6 leading-tight max-w-6xl text-5xl md:text-6xl lg:text-6xl xl:text-7xl">
-            Master your
+            <Highlighter action="underline" color="#FF9800">
+              Master
+            </Highlighter>{" "}
+            your
             <br />
-            Interview Skills
+            Interview{" "}
+            <Highlighter action="box" color="#FF9800">
+              Skills
+            </Highlighter>
           </h1>
 
           <p className="text-secondary text-base md:text-lg lg:text-xl max-w-3xl mb-8 opacity-90">
