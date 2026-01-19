@@ -1,13 +1,17 @@
 // @/app/(protected)/history/[id]/page.tsx
 import { Suspense } from "react";
-import { PageSkeleton } from "./page-skeleton"; // Your existing skeleton
+import { PageSkeleton } from "./page-skeleton";
 import { createClient } from "@/lib/supabase/server";
 import Header from "@/app/(protected)/Header";
 import { getConversation } from "./actions";
-import { AudioPlayerSection } from "./components/audio-player-section"; // Client
-import { AnalysisSection } from "./components/analysis-section"; // Server
-import { TranscriptSection } from "./components/transcript-section"; // Server
+import { TranscriptSection } from "./components/transcript-section";
 import { ErrorToaster } from "./components/error-toaster";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
+import { getCompanyLogo } from "@/lib/company-logos";
+import { format } from "date-fns";
 
 export default async function Page({
   params,
@@ -56,8 +60,13 @@ export async function ConversationContainer({
     industry: { name: "Unknown Industry" },
   };
 
+  const feedback = conversation?.feedback as any;
+  const startedAt = conversation?.started_at
+    ? new Date(conversation.started_at)
+    : new Date();
+
   return (
-    <div>
+    <div className="min-h-screen bg-background">
       <ErrorToaster error={finalError} />
       <Header
         nav={[
@@ -66,25 +75,138 @@ export async function ConversationContainer({
           { label: jobData.title, href: `/job/${jobData.id}` },
         ]}
       />
-      <div className="container mx-auto p-6 max-w-6xl space-y-6">
-        <AudioPlayerSection
-          conversationId={id}
-          startedAt={conversation?.started_at || new Date().toISOString()}
-          jobTitle={jobData.title}
-          companyName={jobData.company.name}
-          industryName={jobData.industry.name}
-          duration={elevenlabs.metadata?.call_duration_secs}
-          status={elevenlabs.status}
-          transcriptSummary={elevenlabs.analysis?.transcript_summary}
-        />
-        <AnalysisSection
-          analysis={elevenlabs.analysis}
-          feedback={conversation?.feedback as any}
-        />
-        <TranscriptSection
-          transcript={elevenlabs.transcript}
-          conversationId={id}
-        />
+      <div className="container mx-auto p-6 max-w-5xl space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-semibold text-foreground">
+                Interview Results
+              </h1>
+              <Badge
+                variant="outline"
+                className="text-muted-foreground font-normal bg-muted/50"
+              >
+                ID: ...{id.slice(-7)}
+              </Badge>
+            </div>
+            <div className="text-muted-foreground text-sm">
+              {format(startedAt, "MMM d, h:mm a")}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {getCompanyLogo(jobData.company.name) && (
+              <div className="relative h-12 w-12 overflow-hidden rounded-full bg-white p-1 shadow-sm ring-1 ring-border">
+                <Image
+                  src={getCompanyLogo(jobData.company.name)}
+                  alt={jobData.company.name}
+                  className="h-full w-full object-contain"
+                  fill
+                />
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                {jobData.company.name}
+              </p>
+              <h2 className="text-xl font-semibold">{jobData.title}</h2>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs Section */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b rounded-none mb-6">
+            <TabsTrigger
+              value="overview"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="transcription"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2"
+            >
+              Transcription
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent
+            value="overview"
+            className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-2"
+          >
+            {/* Summary */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-lg">Summary</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                {feedback?.summary ||
+                  "No summary available for this interview."}
+              </p>
+            </div>
+
+            <Separator />
+
+            {/* Stage Feedback */}
+            <div className="space-y-6">
+              <h3 className="font-semibold text-lg">Stage Feedback</h3>
+
+              {/* Introduction */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-foreground">Introduction</h4>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {feedback?.communication_score || 0}/10
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {feedback?.stage_feedback?.introduction ||
+                    "No feedback available."}
+                </p>
+                <Separator className="mt-4" />
+              </div>
+
+              {/* Technical */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-foreground">Technical</h4>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {feedback?.technical_score || 0}/10
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {feedback?.stage_feedback?.technical ||
+                    "No feedback available."}
+                </p>
+                <Separator className="mt-4" />
+              </div>
+
+              {/* Behavioral */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-foreground">Behavioral</h4>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {feedback?.behavioral_score || 0}/10
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {feedback?.stage_feedback?.behavioral ||
+                    "No feedback available."}
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent
+            value="transcription"
+            className="animate-in fade-in-50 slide-in-from-bottom-2"
+          >
+            <TranscriptSection
+              transcript={elevenlabs.transcript}
+              conversationId={id}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
