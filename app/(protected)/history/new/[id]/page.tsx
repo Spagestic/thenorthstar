@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { getCompanyLogo } from "@/lib/company-logos";
 import { format } from "date-fns";
+import { Copy } from "lucide-react";
 
 export default async function Page({
   params,
@@ -87,6 +88,7 @@ export async function ConversationContainer({
                 variant="outline"
                 className="text-muted-foreground font-normal bg-muted/50"
               >
+                <Copy />
                 ID: ...{id.slice(-7)}
               </Badge>
             </div>
@@ -117,16 +119,16 @@ export async function ConversationContainer({
 
         {/* Tabs Section */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b rounded-none mb-6">
+          <TabsList className="w-full h-auto gap-2 rounded-none border-b border-border bg-transparent px-0 py-1 text-foreground">
             <TabsTrigger
               value="overview"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2"
+              className="relative after:absolute after:inset-x-0 after:bottom-0 after:-mb-1 after:h-0.5 hover:bg-accent hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:bg-primary data-[state=active]:hover:bg-accent"
             >
               Overview
             </TabsTrigger>
             <TabsTrigger
               value="transcription"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2"
+              className="relative after:absolute after:inset-x-0 after:bottom-0 after:-mb-1 after:h-0.5 hover:bg-accent hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:bg-primary data-[state=active]:hover:bg-accent"
             >
               Transcription
             </TabsTrigger>
@@ -134,7 +136,7 @@ export async function ConversationContainer({
 
           <TabsContent
             value="overview"
-            className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-2"
+            className="space-y-8 py-6 animate-in fade-in-50 slide-in-from-bottom-2"
           >
             {/* Summary */}
             <div className="space-y-3">
@@ -150,49 +152,54 @@ export async function ConversationContainer({
             {/* Stage Feedback */}
             <div className="space-y-6">
               <h3 className="font-semibold text-lg">Stage Feedback</h3>
-
+              <Separator className="" />
               {/* Introduction */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium text-foreground">Introduction</h4>
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {feedback?.communication_score || 0}/10
-                  </span>
+              <div className="px-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-foreground">
+                      Introduction
+                    </h4>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {feedback?.communication_score || 0}/10
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {feedback?.stage_feedback?.introduction ||
+                      "No feedback available."}
+                  </p>
+                  <Separator className="my-4" />
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {feedback?.stage_feedback?.introduction ||
-                    "No feedback available."}
-                </p>
-                <Separator className="mt-4" />
-              </div>
 
-              {/* Technical */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium text-foreground">Technical</h4>
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {feedback?.technical_score || 0}/10
-                  </span>
+                {/* Technical */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-foreground">Technical</h4>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {feedback?.technical_score || 0}/10
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {feedback?.stage_feedback?.technical ||
+                      "No feedback available."}
+                  </p>
+                  <Separator className="my-4" />
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {feedback?.stage_feedback?.technical ||
-                    "No feedback available."}
-                </p>
-                <Separator className="mt-4" />
-              </div>
 
-              {/* Behavioral */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium text-foreground">Behavioral</h4>
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {feedback?.behavioral_score || 0}/10
-                  </span>
+                {/* Behavioral */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-foreground">Behavioral</h4>
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {feedback?.behavioral_score || 0}/10
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {feedback?.stage_feedback?.behavioral ||
+                      "No feedback available."}
+                  </p>
+                  <Separator className="my-4" />
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {feedback?.stage_feedback?.behavioral ||
-                    "No feedback available."}
-                </p>
               </div>
             </div>
           </TabsContent>
