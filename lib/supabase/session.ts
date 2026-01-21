@@ -1,7 +1,9 @@
+// lib/supabase/session.ts
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 export default async function updateSession(request: NextRequest) {
+  // 1. Initialize the response
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -29,19 +31,28 @@ export default async function updateSession(request: NextRequest) {
     },
   );
 
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  // 2. Get the current user
+  // Note: Standard Supabase SSR usually uses .getUser(), but we'll use your existing pattern
+  const { data } = await supabase.auth.getUser();
+  const user = data?.user;
 
-  // 1. Define your public paths based on your folder structure
   const path = request.nextUrl.pathname;
 
-  const isPublicPath = path === "/" || // Landing page (app/(public)/page.tsx)
-    path.startsWith("/privacy") || // Privacy page
-    path.startsWith("/terms") || // Terms page
-    path.startsWith("/auth"); // All auth routes (login, signup, etc.)
-  // path.startsWith("/api"); // Exclude API routes from redirecting to HTML login pages
+  // If user is logged in and tries to access login or sign-up, send them to dashboard
+  if (
+    user && (path.startsWith("/auth/login") || path.startsWith("/auth/sign-up"))
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
 
-  // 2. Only redirect if no user AND the path is NOT public
+  const isPublicPath = path === "/" ||
+    path.startsWith("/privacy") ||
+    path.startsWith("/terms") ||
+    path.startsWith("/auth");
+
+  // If no user and trying to access a private route, redirect to login
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
