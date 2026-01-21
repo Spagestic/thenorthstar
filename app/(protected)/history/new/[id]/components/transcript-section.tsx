@@ -9,9 +9,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Message, MessageContent } from "@/components/ui/message";
-import { Orb } from "@/components/ui/orb";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 import {
   AudioPlayerProvider,
   AudioPlayerButton,
@@ -20,6 +18,7 @@ import {
   AudioPlayerDuration,
   AudioPlayerSpeed,
 } from "@/components/ui/audio-player";
+import Image from "next/image";
 
 export function TranscriptSection({
   transcript,
@@ -108,7 +107,15 @@ export function TranscriptSection({
                   <MessageContent>
                     <p className="whitespace-pre-wrap">{msg.message}</p>
                   </MessageContent>
-                  {msg.role === "agent" && <Orb className="size-8" />}
+                  {msg.role === "agent" && (
+                    <Image
+                      src={"/orb.png"}
+                      alt="Orb"
+                      width={14}
+                      height={14}
+                      className="size-8 rounded-full"
+                    />
+                  )}
                 </Message>
               ))}
             </div>
