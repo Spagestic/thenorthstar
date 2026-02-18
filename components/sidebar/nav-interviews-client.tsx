@@ -1,6 +1,12 @@
 "use client";
 
-import { Download, Forward, MoreHorizontal, Trash2 } from "lucide-react";
+import {
+  Download,
+  Forward,
+  MoreHorizontal,
+  PhoneCall,
+  Trash2,
+} from "lucide-react";
 import { IconPin, IconArchive } from "@tabler/icons-react";
 import Image from "next/image";
 import {
@@ -19,13 +25,16 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { CompanyLogo } from "../CompanyLogo";
+import { Avatar } from "@radix-ui/react-avatar";
+import { AvatarFallback } from "../ui/avatar";
 
 type Interview = {
   id: string;
   conversationId: string;
   name: string;
   company: string;
-  logo: { src: string } | null;
+  domain: string;
   url: string;
   startedAt: string | null;
 };
@@ -56,13 +65,10 @@ export function NavInterviewsClient({ interviews }: NavInterviewsClientProps) {
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
-                <Image
-                  src={item.logo?.src || "/logos/default.png"}
-                  alt={item.company}
-                  width={16}
-                  height={16}
-                  className="h-4 w-4"
-                />
+                <span className="text-sm font-semibold text-muted-foreground">
+                  {(item.company || "C").slice(0, 1)}
+                </span>
+
                 <span>{item.name}</span>
               </a>
             </SidebarMenuButton>
