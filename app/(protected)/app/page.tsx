@@ -4,9 +4,10 @@ import Header from "../Header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createClient } from "@/lib/supabase/server";
 import { JobCard } from "../jobs/components/job-card";
-
+import Link from "next/link";
 import type { SearchParams } from "nuqs/server";
 import { ScrapeInput } from "./components/scrape-input";
+import { Button } from "@/components/ui/button";
 
 interface PageProps {
   searchParams: Promise<SearchParams>;
@@ -17,9 +18,9 @@ export default function HomePage({ searchParams }: PageProps) {
     <div className="flex flex-col h-screen">
       <Header nav={["Dashboard"]} />
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl px-6 py-8 space-y-8">
+        <div className="mx-auto px-6 py-8 space-y-8">
           {/* Hero Scrape Section */}
-          <section className="text-center space-y-4 pt-4">
+          <section className="text-center space-y-4 pt-16">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold tracking-tight">
                 Practice for your next interview
@@ -68,7 +69,7 @@ async function RecentScrapes() {
     .from("job_postings")
     .select("*")
     .order("created_at", { ascending: false })
-    .limit(6);
+    .limit(8);
 
   if (!jobs || jobs.length === 0) {
     return (
@@ -83,8 +84,13 @@ async function RecentScrapes() {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-xl font-semibold tracking-tight">Recent scrapes</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-xl font-semibold tracking-tight">Recent scrapes</h2>
+        <Button variant="ghost">
+          <Link href="/jobs">View all</Link>
+        </Button>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {jobs.map((job: any) => (
           <JobCard
             key={job.id}
