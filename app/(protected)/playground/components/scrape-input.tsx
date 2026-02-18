@@ -134,57 +134,6 @@ export function ScrapeInput() {
           </p>
         )}
       </form>
-
-      {extractedJob && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Extracted job details</CardTitle>
-            <CardDescription>
-              Results are shown below and saved to your job postings.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-2 text-sm">
-              <p>
-                <span className="font-medium">Title:</span>{" "}
-                {extractedJob.title || "Unknown"}
-              </p>
-              <p>
-                <span className="font-medium">Company:</span>{" "}
-                {extractedJob.companyName || "Unknown"}
-              </p>
-              <p className="break-all">
-                <span className="font-medium">URL:</span>{" "}
-                <a
-                  href={extractedJob.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline underline-offset-2"
-                >
-                  {extractedJob.url}
-                </a>
-              </p>
-              <div className="flex flex-wrap gap-2 pt-1">
-                {extractedJob.workMode && (
-                  <Badge variant="secondary">{extractedJob.workMode}</Badge>
-                )}
-                {extractedJob.employmentType && (
-                  <Badge variant="outline">{extractedJob.employmentType}</Badge>
-                )}
-              </div>
-            </div>
-
-            <details className="rounded-md border p-3">
-              <summary className="cursor-pointer text-sm font-medium">
-                View raw extracted JSON
-              </summary>
-              <pre className="mt-3 overflow-x-auto text-xs leading-relaxed">
-                {JSON.stringify(extractedJob, null, 2)}
-              </pre>
-            </details>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
