@@ -28,19 +28,21 @@ export async function ConversationContainer({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-
+  console.log("Fetching conversation with ID:", id);
   const { data: conversation } = await supabase
-    .from("voice_conversations")
+    .from("interviews")
     .select(
       `
-      id, conversation_id, started_at,
-      job:job_positions!inner(
-        id, title, 
-        company:companies!inner(name), 
-        industry:industry!inner(name)
+      id,
+      conversation_id,
+      started_at,
+      job:job_postings(
+        title,
+        company_name
       )
-    `
+    `,
     )
+    // .eq("user_id", user.id)
     .eq("conversation_id", id)
     .single();
 
@@ -53,7 +55,6 @@ export async function ConversationContainer({
     id: "unknown",
     title: "Unknown Position",
     company: { name: "Unknown Company" },
-    industry: { name: "Unknown Industry" },
   };
 
   return (
@@ -62,7 +63,7 @@ export async function ConversationContainer({
       <Header
         nav={[
           { label: "History", href: "/dashboard" },
-          { label: jobData.company.name, href: "#" },
+          { label: jobData.company_name, href: "#" },
           { label: jobData.title, href: `/job/${jobData.id}` },
         ]}
       />
@@ -71,8 +72,7 @@ export async function ConversationContainer({
           conversationId={id}
           startedAt={conversation?.started_at || new Date().toISOString()}
           jobTitle={jobData.title}
-          companyName={jobData.company.name}
-          industryName={jobData.industry.name}
+          companyName={jobData.company_name}
           duration={elevenlabs.metadata?.call_duration_secs}
           status={elevenlabs.status}
           transcriptSummary={elevenlabs.analysis?.transcript_summary}
