@@ -66,7 +66,7 @@ async function RecentScrapes() {
 
   const { data: jobs } = await supabase
     .from("job_postings")
-    .select("*, company:companies(name, website, logo_url)")
+    .select("*")
     .order("created_at", { ascending: false })
     .limit(6);
 
