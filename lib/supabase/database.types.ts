@@ -153,7 +153,6 @@ export type Database = {
       };
       job_postings: {
         Row: {
-          company_id: string | null;
           company_name: string;
           created_at: string | null;
           description: string | null;
@@ -174,7 +173,6 @@ export type Database = {
           work_mode: string | null;
         };
         Insert: {
-          company_id?: string | null;
           company_name: string;
           created_at?: string | null;
           description?: string | null;
@@ -195,7 +193,6 @@ export type Database = {
           work_mode?: string | null;
         };
         Update: {
-          company_id?: string | null;
           company_name?: string;
           created_at?: string | null;
           description?: string | null;
@@ -215,15 +212,7 @@ export type Database = {
           valid_through?: string | null;
           work_mode?: string | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "job_postings_company_id_fkey";
-            columns: ["company_id"];
-            isOneToOne: false;
-            referencedRelation: "companies";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       profiles: {
         Row: {
@@ -246,42 +235,6 @@ export type Database = {
           full_name?: string | null;
           id?: string;
           updated_at?: string | null;
-        };
-        Relationships: [];
-      };
-      publications: {
-        Row: {
-          authors: Json | null;
-          created_at: string | null;
-          doi: string | null;
-          id: string;
-          published_on: string | null;
-          title: string;
-          url: string | null;
-          user_id: string;
-          venue: string | null;
-        };
-        Insert: {
-          authors?: Json | null;
-          created_at?: string | null;
-          doi?: string | null;
-          id?: string;
-          published_on?: string | null;
-          title: string;
-          url?: string | null;
-          user_id: string;
-          venue?: string | null;
-        };
-        Update: {
-          authors?: Json | null;
-          created_at?: string | null;
-          doi?: string | null;
-          id?: string;
-          published_on?: string | null;
-          title?: string;
-          url?: string | null;
-          user_id?: string;
-          venue?: string | null;
         };
         Relationships: [];
       };
