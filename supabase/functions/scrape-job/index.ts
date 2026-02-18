@@ -1,4 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
+import { JobPostingSchema } from "./JobPostingSchema.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,42 +8,25 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const JOB_POSTING_JSON_SCHEMA = {
-  type: "object",
-  properties: {
-    title: { type: ["string", "null"] },
-    companyName: { type: ["string", "null"] },
-    url: { type: "string" },
-    jobLocations: {
-      type: ["array", "null"],
-      items: {
-        type: "object",
-        properties: {
-          city: { type: ["string", "null"] },
-          state: { type: ["string", "null"] },
-          country: { type: ["string", "null"] },
-          rawAddress: { type: ["string", "null"] },
-        },
-      },
-    },
-    workMode: { type: ["string", "null"] },
-    employmentType: { type: ["string", "null"] },
-    description: { type: ["string", "null"] },
-    baseSalary: {
-      type: ["object", "null"],
-      properties: {
-        currency: { type: ["string", "null"] },
-        minValue: { type: ["number", "null"] },
-        maxValue: { type: ["number", "null"] },
-        unitText: { type: ["string", "null"] },
-      },
-    },
-    datePosted: { type: ["string", "null"] },
-    validThrough: { type: ["string", "null"] },
-    directApplyUrl: { type: ["string", "null"] },
-  },
-  required: ["url"],
-} as const;
+// Convert Zod schema to JSON Schema for Firecrawl's extract format
+const JOB_POSTING_JSON_SCHEMA = z.toJSONSchema(JobPostingSchema) as Record<
+  string,
+  unknown
+>;
+
+type JobPosting = z.infer<typeof JobPostingSchema>;
+
+const MISTRAL_EXTRACTION_PROMPT = [
+  "Extract all job posting details from this markdown into strict JSON.",
+  "Use this JSON schema shape:",
+  JSON.stringify(JOB_POSTING_JSON_SCHEMA),
+  "Rules:",
+  "- Return ONLY valid JSON object and no additional text.",
+  "- If a field is not found, use null.",
+  "- Preserve full job description in markdown for description.",
+  "- workMode must be one of REMOTE, HYBRID, ONSITE, UNKNOWN.",
+  "- employmentType must be one of FULL_TIME, PART_TIME, CONTRACT, TEMPORARY, INTERN, VOLUNTEER, OTHER.",
+].join("\n");
 
 const DEFAULT_ACTIONS = [
   { type: "wait", milliseconds: 2000 },
@@ -62,6 +47,155 @@ function toIsoOrNull(value?: string | null): string | null {
   if (!value) return null;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function normalizeMistralContentToText(content: unknown): string {
+  if (typeof content === "string") return content;
+
+  if (Array.isArray(content)) {
+    const chunks = content
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object" && "text" in item) {
+          const text = (item as { text?: unknown }).text;
+          return typeof text === "string" ? text : "";
+        }
+        return "";
+      })
+      .filter(Boolean);
+
+    return chunks.join("\n");
+  }
+
+  return "";
+}
+
+function stripJsonCodeFence(text: string): string {
+  const trimmed = text.trim();
+  if (!trimmed.startsWith("```")) return trimmed;
+  return trimmed
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/, "")
+    .trim();
+}
+
+function buildMinimalJob(
+  targetUrl: string,
+  markdown: string,
+  raw: Record<string, unknown>,
+): JobPosting {
+  return {
+    url: targetUrl,
+    title: typeof raw.title === "string" ? raw.title : null,
+    companyName: typeof raw.companyName === "string" ? raw.companyName : null,
+    workMode: "UNKNOWN",
+    description: typeof raw.description === "string" && raw.description.trim()
+      ? raw.description
+      : markdown,
+    jobLocations: null,
+    employmentType: null,
+    baseSalary: null,
+    datePosted: null,
+    validThrough: null,
+    directApplyUrl: null,
+  };
+}
+
+async function extractStructuredJobWithMistral(params: {
+  markdown: string;
+  targetUrl: string;
+  apiKey: string;
+}): Promise<JobPosting> {
+  const { markdown, targetUrl, apiKey } = params;
+  const model = Deno.env.get("MISTRAL_MODEL") ?? "mistral-large-latest";
+
+  let lastRaw: Record<string, unknown> = {};
+  let validationErrors: z.ZodIssue[] | undefined;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const retryContext = validationErrors
+      ? `\nPrevious output failed validation. Fix these issues:\n${
+        JSON.stringify(validationErrors, null, 2)
+      }`
+      : "";
+
+    const mistralRes = await fetch(
+      "https://api.mistral.ai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          temperature: 0,
+          response_format: { type: "json_object" },
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are an expert HR data extractor that outputs strict JSON.",
+            },
+            {
+              role: "user",
+              content:
+                `${MISTRAL_EXTRACTION_PROMPT}${retryContext}\n\nJob URL: ${targetUrl}\n\nMarkdown:\n${markdown}`,
+            },
+          ],
+        }),
+      },
+    );
+
+    const mistralBody = await mistralRes.json().catch(() => null);
+    if (!mistralRes.ok) {
+      const details = mistralBody && typeof mistralBody === "object"
+        ? JSON.stringify(mistralBody)
+        : "Unknown Mistral error";
+      throw new Error(`Mistral extraction failed: ${details}`);
+    }
+
+    const content = (mistralBody as {
+      choices?: Array<{ message?: { content?: unknown } }>;
+    })?.choices?.[0]?.message?.content;
+
+    const contentText = stripJsonCodeFence(
+      normalizeMistralContentToText(content),
+    );
+
+    let parsed: unknown = {};
+    try {
+      parsed = JSON.parse(contentText || "{}");
+    } catch {
+      parsed = {};
+    }
+
+    const raw = parsed && typeof parsed === "object"
+      ? parsed as Record<string, unknown>
+      : {};
+
+    lastRaw = raw;
+
+    const parseResult = JobPostingSchema.safeParse({
+      ...raw,
+      url: typeof raw.url === "string" && raw.url.trim() ? raw.url : targetUrl,
+      description: typeof raw.description === "string" && raw.description.trim()
+        ? raw.description
+        : markdown,
+    });
+
+    if (parseResult.success) {
+      return parseResult.data;
+    }
+
+    validationErrors = parseResult.error.issues;
+  }
+
+  console.warn(
+    "Mistral output failed schema validation after retry",
+    validationErrors,
+  );
+  return buildMinimalJob(targetUrl, markdown, lastRaw);
 }
 
 Deno.serve(async (req: Request) => {
@@ -96,7 +230,6 @@ Deno.serve(async (req: Request) => {
 
     const body = await req.json();
     const targetUrl = typeof body?.url === "string" ? body.url.trim() : "";
-    const maxAge = typeof body?.maxAge === "number" ? body.maxAge : 600000;
 
     if (!targetUrl) {
       return jsonResponse({ error: "URL is required" }, 400);
@@ -116,76 +249,34 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const mistralApiKey = Deno.env.get("MISTRAL_API_KEY");
+    if (!mistralApiKey) {
+      return jsonResponse(
+        { error: "MISTRAL_API_KEY is not configured" },
+        500,
+      );
+    }
+
+    // Primary request: scrape raw markdown and links
     const firecrawlRes = await fetch("https://api.firecrawl.dev/v1/scrape", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${firecrawlApiKey}`,
-        "x-api-key": firecrawlApiKey,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         url: targetUrl,
-        formats: [
-          "markdown",
-          "links",
-          {
-            type: "json",
-            schema: JOB_POSTING_JSON_SCHEMA,
-            prompt: [
-              "Extract all job posting details from this page.",
-              "Focus on: job title, company name, locations, work mode (remote/hybrid/onsite),",
-              "employment type, full job description in markdown, responsibilities,",
-              "qualifications, salary/compensation, dates, and application URL.",
-              "If a field is not found on the page, leave it null.",
-              "For the description field, preserve the full content as markdown.",
-            ].join(" "),
-          },
-        ],
+        formats: ["markdown", "links"],
         actions: DEFAULT_ACTIONS,
         excludeTags: ["script", "style", "noscript", "iframe"],
         onlyMainContent: true,
-        maxAge,
-        storeInCache: true,
         timeout: 120000,
       }),
     });
 
-    let firecrawlBody = await firecrawlRes.json().catch(() => null);
+    const firecrawlBody = await firecrawlRes.json().catch(() => null);
 
-    // Fallback path: some pages/schema combos can trigger a 400 with JSON format.
-    // Retry without JSON extraction and save a minimal row instead of failing.
-    if (!firecrawlRes.ok && firecrawlRes.status === 400) {
-      const fallbackRes = await fetch("https://api.firecrawl.dev/v1/scrape", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${firecrawlApiKey}`,
-          "x-api-key": firecrawlApiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: targetUrl,
-          formats: ["markdown", "links"],
-          actions: DEFAULT_ACTIONS,
-          excludeTags: ["script", "style", "noscript", "iframe"],
-          onlyMainContent: true,
-          maxAge,
-          storeInCache: true,
-          timeout: 120000,
-        }),
-      });
-
-      firecrawlBody = await fallbackRes.json().catch(() => null);
-
-      if (!fallbackRes.ok || !firecrawlBody?.success) {
-        return jsonResponse(
-          {
-            error: firecrawlBody?.error || "Firecrawl scrape failed",
-            details: firecrawlBody,
-          },
-          fallbackRes.status || 500,
-        );
-      }
-    } else if (!firecrawlRes.ok || !firecrawlBody?.success) {
+    if (!firecrawlRes.ok || !firecrawlBody?.success) {
       return jsonResponse(
         {
           error: firecrawlBody?.error || "Firecrawl scrape failed",
@@ -199,40 +290,46 @@ Deno.serve(async (req: Request) => {
       string,
       unknown
     >;
-    const job = (extracted.json || {}) as Record<string, unknown>;
-    const salary = (job.baseSalary || null) as Record<string, unknown> | null;
-    const canonicalUrl = typeof job.url === "string" && job.url
-      ? job.url
-      : targetUrl;
+
+    const markdown = typeof extracted.markdown === "string"
+      ? extracted.markdown
+      : "";
+
+    if (!markdown.trim()) {
+      return jsonResponse(
+        { error: "Scraped page did not return markdown content" },
+        422,
+      );
+    }
+
+    const job = await extractStructuredJobWithMistral({
+      markdown,
+      targetUrl,
+      apiKey: mistralApiKey,
+    });
+
     const metadata = (extracted.metadata || {}) as Record<string, unknown>;
-    const derivedTitle = typeof job.title === "string" && job.title
-      ? job.title
-      : (typeof metadata.title === "string" ? metadata.title : "Unknown Title");
+    const derivedTitle = job.title ||
+      (typeof metadata.title === "string" ? metadata.title : null) ||
+      "Unknown Title";
 
     const dbRow = {
-      url: canonicalUrl,
+      url: job.url,
       title: derivedTitle,
-      company_name: (job.companyName as string | undefined) ||
-        "Unknown Company",
-      location: (job.jobLocations as unknown) ?? null,
-      work_mode: (job.workMode as string | undefined) ?? null,
-      employment_type: (job.employmentType as string | undefined) ?? null,
-      salary_min: typeof salary?.minValue === "number" ? salary.minValue : null,
-      salary_max: typeof salary?.maxValue === "number" ? salary.maxValue : null,
-      salary_currency: typeof salary?.currency === "string"
-        ? salary.currency
-        : null,
-      salary_period: typeof salary?.unitText === "string"
-        ? salary.unitText
-        : null,
-      posted_at: toIsoOrNull(job.datePosted as string | null | undefined),
-      valid_through: toIsoOrNull(job.validThrough as string | null | undefined),
-      direct_apply_url: typeof job.directApplyUrl === "string"
-        ? job.directApplyUrl
-        : null,
-      description: typeof job.description === "string"
-        ? job.description
-        : (extracted.markdown as string | undefined) ?? null,
+      company_name: job.companyName || "Unknown Company",
+      location: job.jobLocations ?? null,
+      work_mode: job.workMode ?? null,
+      employment_type: job.employmentType ?? null,
+      salary_min: job.baseSalary?.minValue ?? null,
+      salary_max: job.baseSalary?.maxValue ?? null,
+      salary_currency: job.baseSalary?.currency ?? null,
+      salary_period: job.baseSalary?.unitText ?? null,
+      posted_at: toIsoOrNull(job.datePosted),
+      valid_through: toIsoOrNull(job.validThrough),
+      direct_apply_url: job.directApplyUrl ?? null,
+      description: job.description ??
+        markdown ??
+        null,
       user_id: user.id,
       updated_at: new Date().toISOString(),
     };
@@ -249,13 +346,10 @@ Deno.serve(async (req: Request) => {
 
     return jsonResponse({
       success: true,
-      job: {
-        ...job,
-        url: canonicalUrl,
-      },
+      job,
       savedJob,
       metadata: extracted.metadata ?? null,
-      markdown: extracted.markdown ?? null,
+      markdown,
     });
   } catch (error) {
     console.error("scrape-job edge function error:", error);
