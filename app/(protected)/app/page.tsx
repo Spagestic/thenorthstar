@@ -1,60 +1,72 @@
-// page.tsx
 import { Suspense } from "react";
-import Header from "../Header";
-import { Skeleton } from "@/components/ui/skeleton";
 import { createClient } from "@/lib/supabase/server";
-import { JobCard } from "../jobs/components/job-card";
-import Link from "next/link";
+import Header from "../Header";
+import { JobCard } from "./components/job-card";
+import { JobCardSkeleton } from "./components/job-card-skeleton";
+import { JobSearchBar } from "./components/job-search-bar";
+import { JobsFilters } from "./components/jobs-filters";
+import { jobSearchParamsCache } from "./components/searchParams";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { SearchParams } from "nuqs/server";
-import { ScrapeInput } from "./components/scrape-input";
-import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface PageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export default function HomePage({ searchParams }: PageProps) {
+const PAGE_SIZE = 45;
+
+export default function Page({ searchParams }: PageProps) {
   return (
-    <div className="flex flex-col h-screen">
-      <Header nav={["Dashboard"]} />
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto px-6 py-8 space-y-8">
-          {/* Hero Scrape Section */}
-          <section className="text-center space-y-4 pt-16">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tight">
-                Practice for your next interview
-              </h1>
-              <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-                Paste a job posting URL and start a mock interview in minutes
-              </p>
-            </div>
-            <div className="max-w-2xl mx-auto">
-              <Suspense
-                fallback={<Skeleton className="h-14 w-full rounded-xl" />}
-              >
-                <ScrapeInput />
+    <div className="container mx-auto flex flex-col h-screen">
+      <Header nav={["Jobs"]} />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Sticky search and filters section */}
+        <div className="sticky top-0 z-10 bg-background border-b">
+          <div className="p-4 pt-8 space-y-4">
+            <div className="w-full">
+              <Suspense fallback={<Skeleton className="h-10 w-full" />}>
+                <JobSearchBar />
               </Suspense>
             </div>
-          </section>
+            <div className="w-full">
+              <Suspense
+                fallback={
+                  <div className="space-y-4">
+                    <div className="flex gap-3">
+                      <Skeleton className="h-10 w-50" />
+                      <Skeleton className="h-10 w-50" />
+                      <Skeleton className="h-10 w-50" />
+                      <Skeleton className="h-10 w-40" />
+                    </div>
+                  </div>
+                }
+              >
+                <JobsFilters />
+              </Suspense>
+            </div>
+          </div>
+        </div>
 
-          {/* Recent Scrapes */}
+        {/* Scrollable job list */}
+        <div className="flex-1 overflow-y-auto p-4">
           <Suspense
             fallback={
-              <div className="space-y-4">
-                <div className="h-7 w-40 bg-muted animate-pulse rounded" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {[...Array(3)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="h-48 w-full bg-muted animate-pulse rounded-xl"
-                    />
-                  ))}
-                </div>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                <JobCardSkeleton count={9} />
               </div>
             }
           >
-            <RecentScrapes />
+            <JobList searchParams={searchParams} />
+          </Suspense>
+          <Suspense fallback={<div className="h-12" />}>
+            <JobPagination className="pt-8" searchParams={searchParams} />
           </Suspense>
         </div>
       </div>
@@ -62,62 +74,158 @@ export default function HomePage({ searchParams }: PageProps) {
   );
 }
 
-async function RecentScrapes() {
+async function JobList({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const resolvedParams = jobSearchParamsCache.parse(await searchParams);
+  const { search, industry, company, seniority, page } = resolvedParams;
+
   const supabase = await createClient();
 
-  const { data: jobs } = await supabase
-    .from("job_postings")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(8);
+  // Calculate pagination range
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
 
-  if (!jobs || jobs.length === 0) {
+  let query = supabase.from("job_positions").select(
+    `
+    id, title, category, seniority_level, typical_requirements, 
+    typical_responsibilities, industry_id, company_id,
+    companies!inner (*),
+    industry!inner (name)
+  `,
+    { count: "exact" }
+  );
+
+  // Apply filters based on parsed search params
+  if (industry) {
+    query = query.eq("industry.name", industry);
+  }
+
+  if (company) {
+    query = query.eq("companies.name", company);
+  }
+
+  if (seniority) {
+    query = query.eq("seniority_level", seniority);
+  }
+
+  // TEXT SEARCH feature!
+  if (search) {
+    query = query.textSearch("title", search, { config: "english" });
+  }
+
+  const { data, error, count } = await query.range(from, to);
+
+  if (!data || data.length === 0) {
     return (
-      <section className="space-y-2">
-        <h2 className="text-xl font-semibold tracking-tight">Recent scrapes</h2>
-        <p className="text-sm text-muted-foreground">
-          No recent scrapes yet. Paste a job URL above to get started.
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <p className="text-lg text-muted-foreground">No jobs found</p>
+        <p className="text-sm text-muted-foreground mt-2">
+          Try adjusting your search filters
         </p>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-xl font-semibold tracking-tight">Recent scrapes</h2>
-        <Button variant="ghost">
-          <Link href="/jobs">View all</Link>
-        </Button>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {jobs.map((job: any) => (
-          <JobCard
-            key={job.id}
-            job={{
-              ...job,
-              workMode: job.work_mode as any,
-              companyName:
-                job.company?.name || job.company_name || "Unknown Company",
-              companyLogo: job.company?.logo_url || undefined,
-              directApplyUrl: job.direct_apply_url,
-              employmentType: job.employment_type as any,
-              datePosted: job.posted_at,
-              jobLocations: job.location as any,
-              baseSalary:
-                job.salary_min || job.salary_max
-                  ? {
-                      minValue: job.salary_min,
-                      maxValue: job.salary_max,
-                      currency: job.salary_currency,
-                      unitText: job.salary_period,
-                    }
-                  : undefined,
-              description: job.description,
-            }}
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {data.map((job) => (
+        <JobCard key={job.id} job={job} />
+      ))}
+    </div>
+  );
+}
+
+async function JobPagination({
+  className,
+  searchParams,
+}: {
+  className?: string;
+  searchParams: Promise<SearchParams>;
+}) {
+  const resolvedParams = jobSearchParamsCache.parse(await searchParams);
+  const { search, industry, company, seniority, page } = resolvedParams;
+
+  const supabase = await createClient();
+
+  let countQuery = supabase.from("job_positions").select(
+    `
+    id,
+    companies!inner (name),
+    industry!inner (name)
+  `,
+    { count: "exact", head: true }
+  );
+
+  // Apply the same filters to get accurate count
+  if (industry) {
+    countQuery = countQuery.eq("industry.name", industry);
+  }
+
+  if (company) {
+    countQuery = countQuery.eq("companies.name", company);
+  }
+
+  if (seniority) {
+    countQuery = countQuery.eq("seniority_level", seniority);
+  }
+
+  if (search) {
+    countQuery = countQuery.textSearch("title", search, { config: "english" });
+  }
+
+  const { count } = await countQuery;
+  const totalPages = count ? Math.ceil(count / PAGE_SIZE) : 1;
+  const hasPreviousPage = page > 1;
+  const hasNextPage = page < totalPages;
+
+  // Build query params for navigation
+  const buildPageUrl = (newPage: number) => {
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (industry) params.set("industry", industry);
+    if (company) params.set("company", company);
+    if (seniority) params.set("seniority", seniority);
+    if (newPage > 1) params.set("page", newPage.toString());
+
+    const queryString = params.toString();
+    return queryString ? `?${queryString}` : "";
+  };
+
+  if (totalPages <= 1) {
+    return null;
+  }
+
+  return (
+    <Pagination className={className}>
+      <PaginationContent className="w-full justify-between">
+        <PaginationItem>
+          <PaginationPrevious
+            href={hasPreviousPage ? buildPageUrl(page - 1) : "#"}
+            className={`border ${
+              !hasPreviousPage ? "pointer-events-none opacity-50" : ""
+            }`}
+            aria-disabled={!hasPreviousPage}
           />
-        ))}
-      </div>
-    </section>
+        </PaginationItem>
+        <PaginationItem>
+          <p className="text-muted-foreground text-sm" aria-live="polite">
+            Page <span className="text-foreground">{page}</span> of{" "}
+            <span className="text-foreground">{totalPages}</span>
+          </p>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationNext
+            href={hasNextPage ? buildPageUrl(page + 1) : "#"}
+            className={`border ${
+              !hasNextPage ? "pointer-events-none opacity-50" : ""
+            }`}
+            aria-disabled={!hasNextPage}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
   );
 }

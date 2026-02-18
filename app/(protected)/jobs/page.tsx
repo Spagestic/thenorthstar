@@ -32,7 +32,7 @@ export default function HomePage({ searchParams }: PageProps) {
         nav={["Jobs"]}
         rightContent={
           <Button size="sm" className="gap-2" asChild>
-            <Link href="/app" className="flex items-center gap-2">
+            <Link href="/dashboard" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Add Job</span>
             </Link>
