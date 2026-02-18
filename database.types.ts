@@ -88,6 +88,47 @@ export type Database = {
         };
         Relationships: [];
       };
+      interviews: {
+        Row: {
+          agent_id: string | null;
+          conversation_id: string;
+          created_at: string;
+          feedback: Json | null;
+          id: string;
+          job_id: string;
+          started_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          agent_id?: string | null;
+          conversation_id: string;
+          created_at?: string;
+          feedback?: Json | null;
+          id?: string;
+          job_id: string;
+          started_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          agent_id?: string | null;
+          conversation_id?: string;
+          created_at?: string;
+          feedback?: Json | null;
+          id?: string;
+          job_id?: string;
+          started_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "interviews_job_id_fkey";
+            columns: ["job_id"];
+            isOneToOne: false;
+            referencedRelation: "job_postings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       job_positions: {
         Row: {
           category: string;

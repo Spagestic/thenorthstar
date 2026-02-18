@@ -117,31 +117,6 @@ export function JobCard({ job }: { job: JobPosting }) {
               <Phone className="size-4" />
               Practice
             </Button>
-            {/* {job.directApplyUrl ? (
-              <Button
-                asChild
-                className="h-10 rounded-xl px-4 bg-primary text-primary-foreground hover:bg-primary/90"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Link
-                  href={job.directApplyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Apply now
-                </Link>
-              </Button>
-            ) : (
-              <Button
-                className="h-10 rounded-xl px-4 bg-primary text-primary-foreground hover:bg-primary/90"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDialogOpen(true);
-                }}
-              >
-                Apply now
-              </Button>
-            )} */}
           </div>
         </CardContent>
       </Card>

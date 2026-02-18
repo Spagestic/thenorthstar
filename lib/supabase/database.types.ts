@@ -88,6 +88,47 @@ export type Database = {
         };
         Relationships: [];
       };
+      interviews: {
+        Row: {
+          agent_id: string | null;
+          conversation_id: string;
+          created_at: string;
+          feedback: Json | null;
+          id: string;
+          job_id: string;
+          started_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          agent_id?: string | null;
+          conversation_id: string;
+          created_at?: string;
+          feedback?: Json | null;
+          id?: string;
+          job_id: string;
+          started_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          agent_id?: string | null;
+          conversation_id?: string;
+          created_at?: string;
+          feedback?: Json | null;
+          id?: string;
+          job_id?: string;
+          started_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "interviews_job_id_fkey";
+            columns: ["job_id"];
+            isOneToOne: false;
+            referencedRelation: "job_postings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       job_positions: {
         Row: {
           category: string;
@@ -351,15 +392,13 @@ export type TablesInsert<
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
+  } ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
       "Tables"
     ]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
+} ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
     "Tables"
   ][TableName] extends {
     Insert: infer I;
@@ -378,15 +417,13 @@ export type TablesUpdate<
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
+  } ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
       "Tables"
     ]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
+} ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
     "Tables"
   ][TableName] extends {
     Update: infer U;
@@ -405,15 +442,13 @@ export type Enums<
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]][
+  } ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]][
       "Enums"
     ]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][
+} ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][
     EnumName
   ]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
@@ -426,15 +461,13 @@ export type CompositeTypes<
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[
+  } ? keyof DatabaseWithoutInternals[
       PublicCompositeTypeNameOrOptions["schema"]
     ]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]][
+} ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]][
     "CompositeTypes"
   ][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends

@@ -1,4 +1,5 @@
 export type JobPosting = {
+    id: string;
     title?: string | null;
     companyName?: string | null;
     companyLogo?: string | null;

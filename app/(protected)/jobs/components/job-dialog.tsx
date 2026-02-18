@@ -113,9 +113,7 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
               )}
               <Button size="sm" variant="default" asChild className="w-1/2">
                 <Link
-                  href={`/call/practice?title=${encodeURIComponent(
-                    job.title || "",
-                  )}&company=${encodeURIComponent(job.companyName || "")}`}
+                  href={`/interview/${job.id}?&company=${job.companyName}&job=${job.title}`}
                   className="gap-2"
                 >
                   <PhoneCall className="h-4 w-4" />
