@@ -31,7 +31,6 @@ export async function NavInterviews() {
     .eq("user_id", user.id)
     .order("started_at", { ascending: false })
     .limit(10);
-  console.log("Fetched conversations:", conversations);
 
   // Transform the data for display
   const interviews =
