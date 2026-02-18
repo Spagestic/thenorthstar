@@ -1,6 +1,8 @@
 {
+  "lock": false,
   "imports": {
     "@supabase/supabase-js": "npm:@supabase/supabase-js@2",
-    "zod": "npm:zod@4"
+    "zod": "npm:zod@4",
+    "@mistralai/mistralai": "npm:@mistralai/mistralai@^1.7.2"
   }
 }
