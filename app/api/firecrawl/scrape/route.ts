@@ -1,6 +1,8 @@
 // app/api/firecrawl/scrape/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { firecrawl } from "../firecrawlClient";
+import { JobPostingSchema } from "./JobPostingSchema";
+import { z } from "zod";
 import type {
     ActionOption,
     FirecrawlScrapeRequestBody,
@@ -9,75 +11,7 @@ import type {
     FormatOption,
 } from "./types";
 
-const DEFAULT_WEBSITE_SCHEMA = {
-    type: "object",
-    properties: {
-        company_name: { type: "string" },
-        company_description: { type: "string" },
-        main_products_or_services: {
-            type: "array",
-            items: { type: "string" },
-        },
-        target_audience: { type: "string" },
-        unique_value_proposition: { type: "string" },
-        call_to_action: {
-            type: "array",
-            items: {
-                type: "object",
-                properties: {
-                    text: { type: "string" },
-                    url: { type: "string" },
-                },
-            },
-        },
-        key_features: {
-            type: "array",
-            items: {
-                type: "object",
-                properties: {
-                    name: { type: "string" },
-                    description: { type: "string" },
-                },
-            },
-        },
-        social_proof: {
-            type: "object",
-            properties: {
-                testimonials_count: { type: "number" },
-                notable_clients: {
-                    type: "array",
-                    items: { type: "string" },
-                },
-                metrics: {
-                    type: "array",
-                    items: { type: "string" },
-                },
-            },
-        },
-        pricing_available: { type: "boolean" },
-        contact_info: {
-            type: "object",
-            properties: {
-                email: { type: "string" },
-                phone: { type: "string" },
-                address: { type: "string" },
-            },
-        },
-        social_links: {
-            type: "object",
-            properties: {
-                twitter: { type: "string" },
-                linkedin: { type: "string" },
-                github: { type: "string" },
-            },
-        },
-    },
-    required: [
-        "company_name",
-        "company_description",
-        "main_products_or_services",
-    ],
-} as const;
+const JOB_POSTING_JSON_SCHEMA = z.toJSONSchema(JobPostingSchema);
 
 const DEFAULT_ACTIONS: ActionOption[] = [
     { type: "wait", milliseconds: 2000 },
@@ -90,14 +24,7 @@ const DEFAULT_ACTIONS: ActionOption[] = [
 export async function POST(request: NextRequest) {
     try {
         const body = (await request.json()) as FirecrawlScrapeRequestBody;
-        const {
-            url,
-            maxAge,
-            storeInCache,
-            jsonPrompt,
-            jsonSchema,
-            actions,
-        } = body;
+        const { url, maxAge, storeInCache, actions } = body;
 
         if (!url) {
             return NextResponse.json<FirecrawlScrapeResponseBody>(
@@ -106,51 +33,62 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Build formats array with proper SDK types
-        const formats: FormatOption[] = ["markdown", "branding", "links"];
-
-        // Add JSON extraction - construct the full object inline to keep the narrow type
-        if (jsonSchema && jsonPrompt) {
-            formats.push({
+        const formats: FormatOption[] = [
+            "markdown",
+            "links",
+            {
                 type: "json",
-                schema: jsonSchema,
-                prompt: jsonPrompt,
-            });
-        } else if (jsonSchema) {
-            formats.push({
-                type: "json",
-                schema: jsonSchema,
-            });
-        } else if (jsonPrompt) {
-            formats.push({
-                type: "json",
-                prompt: jsonPrompt,
-            });
-        } else {
-            formats.push({
-                type: "json",
-                schema: DEFAULT_WEBSITE_SCHEMA,
-                prompt:
-                    "Extract comprehensive information about this company/website. Focus on understanding what the business does, who it serves, and its key offerings.",
-            });
-        }
+                schema: JOB_POSTING_JSON_SCHEMA,
+                prompt: [
+                    "Extract all job posting details from this page.",
+                    "Focus on: job title, company name, locations, work mode (remote/hybrid/onsite),",
+                    "employment type, full job description in markdown, responsibilities,",
+                    "qualifications, salary/compensation, dates, and application URL.",
+                    "If a field is not found on the page, leave it null.",
+                    "For the description field, preserve the full content as markdown.",
+                ].join(" "),
+            },
+        ];
 
         const scrapeResult = (await firecrawl.scrape(url, {
             formats,
             actions: actions ?? DEFAULT_ACTIONS,
-            excludeTags: ["nav", "footer", "header", "script", "style"],
+            excludeTags: ["script", "style", "noscript", "iframe"],
             onlyMainContent: true,
             maxAge: maxAge ?? 172800000,
             storeInCache: storeInCache ?? true,
             timeout: 120000,
         })) as FirecrawlScrapeResult;
 
+        // Validate the extracted JSON against our Zod schema
+        let validatedJob = null;
+        if (scrapeResult.json) {
+            const parsed = JobPostingSchema.safeParse({
+                ...scrapeResult.json,
+                // Ensure the source URL is always set
+                url: scrapeResult.json.url || url,
+            });
+
+            if (parsed.success) {
+                validatedJob = parsed.data;
+            } else {
+                console.warn(
+                    "Job posting validation warnings:",
+                    parsed.error.flatten(),
+                );
+                // Still use the raw data but with the URL guaranteed
+                validatedJob = {
+                    ...scrapeResult.json,
+                    url: scrapeResult.json.url || url,
+                };
+            }
+        }
+
         const responseBody: FirecrawlScrapeResponseBody = {
             success: true,
             markdown: scrapeResult.markdown,
             metadata: scrapeResult.metadata,
-            branding: scrapeResult.branding,
-            json: scrapeResult.json,
+            json: validatedJob,
             links: scrapeResult.links,
         };
 

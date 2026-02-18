@@ -64,114 +64,6 @@ export type Database = {
           },
         ];
       };
-      educations: {
-        Row: {
-          created_at: string | null;
-          degree: string | null;
-          description: string | null;
-          end_date: string | null;
-          field_of_study: string | null;
-          grade: string | null;
-          id: string;
-          institution: string;
-          start_date: string | null;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string | null;
-          degree?: string | null;
-          description?: string | null;
-          end_date?: string | null;
-          field_of_study?: string | null;
-          grade?: string | null;
-          id?: string;
-          institution: string;
-          start_date?: string | null;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string | null;
-          degree?: string | null;
-          description?: string | null;
-          end_date?: string | null;
-          field_of_study?: string | null;
-          grade?: string | null;
-          id?: string;
-          institution?: string;
-          start_date?: string | null;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
-      experiences: {
-        Row: {
-          company: string | null;
-          created_at: string | null;
-          description: string | null;
-          end_date: string | null;
-          id: string;
-          is_current: boolean | null;
-          location: string | null;
-          start_date: string | null;
-          title: string;
-          user_id: string;
-        };
-        Insert: {
-          company?: string | null;
-          created_at?: string | null;
-          description?: string | null;
-          end_date?: string | null;
-          id?: string;
-          is_current?: boolean | null;
-          location?: string | null;
-          start_date?: string | null;
-          title: string;
-          user_id: string;
-        };
-        Update: {
-          company?: string | null;
-          created_at?: string | null;
-          description?: string | null;
-          end_date?: string | null;
-          id?: string;
-          is_current?: boolean | null;
-          location?: string | null;
-          start_date?: string | null;
-          title?: string;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
-      honors_awards: {
-        Row: {
-          awarded_on: string | null;
-          created_at: string | null;
-          description: string | null;
-          id: string;
-          issuer: string | null;
-          name: string;
-          user_id: string;
-        };
-        Insert: {
-          awarded_on?: string | null;
-          created_at?: string | null;
-          description?: string | null;
-          id?: string;
-          issuer?: string | null;
-          name: string;
-          user_id: string;
-        };
-        Update: {
-          awarded_on?: string | null;
-          created_at?: string | null;
-          description?: string | null;
-          id?: string;
-          issuer?: string | null;
-          name?: string;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
       industry: {
         Row: {
           created_at: string | null;
@@ -277,6 +169,7 @@ export type Database = {
           title: string;
           updated_at: string | null;
           url: string;
+          user_id: string | null;
           valid_through: string | null;
           work_mode: string | null;
         };
@@ -297,6 +190,7 @@ export type Database = {
           title: string;
           updated_at?: string | null;
           url: string;
+          user_id?: string | null;
           valid_through?: string | null;
           work_mode?: string | null;
         };
@@ -317,6 +211,7 @@ export type Database = {
           title?: string;
           updated_at?: string | null;
           url?: string;
+          user_id?: string | null;
           valid_through?: string | null;
           work_mode?: string | null;
         };
@@ -329,42 +224,6 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
-      };
-      licenses_certifications: {
-        Row: {
-          created_at: string | null;
-          credential_id: string | null;
-          credential_url: string | null;
-          expiry_date: string | null;
-          id: string;
-          issue_date: string | null;
-          issuer: string | null;
-          name: string;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string | null;
-          credential_id?: string | null;
-          credential_url?: string | null;
-          expiry_date?: string | null;
-          id?: string;
-          issue_date?: string | null;
-          issuer?: string | null;
-          name: string;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string | null;
-          credential_id?: string | null;
-          credential_url?: string | null;
-          expiry_date?: string | null;
-          id?: string;
-          issue_date?: string | null;
-          issuer?: string | null;
-          name?: string;
-          user_id?: string;
-        };
-        Relationships: [];
       };
       profiles: {
         Row: {
@@ -387,45 +246,6 @@ export type Database = {
           full_name?: string | null;
           id?: string;
           updated_at?: string | null;
-        };
-        Relationships: [];
-      };
-      projects: {
-        Row: {
-          created_at: string | null;
-          description: string | null;
-          end_date: string | null;
-          id: string;
-          name: string;
-          role: string | null;
-          skills: string[] | null;
-          start_date: string | null;
-          url: string | null;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string | null;
-          description?: string | null;
-          end_date?: string | null;
-          id?: string;
-          name: string;
-          role?: string | null;
-          skills?: string[] | null;
-          start_date?: string | null;
-          url?: string | null;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string | null;
-          description?: string | null;
-          end_date?: string | null;
-          id?: string;
-          name?: string;
-          role?: string | null;
-          skills?: string[] | null;
-          start_date?: string | null;
-          url?: string | null;
-          user_id?: string;
         };
         Relationships: [];
       };
@@ -462,30 +282,6 @@ export type Database = {
           url?: string | null;
           user_id?: string;
           venue?: string | null;
-        };
-        Relationships: [];
-      };
-      user_languages: {
-        Row: {
-          created_at: string | null;
-          id: string;
-          language: string;
-          proficiency: Database["public"]["Enums"]["language_proficiency"];
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string | null;
-          id?: string;
-          language: string;
-          proficiency: Database["public"]["Enums"]["language_proficiency"];
-          user_id: string;
-        };
-        Update: {
-          created_at?: string | null;
-          id?: string;
-          language?: string;
-          proficiency?: Database["public"]["Enums"]["language_proficiency"];
-          user_id?: string;
         };
         Relationships: [];
       };
@@ -529,39 +325,6 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
-      };
-      volunteering: {
-        Row: {
-          created_at: string | null;
-          description: string | null;
-          end_date: string | null;
-          id: string;
-          organization: string;
-          role: string | null;
-          start_date: string | null;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string | null;
-          description?: string | null;
-          end_date?: string | null;
-          id?: string;
-          organization: string;
-          role?: string | null;
-          start_date?: string | null;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string | null;
-          description?: string | null;
-          end_date?: string | null;
-          id?: string;
-          organization?: string;
-          role?: string | null;
-          start_date?: string | null;
-          user_id?: string;
-        };
-        Relationships: [];
       };
     };
     Views: {
@@ -635,15 +398,13 @@ export type TablesInsert<
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
+  } ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
       "Tables"
     ]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
+} ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
     "Tables"
   ][TableName] extends {
     Insert: infer I;
@@ -662,15 +423,13 @@ export type TablesUpdate<
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
+  } ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
       "Tables"
     ]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
+} ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]][
     "Tables"
   ][TableName] extends {
     Update: infer U;
@@ -689,15 +448,13 @@ export type Enums<
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]][
+  } ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]][
       "Enums"
     ]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][
+} ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][
     EnumName
   ]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
@@ -710,15 +467,13 @@ export type CompositeTypes<
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals;
-  }
-    ? keyof DatabaseWithoutInternals[
+  } ? keyof DatabaseWithoutInternals[
       PublicCompositeTypeNameOrOptions["schema"]
     ]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals;
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]][
+} ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]][
     "CompositeTypes"
   ][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends

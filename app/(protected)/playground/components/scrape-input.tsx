@@ -1,102 +1,190 @@
+// scrape-input.tsx
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Loader2, Link, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import type { JobPosting } from "@/app/api/ai/extract/details/schema";
+
+type ScrapeAndSaveResponse = {
+  success: boolean;
+  job?: JobPosting;
+  error?: string;
+};
 
 export function ScrapeInput() {
+  const router = useRouter();
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [extractedJob, setExtractedJob] = useState<JobPosting | null>(null);
 
   async function handleScrape(e: React.FormEvent) {
     e.preventDefault();
-    if (!url.trim()) return;
+    const trimmed = url.trim();
+    if (!trimmed) return;
 
     // Basic URL validation
     try {
-      new URL(url);
+      new URL(trimmed);
     } catch {
       toast.error("Please enter a valid URL");
       return;
     }
 
     setLoading(true);
+    setExtractedJob(null);
 
     try {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const scrapeRes = await fetch("/api/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: trimmed,
+          maxAge: 600000, // 10 min cache for job postings
+        }),
+      });
 
-      if (!session) {
-        toast.error("Please sign in first");
+      if (!scrapeRes.ok) {
+        const err = await scrapeRes.json();
+        throw new Error(err.error || "Failed to scrape and save job");
+      }
+
+      const scrapeData: ScrapeAndSaveResponse = await scrapeRes.json();
+
+      if (!scrapeData.success) {
+        throw new Error(scrapeData.error || "Scrape returned failure");
+      }
+
+      const job = scrapeData.job ?? null;
+
+      if (!job || !job.title) {
+        toast.error(
+          "Could not extract job details from this page. Is this a job posting?",
+        );
         return;
       }
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/scrape-job`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ url: url.trim() }),
-        },
+      setExtractedJob({
+        ...job,
+        url: job.url || trimmed,
+      });
+
+      toast.success(
+        `Extracted & saved "${job.title}" at ${job.companyName || "Unknown Company"}`,
       );
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to start scrape");
-      }
-
-      toast.success("Scraping started! It will appear below shortly.");
       setUrl("");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Something went wrong");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleScrape} className="relative">
-      <div className="flex items-center gap-0 border-2 border-border rounded-xl bg-background shadow-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-        <div className="pl-4 text-muted-foreground">
-          <Link className="h-5 w-5" />
+    <div className="space-y-4">
+      <form onSubmit={handleScrape} className="relative">
+        <div className="flex items-center gap-0 border-2 border-border rounded-xl bg-background shadow-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+          <div className="pl-4 text-muted-foreground">
+            <Link className="h-5 w-5" />
+          </div>
+          <Input
+            type="url"
+            placeholder="https://company.com/careers/software-engineer"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="border-0 shadow-none focus-visible:ring-0 text-base h-14 bg-transparent"
+            disabled={loading}
+          />
+          <div className="pr-2">
+            <Button
+              type="submit"
+              disabled={loading || !url.trim()}
+              size="lg"
+              className="rounded-lg h-10 px-6"
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  Scrape
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-        <Input
-          type="url"
-          placeholder="https://company.com/careers/software-engineer"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          className="border-0 shadow-none focus-visible:ring-0 text-base h-14 bg-transparent"
-          disabled={loading}
-        />
-        <div className="pr-2">
-          <Button
-            type="submit"
-            disabled={loading || !url.trim()}
-            size="lg"
-            className="rounded-lg h-10 px-6"
-          >
-            {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                Scrape
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-    </form>
+
+        {loading && (
+          <p className="text-sm text-muted-foreground text-center mt-3 animate-pulse">
+            Scraping and extracting job details…
+          </p>
+        )}
+      </form>
+
+      {extractedJob && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Extracted job details</CardTitle>
+            <CardDescription>
+              Results are shown below and saved to your job postings.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2 text-sm">
+              <p>
+                <span className="font-medium">Title:</span>{" "}
+                {extractedJob.title || "Unknown"}
+              </p>
+              <p>
+                <span className="font-medium">Company:</span>{" "}
+                {extractedJob.companyName || "Unknown"}
+              </p>
+              <p className="break-all">
+                <span className="font-medium">URL:</span>{" "}
+                <a
+                  href={extractedJob.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline underline-offset-2"
+                >
+                  {extractedJob.url}
+                </a>
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {extractedJob.workMode && (
+                  <Badge variant="secondary">{extractedJob.workMode}</Badge>
+                )}
+                {extractedJob.employmentType && (
+                  <Badge variant="outline">{extractedJob.employmentType}</Badge>
+                )}
+              </div>
+            </div>
+
+            <details className="rounded-md border p-3">
+              <summary className="cursor-pointer text-sm font-medium">
+                View raw extracted JSON
+              </summary>
+              <pre className="mt-3 overflow-x-auto text-xs leading-relaxed">
+                {JSON.stringify(extractedJob, null, 2)}
+              </pre>
+            </details>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }
