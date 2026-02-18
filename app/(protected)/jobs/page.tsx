@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 16;
 
 interface PageProps {
   searchParams: Promise<SearchParams>;
@@ -40,7 +40,7 @@ export default function HomePage({ searchParams }: PageProps) {
         }
       />
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto  px-6 space-y-6">
+        <div className="mx-auto px-6 mb-8 space-y-6">
           <div className="sticky top-0 z-10 bg-background  py-4 -mx-6 px-6 border-b">
             <div className="space-y-4 mx-auto">
               <Suspense fallback={<Skeleton className="h-10 w-full" />}>
@@ -133,11 +133,9 @@ export async function JobList({
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  let query = supabase
-    .from("job_postings")
-    .select("*, company:companies(name, website, logo_url)", {
-      count: "exact",
-    });
+  let query = supabase.from("job_postings").select("*", {
+    count: "exact",
+  });
 
   if (search) {
     query = query.or(`title.ilike.%${search}%,company_name.ilike.%${search}%`);
