@@ -3,6 +3,7 @@ export type JobPosting = {
     title?: string | null;
     companyName?: string | null;
     companyLogo?: string | null;
+    companyDomain?: string | null;
     url?: string | null;
     jobLocations?: {
         city?: string | null;

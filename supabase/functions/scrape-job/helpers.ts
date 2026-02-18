@@ -48,6 +48,9 @@ export function buildMinimalJob(
     url: targetUrl,
     title: typeof raw.title === "string" ? raw.title : null,
     companyName: typeof raw.companyName === "string" ? raw.companyName : null,
+    companyDomain: typeof raw.companyDomain === "string"
+      ? raw.companyDomain
+      : null,
     workMode: "UNKNOWN",
     description: typeof raw.description === "string" && raw.description.trim()
       ? raw.description

@@ -18,7 +18,9 @@ export const JobPostingSchema = z.object({
   companyName: z.string().nullable().optional().describe(
     "Name of the hiring organization",
   ),
-
+  companyDomain: z.string().nullable().optional().describe(
+    "The company's website domain, e.g. example.com",
+  ),
   // URL is critical for unique identification and re-scraping
   url: z.string().describe("The canonical URL of the job post"),
 

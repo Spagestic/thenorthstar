@@ -99,6 +99,7 @@ Deno.serve(async (req: Request) => {
       url: job.url,
       title: derivedTitle,
       company_name: job.companyName || "Unknown Company",
+      company_domain: job.companyDomain || null,
       location: job.jobLocations ?? null,
       work_mode: job.workMode ?? null,
       employment_type: job.employmentType ?? null,
