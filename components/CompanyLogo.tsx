@@ -1,9 +1,9 @@
 // refer to https://logos.apistemic.com/
-import Image from "next/image";
+"use client";
 
 export function CompanyLogo({ domain }: { domain: string }) {
   return (
-    <Image
+    <img
       src={
         domain.includes(".")
           ? `https://logos-api.apistemic.com/domain:${domain}`
@@ -12,7 +12,7 @@ export function CompanyLogo({ domain }: { domain: string }) {
       alt={`${domain} logo`}
       width={64}
       height={64}
-      unoptimized // Required: ensures client-side fetching
+      loading="lazy"
     />
   );
 }
