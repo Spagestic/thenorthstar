@@ -1,9 +1,16 @@
 // refer to https://logos.apistemic.com/
 "use client";
 
-export function CompanyLogo({ domain }: { domain: string }) {
+export function CompanyLogo({
+  domain,
+  className,
+}: {
+  domain: string;
+  className?: string;
+}) {
   return (
     <img
+      className={className}
       src={
         domain.includes(".")
           ? `https://logos-api.apistemic.com/domain:${domain}`
