@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bookmark, Phone } from "lucide-react";
 import type { Database } from "@/lib/supabase/database.types";
+import Link from "next/link";
 import { JobDialog } from "./job-dialog";
 import {
   formatTimeAgo,
@@ -124,14 +125,16 @@ export function JobCard({ job }: { job: JobRow }) {
             </div>
 
             <Button
+              asChild
               className="h-10 rounded-xl px-4 bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsDialogOpen(true);
-              }}
             >
-              <Phone className="size-4" />
-              Practice
+              <Link
+                href={`/interview/${job.id}?company=${encodeURIComponent(job.company_name)}&job=${encodeURIComponent(job.title)}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Phone className="size-4" />
+                Practice
+              </Link>
             </Button>
           </div>
         </CardContent>
