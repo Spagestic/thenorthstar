@@ -1,3 +1,4 @@
+// app/(protected)/jobs/components/job-search-bar.tsx
 "use client";
 
 import * as React from "react";

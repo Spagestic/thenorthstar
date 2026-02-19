@@ -1,6 +1,7 @@
 import { JobPosting } from "@/types/job-posting";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { Json } from "@/database.types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -75,14 +76,19 @@ export function formatWorkMode(mode?: string | null) {
   return WORK_MODE_LABELS[mode] || mode;
 }
 
-export function formatSalary(job: JobPosting) {
-  const min = job.baseSalary?.minValue;
-  const max = job.baseSalary?.maxValue;
+export function formatSalary(
+  salary: {
+    minValue: number | null;
+    maxValue: number | null;
+    currency: string | null;
+    unitText: string | null;
+  } | null,
+): string | null {
+  const min = salary?.minValue;
+  const max = salary?.maxValue;
   if (!min && !max) return null;
 
-  const currency = job.baseSalary?.currency === "USD"
-    ? "$"
-    : job.baseSalary?.currency || "$";
+  const currency = salary?.currency === "USD" ? "$" : salary?.currency || "$";
 
   // Match the reference: "$150 – 220k" (no /yr text, compact)
   const fmt = (v?: number | null) => {
@@ -97,12 +103,17 @@ export function formatSalary(job: JobPosting) {
   return `${currency}${fmt(max)}`;
 }
 
-export function formatLocation(job: JobPosting) {
-  const firstLocation = job.jobLocations?.[0];
+export function formatLocation(location: any | null): string {
+  const firstLocation = location?.jobLocations?.[0];
   return (
     firstLocation?.rawAddress ||
     [firstLocation?.city, firstLocation?.country].filter(Boolean).join(", ") ||
-    formatWorkMode(job.workMode) ||
+    formatWorkMode(location?.workMode) ||
     "Remote"
   );
+}
+
+export function getCompanyLogoUrl(domain: string | null): string | null {
+  if (!domain) return null;
+  return `https://logos-api.apistemic.com/domain:${domain}`;
 }

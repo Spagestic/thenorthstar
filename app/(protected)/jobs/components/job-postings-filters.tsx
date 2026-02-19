@@ -1,3 +1,4 @@
+// app/(protected)/jobs/components/job-postings-filters.tsx
 "use client";
 
 import * as React from "react";
@@ -30,6 +31,7 @@ export function JobPostingsFilters({
       employmentType: parseAsString,
       workMode: parseAsString,
       page: parseAsString,
+      sort: parseAsString,
     },
     {
       shallow: false,
@@ -37,7 +39,7 @@ export function JobPostingsFilters({
     },
   );
 
-  const { employmentType, workMode } = filters;
+  const { employmentType, workMode, sort } = filters;
 
   const updateFilter = (key: keyof typeof filters, value: string | null) => {
     if (value && value !== "all") {
@@ -55,11 +57,14 @@ export function JobPostingsFilters({
     setFilters({
       employmentType: null,
       workMode: null,
+      sort: null,
       page: null,
     });
   };
 
-  const activeFiltersCount = [employmentType, workMode].filter(Boolean).length;
+  const activeFiltersCount = [employmentType, workMode, sort].filter(
+    Boolean,
+  ).length;
   const hasActiveFilters = activeFiltersCount > 0;
 
   return (
@@ -100,6 +105,25 @@ export function JobPostingsFilters({
             ))}
           </SelectContent>
         </Select>
+        <Select
+          value={sort || "posted_at_desc"}
+          onValueChange={(value) =>
+            updateFilter("sort", value === "posted_at_desc" ? null : value)
+          }
+          disabled={isPending}
+        >
+          <SelectTrigger className="w-44 ml-auto">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="posted_at_desc">Newest First</SelectItem>
+            <SelectItem value="posted_at_asc">Oldest First</SelectItem>
+            <SelectItem value="salary_desc">Salary: High → Low</SelectItem>
+            <SelectItem value="salary_asc">Salary: Low → High</SelectItem>
+            <SelectItem value="title_asc">Title: A → Z</SelectItem>
+            <SelectItem value="title_desc">Title: Z → A</SelectItem>
+          </SelectContent>
+        </Select>
 
         {hasActiveFilters && (
           <Button
@@ -137,6 +161,19 @@ export function JobPostingsFilters({
                 size="icon"
                 className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
                 onClick={() => removeFilter("workMode")}
+              >
+                <X className="h-2 w-2" />
+              </Button>
+            </Badge>
+          )}
+          {sort && (
+            <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+              Sort: {sort.replace(/_/g, " ")}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
+                onClick={() => removeFilter("sort")}
               >
                 <X className="h-2 w-2" />
               </Button>

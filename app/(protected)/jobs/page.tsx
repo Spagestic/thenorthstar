@@ -1,5 +1,5 @@
+// app/(protected)/jobs/page.tsx
 import { Suspense } from "react";
-import { ScraperDialog } from "./components/scraper-dialog";
 import Header from "../Header";
 import { createClient } from "@/lib/supabase/server";
 import { JobCard } from "./components/job-card";
@@ -126,10 +126,10 @@ export async function JobList({
   searchParams: Promise<SearchParams>;
 }) {
   const resolvedParams = jobPostingsSearchParamsCache.parse(await searchParams);
-  const { search, employmentType, workMode, page } = resolvedParams;
-
+  const { search, employmentType, workMode, page, sort } = resolvedParams;
+  const [sortField, sortDir] = (sort || "posted_at_desc").split(/_(?=[^_]+$)/);
   const supabase = await createClient();
-
+  const column = sortField === "salary" ? "salary_max" : sortField;
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
@@ -150,7 +150,7 @@ export async function JobList({
   }
 
   const { data: jobs, count } = await query
-    .order("posted_at", { ascending: false })
+    .order(column, { ascending: sortDir === "asc", nullsFirst: false })
     .range(from, to);
 
   if (!jobs || jobs.length === 0) {
@@ -166,31 +166,8 @@ export async function JobList({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {jobs.map((job: any) => (
-        <JobCard
-          key={job.id}
-          job={{
-            ...job,
-            workMode: job.work_mode as any,
-            companyName:
-              job.company?.name || job.company_name || "Unknown Company",
-            companyLogo: job.company?.logo_url || undefined,
-            directApplyUrl: job.direct_apply_url,
-            employmentType: job.employment_type as any,
-            datePosted: job.posted_at,
-            jobLocations: job.location as any,
-            baseSalary:
-              job.salary_min || job.salary_max
-                ? {
-                    minValue: job.salary_min,
-                    maxValue: job.salary_max,
-                    currency: job.salary_currency,
-                    unitText: job.salary_period,
-                  }
-                : undefined,
-            description: job.description,
-          }}
-        />
+      {jobs.map((job) => (
+        <JobCard key={job.id} job={job} />
       ))}
     </div>
   );
@@ -204,7 +181,7 @@ async function JobPagination({
   searchParams: Promise<SearchParams>;
 }) {
   const resolvedParams = jobPostingsSearchParamsCache.parse(await searchParams);
-  const { search, employmentType, workMode, page } = resolvedParams;
+  const { search, employmentType, workMode, page, sort } = resolvedParams;
 
   const supabase = await createClient();
 
@@ -237,7 +214,7 @@ async function JobPagination({
     if (employmentType) params.set("employmentType", employmentType);
     if (workMode) params.set("workMode", workMode);
     if (newPage > 1) params.set("page", newPage.toString());
-
+    if (sort && sort !== "posted_at_desc") params.set("sort", sort);
     const queryString = params.toString();
     return queryString ? `?${queryString}` : "";
   };
