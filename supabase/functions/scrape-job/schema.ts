@@ -10,13 +10,13 @@ export const JOB_POSTING_JSON_SCHEMA = z.toJSONSchema(
 ) as Record<string, unknown>;
 
 export const MISTRAL_EXTRACTION_PROMPT = [
-  "Extract all job posting details from this markdown into strict JSON.",
-  "Use this JSON schema shape:",
-  JSON.stringify(JOB_POSTING_JSON_SCHEMA),
+  "Extract all job posting details from this markdown.",
   "Rules:",
   "- Return ONLY valid JSON object and no additional text.",
   "- If a field is not found, use null.",
   "- Preserve full job description in markdown for description.",
   "- workMode must be one of REMOTE, HYBRID, ONSITE, UNKNOWN.",
   "- employmentType must be one of FULL_TIME, PART_TIME, CONTRACT, TEMPORARY, INTERN, VOLUNTEER, OTHER.",
+  "- For companyDomain, extract the company's ACTUAL website domain (e.g. stripe.com, jpmorganchase.com), NOT the job board domain. If unsure, use null.",
+  "- For companyName, use the company's official full name as displayed on the posting.",
 ].join("\n");
