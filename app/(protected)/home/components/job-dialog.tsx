@@ -1,20 +1,9 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Building2,
-  MapPin,
-  Calendar,
-  ExternalLink,
-  PhoneCall,
-} from "lucide-react";
-import { JobPosting } from "@/types/job-posting";
+import { MapPin, ExternalLink, PhoneCall } from "lucide-react";
+import type { Database } from "@/lib/supabase/database.types";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import ReactMarkdown from "react-markdown";
@@ -24,6 +13,7 @@ import {
   formatWorkMode,
   formatSalary,
   formatLocation,
+  getCompanyLogoUrl,
 } from "@/lib/utils";
 import {
   TypographyH1,
@@ -37,17 +27,28 @@ import {
   TypographyTable,
 } from "@/components/ui/typography";
 
+type JobRow = Database["public"]["Tables"]["job_postings"]["Row"];
 interface JobDialogProps {
-  job: JobPosting;
+  job: JobRow;
   isOpen: boolean;
   onClose: (open: boolean) => void;
 }
 
 export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
-  const salaryString = useMemo(() => formatSalary(job), [job]);
-  const location = useMemo(() => formatLocation(job), [job]);
-  const employmentType = formatEmploymentType(job.employmentType);
-  const workMode = formatWorkMode(job.workMode);
+  const salary = useMemo(
+    () =>
+      formatSalary({
+        minValue: job.salary_min,
+        maxValue: job.salary_max,
+        currency: job.salary_currency,
+        unitText: job.salary_period,
+      }),
+    [job.salary_min, job.salary_max, job.salary_currency, job.salary_period],
+  );
+  const location = useMemo(() => formatLocation(job.location), [job.location]);
+  const employmentType = formatEmploymentType(job.employment_type);
+  const workMode = formatWorkMode(job.work_mode);
+  const logoUrl = getCompanyLogoUrl(job.company_domain);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -57,16 +58,27 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
           <div className="p-6 md:p-8 bg-muted/30 border-b space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-start gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-border bg-card shadow-xs overflow-hidden">
-                  {job.companyLogo ? (
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
+                  {logoUrl ? (
                     <img
-                      src={job.companyLogo}
-                      alt={`${job.companyName || "Company"} logo`}
-                      className="h-full w-full object-contain p-2"
+                      src={logoUrl}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display =
+                          "none";
+                        (
+                          e.currentTarget.nextElementSibling as HTMLElement
+                        )?.classList.remove("hidden");
+                      }}
                     />
-                  ) : (
-                    <Building2 className="h-8 w-8 text-muted-foreground" />
-                  )}
+                  ) : null}
+                  <span
+                    className={`text-sm font-semibold text-muted-foreground select-none ${logoUrl ? "hidden" : ""}`}
+                  >
+                    {(job.company_name || "C").charAt(0)}
+                  </span>
                 </div>
                 <div className="space-y-1">
                   <DialogTitle className="text-2xl font-semibold tracking-tight">
@@ -74,7 +86,7 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
                   </DialogTitle>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                     <span className="font-semibold text-foreground">
-                      {job.companyName}
+                      {job.company_name}
                     </span>
                     <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
                     <span className="flex items-center gap-1">
@@ -97,22 +109,22 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
                   {workMode}
                 </Badge>
               )}
-              {salaryString && (
+              {salary && (
                 <Badge variant="outline" className="font-medium">
-                  {salaryString}
+                  {salary}
                 </Badge>
               )}
             </div>
             <div className="flex items-center gap-2 w-full">
-              {job.directApplyUrl && (
+              {job.direct_apply_url && (
                 <Button
                   asChild
                   size="sm"
-                  variant={"secondary"}
-                  className="w-1/2"
+                  variant="secondary"
+                  className="flex-1"
                 >
                   <Link
-                    href={job.directApplyUrl}
+                    href={job.direct_apply_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="gap-2"
@@ -122,12 +134,9 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
                   </Link>
                 </Button>
               )}
-              <Button size="sm" variant="default" asChild className="w-1/2">
+              <Button size="sm" variant="default" asChild className="flex-1">
                 <Link
-                  href={`/call/practice?title=${encodeURIComponent(
-                    job.title || "",
-                  )}&company=${encodeURIComponent(job.companyName || "")}`}
-                  className="gap-2"
+                  href={`/interview/${job.id}?company=${encodeURIComponent(job.company_name)}&job=${encodeURIComponent(job.title)}`}
                 >
                   <PhoneCall className="h-4 w-4" />
                   Practice
@@ -187,22 +196,6 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
           </div>
         </div>
       </DialogContent>
-      <DialogFooter>
-        {job.datePosted && (
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>Posted: {new Date(job.datePosted).toLocaleDateString()}</span>
-          </div>
-        )}
-        {job.validThrough && (
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>
-              Expires: {new Date(job.validThrough).toLocaleDateString()}
-            </span>
-          </div>
-        )}
-      </DialogFooter>
     </Dialog>
   );
 }
