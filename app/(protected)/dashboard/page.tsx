@@ -20,7 +20,7 @@ export default function HomePage({ searchParams }: PageProps) {
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto px-6 py-8 space-y-8">
           {/* Hero Scrape Section */}
-          <section className="text-center space-y-4 pt-16">
+          <section className="text-center space-y-4 pt-36">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold tracking-tight">
                 Practice for your next interview
