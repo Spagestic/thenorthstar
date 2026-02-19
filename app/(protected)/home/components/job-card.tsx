@@ -47,7 +47,7 @@ export function JobCard({ job }: { job: JobRow }) {
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
-                {logoUrl ? (
+                {/* {logoUrl ? (
                   <img
                     src={logoUrl}
                     alt=""
@@ -61,9 +61,9 @@ export function JobCard({ job }: { job: JobRow }) {
                       )?.classList.remove("hidden");
                     }}
                   />
-                ) : null}
+                ) : null} */}
                 <span
-                  className={`text-sm font-semibold text-muted-foreground select-none ${logoUrl ? "hidden" : ""}`}
+                  className={`text-sm font-semibold text-muted-foreground select-none`}
                 >
                   {(job.company_name || "C").charAt(0)}
                 </span>

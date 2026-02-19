@@ -59,7 +59,7 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-start gap-4">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
-                  {logoUrl ? (
+                  {/* {logoUrl ? (
                     <img
                       src={logoUrl}
                       alt=""
@@ -73,9 +73,9 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
                         )?.classList.remove("hidden");
                       }}
                     />
-                  ) : null}
+                  ) : null} */}
                   <span
-                    className={`text-sm font-semibold text-muted-foreground select-none ${logoUrl ? "hidden" : ""}`}
+                    className={`text-sm font-semibold text-muted-foreground select-none`}
                   >
                     {(job.company_name || "C").charAt(0)}
                   </span>
