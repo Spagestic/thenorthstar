@@ -1,4 +1,4 @@
-// page.tsx
+// dashboard/page.tsx
 import { Suspense } from "react";
 import Header from "../Header";
 import { Skeleton } from "@/components/ui/skeleton";
