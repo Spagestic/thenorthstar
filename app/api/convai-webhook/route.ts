@@ -44,8 +44,13 @@ export async function POST(req: NextRequest) {
     if (event.type === "post_call_transcription") {
         const { conversation_id, analysis, agent_id } = event.data;
 
+        const allowedAgents = [
+            process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID,
+            process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID_NEW,
+        ];
+
         // Optional: only handle your Ovoxa agent
-        if (agent_id !== process.env.ELEVENLABS_AGENT_ID) {
+        if (!allowedAgents.includes(agent_id)) {
             return NextResponse.json({ skipped: true }, { status: 200 });
         }
 
@@ -53,9 +58,12 @@ export async function POST(req: NextRequest) {
             analysis.data_collection_results.full_transcript?.value ??
                 analysis.transcript ?? ""; // fallback if you expose raw transcript
 
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+            "http://localhost:3000";
+
         // Call your feedback route (internal call for separation of concerns)
         const feedbackRes = await fetch(
-            `${process.env.NEXT_PUBLIC_APP_URL}/api/ai/feedback`,
+            `${baseUrl}/api/ai/feedback`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
