@@ -6,21 +6,12 @@
 
 ## 🎯 What We Do
 
-NorthStar curates company and role-specific question banks and analyzes both speech content and delivery to provide comprehensive feedback on:
+NorthStar analyzes both speech content and delivery to provide comprehensive feedback on:
 
 - 🗣️ **Speech Content**: Relevance, structure, and completeness of answers
 - 🎤 **Speech Delivery**: Filler words, pauses, pace, and clarity
 - 🎯 **Role Alignment**: How well answers match the specific job requirements
 - 💼 **Company Fit**: Tailored feedback based on company culture and values
-
-## 📊 Our Database
-
-We've curated an extensive interview preparation resource:
-
-- **1,000+** interview questions
-- **100+** different job positions
-- **40+** companies
-- **40+** industries
 
 From software engineering roles at tech giants to consulting positions at top firms, we cover the positions that matter most to university students entering the job market.
 
@@ -28,8 +19,9 @@ From software engineering roles at tech giants to consulting positions at top fi
 
 - **Frontend**: [Next.js](https://nextjs.org) (App Router)
 - **Backend**: [Supabase](https://supabase.com) (Database, Authentication, Storage)
+- **AI Integration**: Voice-based GenAI for interview simulation, Mistral API for data extraction
+- **Web Scraping**: Firecrawl for automated job posting extraction
 - **UI Components**: Shadcn/ui with Tailwind CSS
-- **AI Integration**: Voice-based GenAI for interview simulation
 - **TypeScript**: Full type safety across the application
 
 ## 🚀 Getting Started
@@ -98,9 +90,10 @@ npm run dev
 ```
 app/
 ├── (protected)/          # Authenticated routes
-│   ├── dashboard/        # Job listings and search
-│   ├── job/[id]/         # Individual job details
-│   ├── call/             # AI interview interface
+│   ├── dashboard/        # Job URL pasting & automated scraping (Firecrawl + Mistral)
+│   ├── jobs/             # Job listing and filtering
+│   ├── interview/        # AI interview interface
+│   ├── history/          # Past interview sessions and feedback
 │   └── profile/          # User profile and settings
 ├── (public)/             # Public landing page
 ├── auth/                 # Authentication flows
@@ -118,6 +111,7 @@ lib/
 
 ## ✨ Key Features
 
+- 🔗 **Instant Job Import**: Paste any job URL to automatically scrape (via Firecrawl) and extract requirements (via Mistral API) for instant mock interview setup.
 - 🎙️ **Voice-Based Interviews**: Realistic AI-powered interview simulations
 - 📈 **Personalized Feedback**: Detailed analysis of your interview performance
 - 🔍 **Smart Job Matching**: Browse and filter through 100+ curated positions
