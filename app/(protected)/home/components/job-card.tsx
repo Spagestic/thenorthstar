@@ -20,10 +20,12 @@ type JobRow = Database["public"]["Tables"]["job_postings"]["Row"];
 export function JobCard({ job }: { job: JobRow }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   const timeAgo = formatTimeAgo(job.posted_at);
   const employmentType = formatEmploymentType(job.employment_type);
   const logoUrl = getCompanyLogoUrl(job.company_domain);
+  const showLogo = logoUrl && !logoError;
   const salary = useMemo(
     () =>
       formatSalary({
@@ -47,26 +49,19 @@ export function JobCard({ job }: { job: JobRow }) {
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
-                {/* {logoUrl ? (
+                {showLogo ? (
                   <img
-                    src={logoUrl}
+                    src={logoUrl!}
                     alt=""
                     className="h-full w-full object-cover"
                     loading="lazy"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display =
-                        "none";
-                      (
-                        e.currentTarget.nextElementSibling as HTMLElement
-                      )?.classList.remove("hidden");
-                    }}
+                    onError={() => setLogoError(true)}
                   />
-                ) : null} */}
-                <span
-                  className={`text-sm font-semibold text-muted-foreground select-none`}
-                >
-                  {(job.company_name || "C").charAt(0)}
-                </span>
+                ) : (
+                  <span className="text-sm font-semibold text-muted-foreground select-none">
+                    {(job.company_name || "C").charAt(0)}
+                  </span>
+                )}
               </div>
 
               <div className="min-w-0">
