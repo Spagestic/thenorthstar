@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 data/**
+.firecrawl/
 
 # debug
 npm-debug.log*
