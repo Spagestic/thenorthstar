@@ -116,7 +116,7 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
               )}
             </div>
             <div className="flex items-center gap-2 w-full">
-              {job.direct_apply_url && (
+              {job.url && (
                 <Button
                   asChild
                   size="sm"
@@ -124,7 +124,7 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
                   className="flex-1"
                 >
                   <Link
-                    href={job.direct_apply_url}
+                    href={job.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="gap-2"
