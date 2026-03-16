@@ -216,7 +216,7 @@ async function JobPagination({
     if (newPage > 1) params.set("page", newPage.toString());
     if (sort && sort !== "posted_at_desc") params.set("sort", sort);
     const queryString = params.toString();
-    return queryString ? `?${queryString}` : "";
+    return `?${queryString}`;
   };
 
   if (totalPages <= 1) {
