@@ -86,7 +86,7 @@ async function RecentScrapes() {
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-xl font-semibold tracking-tight">Recent scrapes</h2>
-        <Button variant="ghost">
+        <Button variant="ghost" asChild>
           <Link href="/jobs">View all</Link>
         </Button>
       </div>
