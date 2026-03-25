@@ -10,8 +10,18 @@ export interface ExtractionParams {
   apiKey: string;
 }
 
+export interface BrandingProfile {
+  logo?: string | null;
+  images?: {
+    logo?: string | null;
+    favicon?: string | null;
+    ogImage?: string | null;
+  } | null;
+}
+
 export interface ScrapeResult {
   markdown: string;
   metadata: Record<string, unknown>;
   links?: string[];
+  branding?: BrandingProfile;
 }

@@ -2,6 +2,7 @@ import { JobPosting } from "@/types/job-posting";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { Json } from "@/database.types";
+import { resolveCompanyLogoUrl } from "@/lib/company-logo";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -113,7 +114,12 @@ export function formatLocation(location: any | null): string {
   );
 }
 
-export function getCompanyLogoUrl(domain: string | null): string | null {
-  if (!domain) return null;
-  return `https://logos-api.apistemic.com/domain:${domain}`;
+export function getCompanyLogoUrl(
+  domain: string | null,
+  companyLogoUrl?: string | null,
+): string | null {
+  return resolveCompanyLogoUrl({
+    companyLogoUrl,
+    companyDomain: domain,
+  });
 }

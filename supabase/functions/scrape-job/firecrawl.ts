@@ -21,7 +21,7 @@ export async function scrapeWithFirecrawl(
     },
     body: JSON.stringify({
       url: targetUrl,
-      formats: ["markdown", "links"],
+      formats: ["markdown", "links", "branding"],
       actions: DEFAULT_ACTIONS,
       excludeTags: ["script", "style", "noscript", "iframe"],
       onlyMainContent: true,
@@ -50,6 +50,7 @@ export async function scrapeWithFirecrawl(
     markdown,
     metadata: (data.metadata || {}) as Record<string, unknown>,
     links: Array.isArray(data.links) ? (data.links as string[]) : undefined,
+    branding: data.branding as ScrapeResult["branding"],
   };
 }
 

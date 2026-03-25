@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { JobPosting } from "@/app/api/ai/extract/details/schema";
+import { normalizeJobDescription } from "@/lib/job-description";
 
 export type SaveJobResult = {
     success: boolean;
@@ -15,8 +16,13 @@ export type CompanyInfo = {
     logoUrl?: string;
 };
 
+type SaveableJobPosting = JobPosting & {
+    descriptionRaw?: string | null;
+    companyLogoUrl?: string | null;
+};
+
 export async function saveJobsToSupabase(
-    jobs: JobPosting[],
+    jobs: SaveableJobPosting[],
     options: {
         replaceCompanyJobs?: boolean;
         companyInfo?: CompanyInfo;
@@ -75,6 +81,13 @@ export async function saveJobsToSupabase(
     }
 
     const dbRows = validJobs.map((job) => {
+        const normalizedDescription = normalizeJobDescription({
+            extractedDescription: job.description,
+            rawDescription: job.descriptionRaw,
+            responsibilities: job.responsibilities,
+            qualifications: job.qualifications,
+        });
+
         // 1. Flatten Salary
         const salary = job.baseSalary;
 
@@ -97,7 +110,9 @@ export async function saveJobsToSupabase(
             company_name: job.companyName || options.companyInfo?.name ||
                 "Unknown Company",
             company_id: companyId, // Link to the companies table
-            description: job.description || "",
+            company_logo_url: job.companyLogoUrl || options.companyInfo?.logoUrl || null,
+            description: normalizedDescription.normalizedMarkdown,
+            description_raw: normalizedDescription.raw,
             location: job.jobLocations, // JSONB column
             work_mode: job.workMode,
             employment_type: job.employmentType,

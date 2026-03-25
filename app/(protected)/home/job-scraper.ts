@@ -252,7 +252,8 @@ export function useJobScraper() {
                     firecrawlMetadata?.title ||
                     "Unknown Company",
                 website: new URL(normalizedUrl).origin,
-                logoUrl: previewRes?.logo || branding?.logos?.[0],
+                logoUrl: previewRes?.logo || branding?.logo ||
+                    branding?.images?.logo,
             };
 
             updateStep("1", {
@@ -597,6 +598,10 @@ export function useJobScraper() {
                             }
 
                             finalJob = normalizeLocation(finalJob);
+                            finalJob = {
+                                ...finalJob,
+                                descriptionRaw: doc.markdown,
+                            };
 
                             currentDetails[globalIndex] = `${
                                 finalJob.title || "Job"

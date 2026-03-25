@@ -24,7 +24,7 @@ export function JobCard({ job }: { job: JobRow }) {
 
   const timeAgo = formatTimeAgo(job.posted_at);
   const employmentType = formatEmploymentType(job.employment_type);
-  const logoUrl = getCompanyLogoUrl(job.company_domain);
+  const logoUrl = getCompanyLogoUrl(job.company_domain, job.company_logo_url);
   const showLogo = logoUrl && !logoError;
   const salary = useMemo(
     () =>

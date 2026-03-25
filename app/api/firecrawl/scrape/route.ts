@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
         const formats: FormatOption[] = [
             "markdown",
             "links",
+            "branding",
             {
                 type: "json",
                 schema: JOB_POSTING_JSON_SCHEMA,
@@ -45,7 +46,10 @@ export async function POST(request: NextRequest) {
                     "employment type, full job description in markdown, responsibilities,",
                     "qualifications, salary/compensation, dates, and application URL.",
                     "If a field is not found on the page, leave it null.",
-                    "For the description field, preserve the full content as markdown.",
+                    "For the description field, return canonical markdown for the actual job content only.",
+                    "Exclude navigation, footer, cookie, share, login, and apply-widget chrome unless it contains unique job details.",
+                    "Normalize headings, bullets, and spacing so the markdown is clean and readable.",
+                    "Preserve meaningful sections like responsibilities, requirements, benefits, compensation, and application steps.",
                 ].join(" "),
             },
         ];
@@ -88,6 +92,7 @@ export async function POST(request: NextRequest) {
             success: true,
             markdown: scrapeResult.markdown,
             metadata: scrapeResult.metadata,
+            branding: scrapeResult.branding,
             json: validatedJob,
             links: scrapeResult.links,
         };

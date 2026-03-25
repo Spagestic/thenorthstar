@@ -12,6 +12,10 @@ export async function POST(req: NextRequest) {
         let prompt =
             `You are an expert HR data extractor. Extract precise JSON from this job posting markdown.
         If a value is not found, use null or omit the key.
+        For description, return canonical markdown for the actual job content only.
+        Exclude navigation, footer, cookie, share, login, and apply-widget chrome unless it contains unique job details.
+        Normalize headings, bullets, and spacing so the markdown is clean and readable.
+        Preserve meaningful sections like responsibilities, requirements, benefits, compensation, and application steps.
         ${url ? `The URL of this job is: ${url}` : ""}
         Markdown:\n\n${markdown}`;
 
@@ -19,6 +23,7 @@ export async function POST(req: NextRequest) {
             prompt =
                 `PREVIOUS EXTRACTION FAILED VALIDATION. Please fix the following errors in your extraction:
             ${JSON.stringify(validationErrors, null, 2)}
+            Keep description as canonical markdown for the job content only, with clean headings, bullets, and spacing.
             
             Original Source Markdown:
             ${markdown}`;

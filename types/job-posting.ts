@@ -3,6 +3,7 @@ export type JobPosting = {
     title?: string | null;
     companyName?: string | null;
     companyLogo?: string | null;
+    companyLogoUrl?: string | null;
     companyDomain?: string | null;
     url?: string | null;
     jobLocations?: {
@@ -22,6 +23,7 @@ export type JobPosting = {
         | "OTHER"
         | null;
     description?: string | null;
+    descriptionRaw?: string | null;
     responsibilities?: string[] | null;
     qualifications?: string[] | null;
     baseSalary?: {

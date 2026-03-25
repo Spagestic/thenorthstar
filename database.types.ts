@@ -195,9 +195,11 @@ export type Database = {
       job_postings: {
         Row: {
           company_domain: string | null;
+          company_logo_url: string | null;
           company_name: string;
           created_at: string | null;
           description: string | null;
+          description_raw: string | null;
           direct_apply_url: string | null;
           employment_type: string | null;
           id: string;
@@ -216,9 +218,11 @@ export type Database = {
         };
         Insert: {
           company_domain?: string | null;
+          company_logo_url?: string | null;
           company_name: string;
           created_at?: string | null;
           description?: string | null;
+          description_raw?: string | null;
           direct_apply_url?: string | null;
           employment_type?: string | null;
           id?: string;
@@ -237,9 +241,11 @@ export type Database = {
         };
         Update: {
           company_domain?: string | null;
+          company_logo_url?: string | null;
           company_name?: string;
           created_at?: string | null;
           description?: string | null;
+          description_raw?: string | null;
           direct_apply_url?: string | null;
           employment_type?: string | null;
           id?: string;

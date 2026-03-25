@@ -1,22 +1,31 @@
 // refer to https://logos.apistemic.com/
 "use client";
 
+import { resolveCompanyLogoUrl } from "@/lib/company-logo";
+
 export function CompanyLogo({
   domain,
+  logoUrl,
   className,
 }: {
-  domain: string;
+  domain?: string | null;
+  logoUrl?: string | null;
   className?: string;
 }) {
+  const src = resolveCompanyLogoUrl({
+    companyLogoUrl: logoUrl,
+    companyDomain: domain,
+  });
+
+  if (!src) {
+    return null;
+  }
+
   return (
     <img
       className={className}
-      src={
-        domain.includes(".")
-          ? `https://logos-api.apistemic.com/domain:${domain}`
-          : `https://logos-api.apistemic.com/linkedin:${domain}`
-      }
-      alt={`${domain} logo`}
+      src={src}
+      alt={`${domain || "Company"} logo`}
       width={64}
       height={64}
       loading="lazy"

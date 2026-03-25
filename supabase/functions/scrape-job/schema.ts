@@ -16,7 +16,10 @@ export const MISTRAL_EXTRACTION_PROMPT = [
   "Rules:",
   "- Return ONLY valid JSON object and no additional text.",
   "- If a field is not found, use null.",
-  "- Preserve full job description in markdown for description.",
+  "- For description, return canonical markdown for the actual job content only.",
+  "- Exclude navigation, footer, cookie, share, login, and apply-widget chrome unless it contains unique job details.",
+  "- Normalize headings, bullets, and spacing so the markdown is clean and readable.",
+  "- Preserve meaningful sections like responsibilities, requirements, benefits, compensation, and application steps.",
   "- workMode must be one of REMOTE, HYBRID, ONSITE, UNKNOWN.",
   "- employmentType must be one of FULL_TIME, PART_TIME, CONTRACT, TEMPORARY, INTERN, VOLUNTEER, OTHER.",
 ].join("\n");

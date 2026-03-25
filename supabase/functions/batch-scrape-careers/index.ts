@@ -3,6 +3,8 @@ import { corsHeaders, jsonResponse } from "./cors.ts";
 import { FirecrawlError, scrapeWithFirecrawl } from "../scrape-job/firecrawl.ts";
 import { extractStructuredJobWithMistral } from "../scrape-job/mistral.ts";
 import { toIsoOrNull } from "../scrape-job/helpers.ts";
+import { extractCompanyLogoUrl } from "../../../lib/company-logo.ts";
+import { normalizeJobDescription } from "../../../lib/job-description.ts";
 
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 15;
@@ -345,7 +347,7 @@ Deno.serve(async (req: Request) => {
       try {
         console.log("batch-scrape-careers:scraping-job", { jobUrl });
         const scrapeResult = await scrapeWithFirecrawl(jobUrl, firecrawlApiKey);
-        const { markdown, metadata } = scrapeResult;
+        const { markdown, metadata, branding } = scrapeResult;
 
         const job = await extractStructuredJobWithMistral({
           markdown,
@@ -358,6 +360,14 @@ Deno.serve(async (req: Request) => {
           "Unknown Title";
         const derivedCompanyName = job.companyName ||
           deriveFallbackCompanyName(job.url || jobUrl);
+        const companyLogoUrl = extractCompanyLogoUrl({
+          branding,
+          sourceUrl: jobUrl,
+        });
+        const normalizedDescription = normalizeJobDescription({
+          extractedDescription: job.description ?? null,
+          rawDescription: markdown,
+        });
 
         console.log("batch-scrape-careers:extracted-job", {
           jobUrl,
@@ -373,6 +383,7 @@ Deno.serve(async (req: Request) => {
           title: derivedTitle,
           company_name: derivedCompanyName,
           company_domain: job.companyDomain ?? null,
+          company_logo_url: companyLogoUrl,
           location: job.jobLocations ?? null,
           work_mode: job.workMode ?? null,
           employment_type: job.employmentType ?? null,
@@ -383,7 +394,8 @@ Deno.serve(async (req: Request) => {
           posted_at: toIsoOrNull(job.datePosted),
           valid_through: toIsoOrNull(job.validThrough),
           direct_apply_url: job.directApplyUrl ?? null,
-          description: job.description ?? markdown ?? null,
+          description: normalizedDescription.normalizedMarkdown,
+          description_raw: normalizedDescription.raw,
           user_id: user.id,
           updated_at: new Date().toISOString(),
         };

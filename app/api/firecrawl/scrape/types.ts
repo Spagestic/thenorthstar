@@ -37,6 +37,14 @@ export interface FirecrawlScrapeResult {
     screenshot?: string;
     json?: Record<string, unknown>;
     metadata?: ScrapeMetadata;
+    branding?: {
+        logo?: string;
+        images?: {
+            logo?: string;
+            favicon?: string;
+            ogImage?: string;
+        };
+    };
     actions?: {
         screenshots?: string[];
         scrapes?: Array<{ url: string; html: string }>;
@@ -49,6 +57,7 @@ export interface FirecrawlScrapeResponseBody {
     html?: string;
     json?: JobPosting | Record<string, unknown> | null;
     metadata?: ScrapeMetadata;
+    branding?: FirecrawlScrapeResult["branding"];
     screenshot?: string;
     links?: string[];
     error?: string;

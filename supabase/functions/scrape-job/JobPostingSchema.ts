@@ -56,7 +56,7 @@ export const JobPostingSchema = z.object({
   // Description & Requirements
   // CRITICAL: Always keep the markdown as the primary content
   description: z.string().nullable().optional().describe(
-    "Content of the job body in markdown",
+    "Canonical markdown for the job body. Keep job content sections, exclude page chrome like nav, footer, share/apply widgets, and normalize headings/bullets.",
   ),
 
   // Compensation

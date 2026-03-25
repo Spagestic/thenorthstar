@@ -7,7 +7,7 @@ import type { Database } from "@/lib/supabase/database.types";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import ReactMarkdown from "react-markdown";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   formatEmploymentType,
   formatWorkMode,
@@ -35,6 +35,7 @@ interface JobDialogProps {
 }
 
 export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
+  const [logoError, setLogoError] = useState(false);
   const salary = useMemo(
     () =>
       formatSalary({
@@ -48,7 +49,8 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
   const location = useMemo(() => formatLocation(job.location), [job.location]);
   const employmentType = formatEmploymentType(job.employment_type);
   const workMode = formatWorkMode(job.work_mode);
-  const logoUrl = getCompanyLogoUrl(job.company_domain);
+  const logoUrl = getCompanyLogoUrl(job.company_domain, job.company_logo_url);
+  const showLogo = logoUrl && !logoError;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -59,26 +61,19 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-start gap-4">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
-                  {/* {logoUrl ? (
+                  {showLogo ? (
                     <img
-                      src={logoUrl}
+                      src={logoUrl!}
                       alt=""
                       className="h-full w-full object-cover"
                       loading="lazy"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).style.display =
-                          "none";
-                        (
-                          e.currentTarget.nextElementSibling as HTMLElement
-                        )?.classList.remove("hidden");
-                      }}
+                      onError={() => setLogoError(true)}
                     />
-                  ) : null} */}
-                  <span
-                    className={`text-sm font-semibold text-muted-foreground select-none`}
-                  >
-                    {(job.company_name || "C").charAt(0)}
-                  </span>
+                  ) : (
+                    <span className="text-sm font-semibold text-muted-foreground select-none">
+                      {(job.company_name || "C").charAt(0)}
+                    </span>
+                  )}
                 </div>
                 <div className="space-y-1">
                   <DialogTitle className="text-2xl font-semibold tracking-tight">
