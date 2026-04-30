@@ -29,6 +29,7 @@ export async function NavInterviews() {
     `,
     )
     .eq("user_id", user.id)
+    .eq("agent_id", process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID_NEW!)
     .order("started_at", { ascending: false })
     .limit(10);
 
