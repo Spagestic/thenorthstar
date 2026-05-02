@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCompanyLogo } from "@/lib/company-logos";
 import { NavInterviewsClient } from "./nav-interviews-client";
 
 export async function NavInterviews() {
@@ -24,7 +23,9 @@ export async function NavInterviews() {
       started_at,
       job:job_postings(
         title,
-        company_name
+        company_name,
+        company_domain,
+        company_logo_url
       )
     `,
     )
@@ -35,12 +36,13 @@ export async function NavInterviews() {
 
   // Transform the data for display
   const interviews =
-    conversations?.map((conv: any) => ({
+    conversations?.map((conv) => ({
       id: conv.id,
       conversationId: conv.conversation_id,
       name: conv.job?.title || "Unknown Position",
       company: conv.job?.company_name || "Unknown Company",
-      domain: conv.job?.company_domain || "",
+      domain: conv.job?.company_domain ?? null,
+      companyLogoUrl: conv.job?.company_logo_url ?? null,
       url: `/history/${conv.conversation_id}`,
       startedAt: conv.started_at,
     })) || [];

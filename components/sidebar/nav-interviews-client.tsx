@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  Download,
-  Forward,
-  MoreHorizontal,
-  PhoneCall,
-  Trash2,
-} from "lucide-react";
+import { useState } from "react";
+import { Download, Forward, MoreHorizontal, Trash2 } from "lucide-react";
 import { IconPin, IconArchive } from "@tabler/icons-react";
-import Image from "next/image";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,16 +19,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { CompanyLogo } from "../CompanyLogo";
-import { Avatar } from "@radix-ui/react-avatar";
-import { AvatarFallback } from "../ui/avatar";
+import { getCompanyLogoUrl } from "@/lib/utils";
 
 type Interview = {
   id: string;
   conversationId: string;
   name: string;
   company: string;
-  domain: string;
+  domain: string | null;
+  companyLogoUrl: string | null;
   url: string;
   startedAt: string | null;
 };
@@ -42,6 +35,38 @@ type Interview = {
 type NavInterviewsClientProps = {
   interviews: Interview[];
 };
+
+function InterviewNavAvatar({
+  domain,
+  companyLogoUrl,
+  companyName,
+}: {
+  domain: string | null;
+  companyLogoUrl: string | null;
+  companyName: string;
+}) {
+  const [logoError, setLogoError] = useState(false);
+  const logoUrl = getCompanyLogoUrl(domain, companyLogoUrl);
+  const showLogo = Boolean(logoUrl && !logoError);
+
+  return (
+    <span className="flex size-5 shrink-0 items-center justify-center overflow-hidden rounded-full">
+      {showLogo ? (
+        <img
+          src={logoUrl!}
+          alt=""
+          className="size-full object-cover"
+          loading="lazy"
+          onError={() => setLogoError(true)}
+        />
+      ) : (
+        <span className="text-[10px] font-semibold text-muted-foreground select-none">
+          {(companyName || "C").charAt(0)}
+        </span>
+      )}
+    </span>
+  );
+}
 
 export function NavInterviewsClient({ interviews }: NavInterviewsClientProps) {
   const { isMobile } = useSidebar();
@@ -65,10 +90,11 @@ export function NavInterviewsClient({ interviews }: NavInterviewsClientProps) {
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton asChild>
               <a href={item.url}>
-                <span className="text-sm font-semibold text-muted-foreground">
-                  {(item.company || "C").slice(0, 1)}
-                </span>
-
+                <InterviewNavAvatar
+                  domain={item.domain}
+                  companyLogoUrl={item.companyLogoUrl}
+                  companyName={item.company}
+                />
                 <span>{item.name}</span>
               </a>
             </SidebarMenuButton>
