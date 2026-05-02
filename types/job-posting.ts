@@ -1,3 +1,11 @@
+/** One place slot from job postings (DB `location` JSON is often an array of these). */
+export type JobLocationEntry = {
+    city?: string | null;
+    state?: string | null;
+    country?: string | null;
+    rawAddress?: string | null;
+};
+
 export type JobPosting = {
     id: string;
     title?: string | null;
@@ -6,12 +14,7 @@ export type JobPosting = {
     companyLogoUrl?: string | null;
     companyDomain?: string | null;
     url?: string | null;
-    jobLocations?: {
-        city?: string | null;
-        state?: string | null;
-        country?: string | null;
-        rawAddress?: string | null;
-    }[] | null;
+    jobLocations?: JobLocationEntry[] | null;
     workMode?: "REMOTE" | "HYBRID" | "ONSITE" | "UNKNOWN" | null;
     employmentType?:
         | "FULL_TIME"

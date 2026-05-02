@@ -36,7 +36,10 @@ export function JobCard({ job }: { job: JobRow }) {
       }),
     [job.salary_min, job.salary_max, job.salary_currency, job.salary_period],
   );
-  const location = useMemo(() => formatLocation(job.location), [job.location]);
+  const location = useMemo(
+    () => formatLocation(job.location, job.work_mode),
+    [job.location, job.work_mode],
+  );
   return (
     <>
       <JobDialog job={job} isOpen={isDialogOpen} onClose={setIsDialogOpen} />

@@ -36,7 +36,10 @@ export function JobCard({ job }: { job: JobRow }) {
       }),
     [job.salary_min, job.salary_max, job.salary_currency, job.salary_period],
   );
-  const location = useMemo(() => formatLocation(job.location), [job.location]);
+  const location = useMemo(
+    () => formatLocation(job.location, job.work_mode),
+    [job.location, job.work_mode],
+  );
   return (
     <>
       <JobDialog job={job} isOpen={isDialogOpen} onClose={setIsDialogOpen} />
@@ -48,7 +51,7 @@ export function JobCard({ job }: { job: JobRow }) {
         <CardHeader>
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full overflow-hidden">
                 {showLogo ? (
                   <img
                     src={logoUrl!}
@@ -115,6 +118,7 @@ export function JobCard({ job }: { job: JobRow }) {
             <div className="min-w-0">
               {salary && <div className="font-semibold truncate">{salary}</div>}
               <div className="text-sm text-muted-foreground line-clamp-1">
+                {/* {salary && job.salary_currency} */}
                 {location}
               </div>
             </div>

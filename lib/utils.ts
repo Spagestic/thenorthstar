@@ -1,4 +1,4 @@
-import { JobPosting } from "@/types/job-posting";
+import { type JobLocationEntry, type JobPosting } from "@/types/job-posting";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { Json } from "@/database.types";
@@ -104,14 +104,66 @@ export function formatSalary(
   return `${currency}${fmt(max)}`;
 }
 
-export function formatLocation(location: any | null): string {
-  const firstLocation = location?.jobLocations?.[0];
-  return (
-    firstLocation?.rawAddress ||
-    [firstLocation?.city, firstLocation?.country].filter(Boolean).join(", ") ||
-    formatWorkMode(location?.workMode) ||
-    "Remote"
+function isLocationEntry(value: unknown): value is JobLocationEntry {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** DB stores `location` as an array; API payloads may use `{ jobLocations: [...] }`. */
+function normalizeLocationEntries(location: unknown): JobLocationEntry[] {
+  if (!location) return [];
+  if (Array.isArray(location)) {
+    return location.filter(isLocationEntry);
+  }
+  if (typeof location === "object" && location !== null) {
+    const nested = (location as { jobLocations?: unknown }).jobLocations;
+    if (Array.isArray(nested)) {
+      return nested.filter(isLocationEntry);
+    }
+  }
+  return [];
+}
+
+/** Prefer a concrete place (city/state) over a generic remote-only row when both exist. */
+function pickBestLocationEntry(entries: JobLocationEntry[]): JobLocationEntry | null {
+  if (entries.length === 0) return null;
+  const withCity = entries.find((e) => e.city?.trim());
+  if (withCity) return withCity;
+  const withState = entries.find((e) => e.state?.trim());
+  if (withState) return withState;
+  const withRaw = entries.find((e) => e.rawAddress?.trim());
+  if (withRaw) return withRaw;
+  return entries[0] ?? null;
+}
+
+function formatLocationEntry(entry: JobLocationEntry): string {
+  const raw = entry.rawAddress?.trim();
+  if (raw) return raw;
+  const parts = [entry.city, entry.state, entry.country].filter((p) =>
+    Boolean(p?.trim()),
   );
+  return parts.join(", ");
+}
+
+/**
+ * @param location — Supabase `job_postings.location` (array of entries) or `{ jobLocations }` from API
+ * @param workMode — `job_postings.work_mode`; used only when there is no address text to show
+ */
+export function formatLocation(
+  location: unknown,
+  workMode?: string | null,
+): string {
+  const entries = normalizeLocationEntries(location);
+  const best = pickBestLocationEntry(entries);
+  const fromAddress = best ? formatLocationEntry(best) : "";
+  if (fromAddress) return fromAddress;
+
+  const legacyRoot =
+    typeof location === "object" && location !== null && !Array.isArray(location)
+      ? (location as { workMode?: string | null }).workMode
+      : null;
+  const mode = workMode ?? legacyRoot ?? null;
+
+  return formatWorkMode(mode) || "";
 }
 
 export function getCompanyLogoUrl(

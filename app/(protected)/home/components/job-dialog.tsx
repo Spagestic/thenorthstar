@@ -46,7 +46,10 @@ export function JobDialog({ job, isOpen, onClose }: JobDialogProps) {
       }),
     [job.salary_min, job.salary_max, job.salary_currency, job.salary_period],
   );
-  const location = useMemo(() => formatLocation(job.location), [job.location]);
+  const location = useMemo(
+    () => formatLocation(job.location, job.work_mode),
+    [job.location, job.work_mode],
+  );
   const employmentType = formatEmploymentType(job.employment_type);
   const workMode = formatWorkMode(job.work_mode);
   const logoUrl = getCompanyLogoUrl(job.company_domain, job.company_logo_url);
