@@ -74,7 +74,9 @@ async function RecentScrapes() {
   if (!jobs || jobs.length === 0) {
     return (
       <section className="space-y-2">
-        <h2 className="text-xl font-semibold tracking-tight">Recent scrapes</h2>
+        <h2 className="text-xl font-semibold tracking-tight">
+          Recent job postings
+        </h2>
         <p className="text-sm text-muted-foreground">
           No recent scrapes yet. Paste a job URL above to get started.
         </p>
@@ -85,7 +87,9 @@ async function RecentScrapes() {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-xl font-semibold tracking-tight">Recent scrapes</h2>
+        <h2 className="text-xl font-semibold tracking-tight">
+          Recent job postings
+        </h2>
         <Button variant="ghost" asChild>
           <Link href="/jobs">View all</Link>
         </Button>
