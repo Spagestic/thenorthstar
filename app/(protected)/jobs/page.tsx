@@ -129,7 +129,14 @@ export async function JobList({
   const { search, employmentType, workMode, page, sort } = resolvedParams;
   const [sortField, sortDir] = (sort || "posted_at_desc").split(/_(?=[^_]+$)/);
   const supabase = await createClient();
-  const column = sortField === "salary" ? "salary_max" : sortField;
+  // Order by created_at for date sorts: posted_at is often null or a stale board date;
+  // created_at matches when the row was added and gives a true "newest first" feed.
+  const column =
+    sortField === "salary"
+      ? "salary_max"
+      : sortField === "posted_at"
+        ? "created_at"
+        : sortField;
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
