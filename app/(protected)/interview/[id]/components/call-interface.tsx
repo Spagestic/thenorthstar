@@ -2,6 +2,7 @@
 
 import { useCallback, useState, useRef } from "react";
 import { useConversation } from "@elevenlabs/react";
+import { useRouter } from "next/navigation";
 import { CallOrb } from "./call-orb";
 import { CallStatus } from "./call-status";
 import { CallControls } from "./call-controls";
@@ -46,6 +47,7 @@ export function CallInterface({
   const conversationIdRef = useRef<string | null>(null);
   const isProcessingRef = useRef<boolean>(false);
   const supabase = createClient();
+  const router = useRouter();
 
   const conversation = useConversation({
     onConnect: () => {
@@ -53,6 +55,9 @@ export function CallInterface({
     },
     onDisconnect: () => {
       console.log("Disconnected");
+      if (conversationIdRef.current) {
+        router.push(`/history/${conversationIdRef.current}`);
+      }
     },
     onMessage: (message) => {
       console.log("Message:", message);
