@@ -44,6 +44,7 @@ export function CallInterface({
   const [agentState, setAgentState] = useState<AgentState>("disconnected");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const conversationIdRef = useRef<string | null>(null);
+  const isProcessingRef = useRef<boolean>(false);
   const supabase = createClient();
 
   const conversation = useConversation({
@@ -117,12 +118,19 @@ export function CallInterface({
   ]);
 
   const handleCall = useCallback(() => {
+    if (isProcessingRef.current) return;
+
+    isProcessingRef.current = true;
+    setTimeout(() => {
+      isProcessingRef.current = false;
+    }, 1000); // Prevent spam clicking for 1 second
+
     if (agentState === "disconnected" || agentState === null) {
       setAgentState("connecting");
       startConversation();
     } else if (agentState === "connected") {
+      setAgentState("disconnecting");
       conversation.endSession();
-      setAgentState("disconnected");
     }
   }, [agentState, conversation, startConversation]);
 
